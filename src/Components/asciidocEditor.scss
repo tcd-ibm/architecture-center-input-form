@@ -1,0 +1,55 @@
+.container {
+  z-index: 10;
+  position: fixed;
+  width: 1000px;
+  height: 600px;
+  margin: 0 auto;
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ced4da;
+  background-color: #f8f9fa;
+  padding: 10px;
+}
+
+.editorContainer {
+  width: 100%;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.editor {
+  counter-reset: line;
+}
+
+.editor #codeArea {
+  outline: none;
+  padding-left: 60px !important;
+}
+
+.editor pre {
+  padding-left: 60px !important;
+}
+
+.editor .lineNumber {
+  position: absolute;
+  left: 0px;
+  color: #cccccc;
+  text-align: right;
+  width: 40px;
+  font-weight: 100;
+}
+
+.previewContainer {
+  width: 100%;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.separator {
+  width: 1px;
+  height: 100%;
+  background-color: #ced4da;
+  margin-left: 25px;
+  margin-right: 25px;
+}
