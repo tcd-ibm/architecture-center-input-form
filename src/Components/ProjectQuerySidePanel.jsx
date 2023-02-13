@@ -6,7 +6,8 @@ function ProjectQuerySidePanel() {
         <SideNav
             isFixedNav
             expanded={true}
-            isChildOfHeader={false}>
+            isChildOfHeader={false}
+            aria-label="Search and filter">
 
             <div className='innerContainer'>
                 <Search

@@ -4,11 +4,11 @@ import { Header, HeaderName, HeaderNavigation, HeaderMenuItem } from '@carbon/re
 
 function MainHeader() {
     return (
-        <Header>
+        <Header aria-label="Amazing SwEng Project">
             <HeaderName href="/" prefix="">
                 Amazing SwEng Project
             </HeaderName>
-            <HeaderNavigation>
+            <HeaderNavigation aria-label="Amazing SwEng Project">
                 <HeaderMenuItem href="/add">
                     Add new project
                 </HeaderMenuItem>
