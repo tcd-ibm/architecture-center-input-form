@@ -8,6 +8,16 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-    }
-  }
+    },
+  },
+  base: "./",
+  server: {
+    /* host = true allows forwarding an IP from the main namespace to another in docker container
+      https://stackoverflow.com/questions/70012970/running-a-vite-dev-server-inside-a-docker-container
+    */
+    host: true,
+    port: 4621,
+    open: false,
+    cors: true,
+  },
 })
