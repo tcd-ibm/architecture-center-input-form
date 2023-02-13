@@ -1,33 +1,23 @@
 import { useState } from 'react';
+import { Content } from '@carbon/react';
 import './MainPage.scss';
-import SearchBar from '../Components/SearchBar';
-import AsciidocEditor from '../Components/AsciidocEditor';
+
+import MainHeader from '../Components/MainHeader';
+import ProjectQuerySidePanel from '../Components/ProjectQuerySidePanel';
 import Card from '../Components/Card';
-import { Button } from '@carbon/react';
 
 function MainPage() {
 
-    const [isEditorOn, SetIsEditorOn] = useState(false);
-
-    const editor = isEditorOn ? <AsciidocEditor /> : null;
-
     return (
-        <div id="bodyContainer">
-            {editor}
-            <div id="sidebarContainer">
-            <div class="fixed_elements">
-                <SearchBar />
-                <Button onClick={() => SetIsEditorOn(() => !isEditorOn)}>Editor</Button>
-            </div>
-            </div>
-
-            <div /* separator */ />
-
+        <>
+        <MainHeader />
+        <ProjectQuerySidePanel />
+        <Content>
             <div id="cardContainer">
-            <Card />
+                <Card />
             </div>
-
-        </div>
+        </Content>
+        </>
     );
 }
 

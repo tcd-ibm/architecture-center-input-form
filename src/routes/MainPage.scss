@@ -1,32 +1,32 @@
-#bodyContainer {
-  /* center */
+// #bodyContainer {
+//   /* center */
 
-  display: flex;
-  justify-content: center;
-  // align-items: center;
-  height: 100%;
+//   display: flex;
+//   justify-content: center;
+//   // align-items: center;
+//   height: 100%;
   
-  grid-auto-flow: column;
-  grid-template-columns: 300px 30px calc(400px * 2 + 1 * 20px);  
-  width: 100%;
-}
+//   grid-auto-flow: column;
+//   grid-template-columns: 300px 30px calc(400px * 2 + 1 * 20px);  
+//   width: 100%;
+// }
 
-@media (min-width: 1600px) {
-  #bodyContainer {
-    grid-template-columns: 300px 30px calc(400px * 3 + 2 * 20px);
-  }
-}
+// @media (min-width: 1600px) {
+//   #bodyContainer {
+//     grid-template-columns: 300px 30px calc(400px * 3 + 2 * 20px);
+//   }
+// }
 
-#sidebarContainer {
-  grid-column-start: 1;
-  position: relative;
-  top: 250px;
-  width: 300px;
-}
+// #sidebarContainer {
+//   grid-column-start: 1;
+//   position: relative;
+//   top: 250px;
+//   width: 300px;
+// }
 
-#sidebarContainer .fixed_elements {
-  position: fixed;
-}
+// #sidebarContainer .fixed_elements {
+//   position: fixed;
+// }
 
 
 #cardContainer {
