@@ -1,7 +1,5 @@
-import { SideNav } from '@carbon/react';
+import { SideNav, Search } from '@carbon/react';
 import './ProjectQuerySidePanel.scss'
-
-import SearchBar from '../Components/SearchBar';
 
 function ProjectQuerySidePanel() {
     return (
@@ -11,7 +9,10 @@ function ProjectQuerySidePanel() {
             isChildOfHeader={false}>
 
             <div className='innerContainer'>
-                <SearchBar />
+                <Search
+                    labelText="Search"
+                    placeholder="Search"
+                />
             </div>
             
         </SideNav>
