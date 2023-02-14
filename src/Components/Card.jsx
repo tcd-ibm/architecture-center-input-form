@@ -3,7 +3,7 @@ import './card.scss';
 
 const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
 
-export default function CardNew({projectData}) {
+export default function Card({projectData}) {
 
   if(!projectData.islive) return null;
   
@@ -14,7 +14,7 @@ export default function CardNew({projectData}) {
       <p>{projectData.Summary}</p>
       <div className='tags'>
         { projectData.ProductType.split(",").map(typetag =>
-            <Tag type="red" title="Clear Filter" key={projectData.ppid + typetag}></Tag>
+            <Tag type="red" title="Clear Filter" key={projectData.ppid + typetag}>{typetag}</Tag>
         )}
         { projectData.Solutions.split(",").map(solutiontag =>
             <Tag type="magenta" title="Clear Filter" key={projectData.ppid + solutiontag}>{solutiontag}</Tag>
