@@ -3,9 +3,9 @@ import axios from 'axios';
 import { Content } from '@carbon/react';
 import './MainPage.scss';
 
-import MainHeader from '../Components/MainHeader';
-import ProjectQuerySidePanel from '../Components/ProjectQuerySidePanel';
-import Card from '../Components/Card';
+import MainHeader from '@/Components/MainHeader';
+import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
+import Card from '@/Components/Card';
 
 function MainPage() {
 
