@@ -28,5 +28,4 @@ if __name__ == "__main__":
                 host="localhost",
                 port=5297,
                 reload=False,
-                debug=False,
                 log_level="info")
