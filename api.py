@@ -205,14 +205,11 @@ async def getPrivateEndPoint(current_user: Users = Depends(get_current_user)):
 '''
 
 
-@router.get("/announcement", response_model=List[Announcement])
+@router.get("/announcement/{aid}", response_model=List[Announcement])
 async def fetch_announcement(session: AsyncSession = Depends(get_session),
                              aid: int = 0,
                              query_params: dict = {}) -> List[Announcement]:
-    r = await session.execute(
-        select(Announcement).filter_by(aid=aid, **query_params)
-        if aid else await session.execute(select(Announcement)).filter_by(
-            **query_params).order_by(Announcement.aid))
+    r = await session.execute(select(Announcement).filter_by(aid=aid, **query_params)) if aid else await session.execute(select(Announcement).filter_by(**query_params).order_by(Announcement.aid))
     return r.scalars().all()
 
 
@@ -222,8 +219,8 @@ async def fetch_detail(session: AsyncSession = Depends(get_session),
                        query_params: dict = {}) -> List[Detail]:
     r = await session.execute(
         select(Detail).filter_by(ppid=ppid, **query_params)
-    ) if ppid else await session.execute(select(Detail)).filter_by(
-        **query_params).order_by(Detail.ppid)
+    ) if ppid else await session.execute(select(Detail).filter_by(
+        **query_params).order_by(Detail.ppid))
     return r.scalars().all()
 
 
@@ -239,7 +236,7 @@ async def fetch_pa(session: AsyncSession = Depends(get_session),
 
 @router.get("/product/{pid}")
 async def fetch_product(session: AsyncSession = Depends(get_session),
-                        pid: int = 0,
+                        pid: str = None,
                         query_params: dict = {}) -> List[Product]:
     r = await session.execute(
         select(Product).filter_by(pid=pid, **query_params)
@@ -248,9 +245,9 @@ async def fetch_product(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/solution")
+@router.get("/solution/{sid}")
 async def fetch_solution(session: AsyncSession = Depends(get_session),
-                         sid: int = 0,
+                         sid: str = None,
                          query_params: dict = {}) -> List[Solution]:
     r = await session.execute(
         select(Solution).filter_by(sid=sid, **query_params)
@@ -259,9 +256,9 @@ async def fetch_solution(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/type")
+@router.get("/type/{tid}")
 async def fetch_type(session: AsyncSession = Depends(get_session),
-                     tid: int = 0,
+                     tid: str = None,
                      query_params: dict = {}) -> List[Type]:
     r = await session.execute(select(Type).filter_by(
         tid=tid, **query_params)) if tid else await session.execute(
@@ -269,9 +266,9 @@ async def fetch_type(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/vertical")
+@router.get("/vertical/{vid}")
 async def fetch_vertical(session: AsyncSession = Depends(get_session),
-                     vid: int = 0,
+                     vid: str = None,
                      query_params: dict = {}) -> List[Vertical]:
     r = await session.execute(select(Vertical).filter_by(
         vid=vid, **query_params)) if vid else await session.execute(
