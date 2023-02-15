@@ -213,7 +213,7 @@ async def fetch_announcement(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/detail/{ppid}")
+@router.get("/detail/{ppid}", response_model=List[Detail])
 async def fetch_detail(session: AsyncSession = Depends(get_session),
                        ppid: int = 0,
                        query_params: dict = {}) -> List[Detail]:
@@ -224,7 +224,7 @@ async def fetch_detail(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/pa/{ppid}")
+@router.get("/pa/{ppid}", response_model=List[PA])
 async def fetch_pa(session: AsyncSession = Depends(get_session),
                    ppid: int = 0,
                    query_params: dict = {}) -> List[PA]:
@@ -234,7 +234,7 @@ async def fetch_pa(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/product/{pid}")
+@router.get("/product/{pid}", response_model=List[Product])
 async def fetch_product(session: AsyncSession = Depends(get_session),
                         pid: str = None,
                         query_params: dict = {}) -> List[Product]:
@@ -245,7 +245,7 @@ async def fetch_product(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/solution/{sid}")
+@router.get("/solution/{sid}", response_model=List[Solution])
 async def fetch_solution(session: AsyncSession = Depends(get_session),
                          sid: str = None,
                          query_params: dict = {}) -> List[Solution]:
@@ -256,7 +256,7 @@ async def fetch_solution(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/type/{tid}")
+@router.get("/type/{tid}", response_model=List[Type])
 async def fetch_type(session: AsyncSession = Depends(get_session),
                      tid: str = None,
                      query_params: dict = {}) -> List[Type]:
@@ -266,7 +266,7 @@ async def fetch_type(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/vertical/{vid}")
+@router.get("/vertical/{vid}", response_model=List[Vertical])
 async def fetch_vertical(session: AsyncSession = Depends(get_session),
                      vid: str = None,
                      query_params: dict = {}) -> List[Vertical]:
