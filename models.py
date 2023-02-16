@@ -60,10 +60,10 @@ class PA(SQLModel, table=True):
     Image1Url: str = Field(default=None)
     ProductType: str = Field(default=None)
     DetailPage: str = Field(default=None)
-    metaDesc: str = Field(default=None)
-    metaKeyword: str = Field(default=None)
     islive: bool = Field(default=False)
     isnew: bool = Field(default=True)
+    metaDesc: str = Field(default=None)
+    metaKeyword: str = Field(default=None)
 
 
 class Product(SQLModel, table=True):
