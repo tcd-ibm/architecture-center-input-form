@@ -50,7 +50,7 @@ jobs:
     
     - name: Set environment
       run: |
-        oc set env deployment.apps/${{secrets.OPENSHIFT_NAMESPACE}} PORT=4621
+        oc set env deployment.apps/architecture-center-input-form PORT=4621
     
     - name: Print application URL
       env:
