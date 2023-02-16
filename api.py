@@ -14,7 +14,6 @@ from db import get_session, init_db
 from models import Users, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical
 
 from datetime import timedelta, datetime
-from cache import AsyncTTL
 
 from typing import List
 
@@ -228,7 +227,6 @@ async def fetch_detail(request: Request,
     return r.scalars().all()
 
 
-@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/pa/{ppid}", response_model=List[PA])
 async def fetch_pa(request: Request,
                    session: AsyncSession = Depends(get_session),
@@ -240,7 +238,6 @@ async def fetch_pa(request: Request,
     return r.scalars().all()
 
 
-@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/product", response_model=List[Product])
 async def fetch_product(request: Request, session: AsyncSession = Depends(get_session)) -> List[Product]:
     r = await session.execute(
@@ -249,7 +246,6 @@ async def fetch_product(request: Request, session: AsyncSession = Depends(get_se
     return r.scalars().all()
 
 
-@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/solution", response_model=List[Solution])
 async def fetch_solution(request: Request, session: AsyncSession = Depends(get_session)) -> List[Solution]:
     r = await session.execute(
@@ -258,7 +254,6 @@ async def fetch_solution(request: Request, session: AsyncSession = Depends(get_s
     return r.scalars().all()
 
 
-@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/type", response_model=List[Type])
 async def fetch_type(request: Request, session: AsyncSession = Depends(get_session)) -> List[Type]:
     r = await session.execute(
@@ -266,7 +261,6 @@ async def fetch_type(request: Request, session: AsyncSession = Depends(get_sessi
     return r.scalars().all()
 
 
-@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/vertical", response_model=List[Vertical])
 async def fetch_vertical(request: Request, session: AsyncSession = Depends(get_session)) -> List[Vertical]:
     r = await session.execute(
