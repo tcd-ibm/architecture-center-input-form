@@ -1,0 +1,293 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProjectQuerySidePanel renders an Accordion with categories and tags 1`] = `
+<nav
+  aria-label="Search and filter"
+  className="cds--side-nav__navigation cds--side-nav cds--side-nav--expanded"
+  onBlur={[Function]}
+  onFocus={[Function]}
+>
+  <div
+    className="innerContainer cds--stack-vertical cds--stack-scale-5"
+    style={{}}
+  >
+    <div
+      aria-labelledby="null-search"
+      className="cds--search cds--search--md"
+      role="search"
+    >
+      <div
+        className="cds--search-magnifier"
+        role={null}
+      >
+        <svg
+          aria-hidden={true}
+          className="cds--search-magnifier-icon"
+          fill="currentColor"
+          focusable="false"
+          height={16}
+          preserveAspectRatio="xMidYMid meet"
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15,14.3L10.7,10c1.9-2.3,1.6-5.8-0.7-7.7S4.2,0.7,2.3,3S0.7,8.8,3,10.7c2,1.7,5,1.7,7,0l4.3,4.3L15,14.3z M2,6.5 C2,4,4,2,6.5,2S11,4,11,6.5S9,11,6.5,11S2,9,2,6.5z"
+          />
+        </svg>
+      </div>
+      <label
+        className="cds--label"
+        htmlFor={null}
+        id="null-search"
+      >
+        Search
+      </label>
+      <input
+        autoComplete="off"
+        className="cds--search-input"
+        id={null}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        placeholder="Search"
+        role="searchbox"
+        type="text"
+      />
+      <button
+        aria-label="Clear search input"
+        className="cds--search-close cds--search-close--hidden"
+        onClick={[Function]}
+        title="Clear search input"
+        type="button"
+      >
+        <svg
+          aria-hidden={true}
+          fill="currentColor"
+          focusable="false"
+          height={16}
+          preserveAspectRatio="xMidYMid meet"
+          viewBox="0 0 32 32"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16 24 9.4z"
+          />
+        </svg>
+      </button>
+    </div>
+    <ul
+      className="cds--accordion cds--accordion--end cds--accordion--md"
+    >
+      <li
+        className="cds--accordion__item"
+        onAnimationEnd={[Function]}
+      >
+        <button
+          aria-controls={null}
+          aria-expanded={false}
+          className="cds--accordion__heading"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          type="button"
+        >
+          <svg
+            aria-hidden={true}
+            className="cds--accordion__arrow"
+            fill="currentColor"
+            focusable="false"
+            height={16}
+            preserveAspectRatio="xMidYMid meet"
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11 8L6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"
+            />
+          </svg>
+          <div
+            className="cds--accordion__title"
+            dir="auto"
+          >
+            Category 1
+          </div>
+        </button>
+        <div
+          className="cds--accordion__content"
+          id={null}
+        >
+          <fieldset
+            className="cds--fieldset"
+          >
+            <div
+              className="cds--form-item cds--checkbox-wrapper"
+            >
+              <input
+                checked={false}
+                className="cds--checkbox"
+                id="tag1-1"
+                onChange={[Function]}
+                onClick={[Function]}
+                type="checkbox"
+              />
+              <label
+                className="cds--checkbox-label"
+                htmlFor="tag1-1"
+                title=""
+              >
+                <span
+                  className="cds--checkbox-label-text"
+                  dir="auto"
+                >
+                  Tag 1-1 name
+                </span>
+              </label>
+            </div>
+            <div
+              className="cds--form-item cds--checkbox-wrapper"
+            >
+              <input
+                checked={false}
+                className="cds--checkbox"
+                id="tag1-2"
+                onChange={[Function]}
+                onClick={[Function]}
+                type="checkbox"
+              />
+              <label
+                className="cds--checkbox-label"
+                htmlFor="tag1-2"
+                title=""
+              >
+                <span
+                  className="cds--checkbox-label-text"
+                  dir="auto"
+                >
+                  Tag 1-2 name
+                </span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </li>
+      <li
+        className="cds--accordion__item"
+        onAnimationEnd={[Function]}
+      >
+        <button
+          aria-controls={null}
+          aria-expanded={false}
+          className="cds--accordion__heading"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          type="button"
+        >
+          <svg
+            aria-hidden={true}
+            className="cds--accordion__arrow"
+            fill="currentColor"
+            focusable="false"
+            height={16}
+            preserveAspectRatio="xMidYMid meet"
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11 8L6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"
+            />
+          </svg>
+          <div
+            className="cds--accordion__title"
+            dir="auto"
+          >
+            Category 2
+          </div>
+        </button>
+        <div
+          className="cds--accordion__content"
+          id={null}
+        >
+          <fieldset
+            className="cds--fieldset"
+          >
+            <div
+              className="cds--form-item cds--checkbox-wrapper"
+            >
+              <input
+                checked={false}
+                className="cds--checkbox"
+                id="tag2-1"
+                onChange={[Function]}
+                onClick={[Function]}
+                type="checkbox"
+              />
+              <label
+                className="cds--checkbox-label"
+                htmlFor="tag2-1"
+                title=""
+              >
+                <span
+                  className="cds--checkbox-label-text"
+                  dir="auto"
+                >
+                  Tag 2-1 name
+                </span>
+              </label>
+            </div>
+            <div
+              className="cds--form-item cds--checkbox-wrapper"
+            >
+              <input
+                checked={false}
+                className="cds--checkbox"
+                id="tag2-2"
+                onChange={[Function]}
+                onClick={[Function]}
+                type="checkbox"
+              />
+              <label
+                className="cds--checkbox-label"
+                htmlFor="tag2-2"
+                title=""
+              >
+                <span
+                  className="cds--checkbox-label-text"
+                  dir="auto"
+                >
+                  Tag 2-2 name
+                </span>
+              </label>
+            </div>
+            <div
+              className="cds--form-item cds--checkbox-wrapper"
+            >
+              <input
+                checked={false}
+                className="cds--checkbox"
+                id="tag2-3"
+                onChange={[Function]}
+                onClick={[Function]}
+                type="checkbox"
+              />
+              <label
+                className="cds--checkbox-label"
+                htmlFor="tag2-3"
+                title=""
+              >
+                <span
+                  className="cds--checkbox-label-text"
+                  dir="auto"
+                >
+                  Tag 2-3 name
+                </span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+`;
