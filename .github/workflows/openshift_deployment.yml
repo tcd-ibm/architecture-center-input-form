@@ -4,6 +4,7 @@ env:
   APP_NAME: "architecture-center-input-form"
   APP_PORT: 4621
   OPENSHIFT_NAMESPACE: "moeto88-dev"
+  
 
 on:
   workflow_run:
@@ -14,7 +15,7 @@ on:
 jobs:   
   openshift-deploy:
     name: Deploy to OpenShift
-      # ubuntu-20.04 can also be used.
+      # ubuntu-20.04 can also be used
     runs-on: ubuntu-20.04
 
     outputs:
