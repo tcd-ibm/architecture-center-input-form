@@ -7,7 +7,7 @@ name: "Publish to Quay.io"
 
 on:
   push:
-    branches: [ dev-frontend-tests ]
+    branches: [ main ]
     tags: [ 'v*.*.*' ]
 
 env:

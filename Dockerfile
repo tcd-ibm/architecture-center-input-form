@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi9/ubi:9.1.0-1750
+FROM registry.access.redhat.com/ubi9/ubi:9.1.0-1750
 
 WORKDIR /architecture-center-input-form
 
