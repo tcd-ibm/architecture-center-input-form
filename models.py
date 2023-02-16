@@ -68,24 +68,24 @@ class PA(SQLModel, table=True):
 
 class Product(SQLModel, table=True):
     __tablename__ = 'ProductList'
-    pid: int = Field(primary_key=True)
+    pid: str = Field(primary_key=True)
     pname: str = Field(max_length=255)
     plink: str = Field(max_length=255)
 
 
 class Solution(SQLModel, table=True):
     __tablename__ = 'SolutionList'
-    sid: int = Field(primary_key=True)
+    sid: str = Field(primary_key=True)
     sname: str = Field(max_length=255)
 
 
 class Type(SQLModel, table=True):
     __tablename__ = 'TypeList'
-    tid: int = Field(primary_key=True)
+    tid: str = Field(primary_key=True)
     typename: str = Field(max_length=255)
 
 
 class Vertical(SQLModel, table=True):
     __tablename__ = 'VerticalList'
-    vid: int = Field(primary_key=True)
+    vid: str = Field(primary_key=True)
     vname: str = Field(max_length=255)

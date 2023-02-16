@@ -209,7 +209,11 @@ async def getPrivateEndPoint(current_user: Users = Depends(get_current_user)):
 async def fetch_announcement(session: AsyncSession = Depends(get_session),
                              aid: int = 0,
                              query_params: dict = {}) -> List[Announcement]:
-    r = await session.execute(select(Announcement).filter_by(aid=aid, **query_params)) if aid else await session.execute(select(Announcement).filter_by(**query_params).order_by(Announcement.aid))
+    r = await session.execute(
+        select(Announcement).filter_by(aid=aid, **query_params)
+    ) if aid else await session.execute(
+        select(Announcement).filter_by(
+            **query_params).order_by(Announcement.aid))
     return r.scalars().all()
 
 
@@ -219,8 +223,8 @@ async def fetch_detail(session: AsyncSession = Depends(get_session),
                        query_params: dict = {}) -> List[Detail]:
     r = await session.execute(
         select(Detail).filter_by(ppid=ppid, **query_params)
-    ) if ppid else await session.execute(select(Detail).filter_by(
-        **query_params).order_by(Detail.ppid))
+    ) if ppid else await session.execute(
+        select(Detail).filter_by(**query_params).order_by(Detail.ppid))
     return r.scalars().all()
 
 
@@ -234,43 +238,33 @@ async def fetch_pa(session: AsyncSession = Depends(get_session),
     return r.scalars().all()
 
 
-@router.get("/product/{pid}", response_model=List[Product])
+@router.get("/product", response_model=List[Product])
 async def fetch_product(session: AsyncSession = Depends(get_session),
-                        pid: str = None,
                         query_params: dict = {}) -> List[Product]:
     r = await session.execute(
-        select(Product).filter_by(pid=pid, **query_params)
-    ) if pid else await session.execute(
         select(Product).filter_by(**query_params).order_by(Product.pid))
     return r.scalars().all()
 
 
-@router.get("/solution/{sid}", response_model=List[Solution])
+@router.get("/solution", response_model=List[Solution])
 async def fetch_solution(session: AsyncSession = Depends(get_session),
-                         sid: str = None,
                          query_params: dict = {}) -> List[Solution]:
     r = await session.execute(
-        select(Solution).filter_by(sid=sid, **query_params)
-    ) if sid else await session.execute(
         select(Solution).filter_by(**query_params).order_by(Solution.sid))
     return r.scalars().all()
 
 
-@router.get("/type/{tid}", response_model=List[Type])
+@router.get("/type", response_model=List[Type])
 async def fetch_type(session: AsyncSession = Depends(get_session),
-                     tid: str = None,
                      query_params: dict = {}) -> List[Type]:
-    r = await session.execute(select(Type).filter_by(
-        tid=tid, **query_params)) if tid else await session.execute(
-            select(Type).filter_by(**query_params).order_by(Type.tid))
+    r = await session.execute(
+        select(Type).filter_by(**query_params).order_by(Type.tid))
     return r.scalars().all()
 
 
-@router.get("/vertical/{vid}", response_model=List[Vertical])
+@router.get("/vertical", response_model=List[Vertical])
 async def fetch_vertical(session: AsyncSession = Depends(get_session),
-                     vid: str = None,
-                     query_params: dict = {}) -> List[Vertical]:
-    r = await session.execute(select(Vertical).filter_by(
-        vid=vid, **query_params)) if vid else await session.execute(
-            select(Vertical).filter_by(**query_params).order_by(Vertical.vid))
+                         query_params: dict = {}) -> List[Vertical]:
+    r = await session.execute(
+        select(Vertical).filter_by(**query_params).order_by(Vertical.vid))
     return r.scalars().all()
