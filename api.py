@@ -2,7 +2,6 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 # from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from fastapi.responses import RedirectResponse
 
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +16,7 @@ from models import Users, UserSignup, UserUpdate, Token, Announcement, Detail, P
 from datetime import timedelta, datetime
 from cache import AsyncTTL
 
-from typing import List, Optional
+from typing import List
 
 # openssl rand -hex 32
 SECRET_KEY = "d8e632e42229356dbbcd5fdc366a05e9bfaca0193ba016e4fd6cf03307d90241"
@@ -206,65 +205,71 @@ async def getPrivateEndPoint(current_user: Users = Depends(get_current_user)):
 
 
 @router.get("/announcement/{aid}", response_model=List[Announcement])
-async def fetch_announcement(session: AsyncSession = Depends(get_session),
-                             aid: int = 0,
-                             query_params: dict = {}) -> List[Announcement]:
+async def fetch_announcement(request: Request,
+                             session: AsyncSession = Depends(get_session),
+                             aid: int = 0) -> List[Announcement]:
     r = await session.execute(
-        select(Announcement).filter_by(aid=aid, **query_params)
+        select(Announcement).filter_by(**request.query_params._dict, aid=aid)
     ) if aid else await session.execute(
-        select(Announcement).filter_by(
-            **query_params).order_by(Announcement.aid))
+        select(Announcement).filter_by(**request.query_params._dict).order_by(
+            Announcement.aid))
     return r.scalars().all()
 
 
 @router.get("/detail/{ppid}", response_model=List[Detail])
-async def fetch_detail(session: AsyncSession = Depends(get_session),
-                       ppid: int = 0,
-                       query_params: dict = {}) -> List[Detail]:
+async def fetch_detail(request: Request,
+                       session: AsyncSession = Depends(get_session),
+                       ppid: int = 0) -> List[Detail]:
     r = await session.execute(
-        select(Detail).filter_by(ppid=ppid, **query_params)
+        select(Detail).filter_by(**request.query_params._dict, ppid=ppid)
     ) if ppid else await session.execute(
-        select(Detail).filter_by(**query_params).order_by(Detail.ppid))
+        select(Detail).filter_by(**request.query_params._dict).order_by(
+            Detail.ppid))
     return r.scalars().all()
 
 
+@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/pa/{ppid}", response_model=List[PA])
-async def fetch_pa(session: AsyncSession = Depends(get_session),
-                   ppid: int = 0,
-                   query_params: dict = {}) -> List[PA]:
-    r = await session.execute(select(PA).filter_by(
-        ppid=ppid, **query_params)) if ppid else await session.execute(
-            select(PA).filter_by(**query_params).order_by(PA.ppid))
+async def fetch_pa(request: Request,
+                   session: AsyncSession = Depends(get_session),
+                   ppid: int = 0) -> List[PA]:
+    r = await session.execute(
+        select(PA).filter_by(**request.query_params._dict, ppid=ppid)
+    ) if ppid else await session.execute(
+        select(PA).filter_by(**request.query_params._dict).order_by(PA.ppid))
     return r.scalars().all()
 
 
+@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/product", response_model=List[Product])
-async def fetch_product(session: AsyncSession = Depends(get_session),
-                        query_params: dict = {}) -> List[Product]:
+async def fetch_product(request: Request, session: AsyncSession = Depends(get_session)) -> List[Product]:
     r = await session.execute(
-        select(Product).filter_by(**query_params).order_by(Product.pid))
+        select(Product).filter_by(**request.query_params._dict).order_by(
+            Product.pid))
     return r.scalars().all()
 
 
+@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/solution", response_model=List[Solution])
-async def fetch_solution(session: AsyncSession = Depends(get_session),
-                         query_params: dict = {}) -> List[Solution]:
+async def fetch_solution(request: Request, session: AsyncSession = Depends(get_session)) -> List[Solution]:
     r = await session.execute(
-        select(Solution).filter_by(**query_params).order_by(Solution.sid))
+        select(Solution).filter_by(**request.query_params._dict).order_by(
+            Solution.sid))
     return r.scalars().all()
 
 
+@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/type", response_model=List[Type])
-async def fetch_type(session: AsyncSession = Depends(get_session),
-                     query_params: dict = {}) -> List[Type]:
+async def fetch_type(request: Request, session: AsyncSession = Depends(get_session)) -> List[Type]:
     r = await session.execute(
-        select(Type).filter_by(**query_params).order_by(Type.tid))
+        select(Type).filter_by(**request.query_params._dict).order_by(Type.tid))
     return r.scalars().all()
 
 
+@AsyncTTL(time_to_live=60, maxsize=128)
 @router.get("/vertical", response_model=List[Vertical])
-async def fetch_vertical(session: AsyncSession = Depends(get_session),
-                         query_params: dict = {}) -> List[Vertical]:
+async def fetch_vertical(request: Request, session: AsyncSession = Depends(get_session)) -> List[Vertical]:
     r = await session.execute(
-        select(Vertical).filter_by(**query_params).order_by(Vertical.vid))
+        select(Vertical).filter_by(**request.query_params._dict).order_by(
+            Vertical.vid))
     return r.scalars().all()
