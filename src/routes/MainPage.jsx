@@ -18,7 +18,7 @@ function MainPage() {
     const [filterTagList, setFilterTagList] = useState([]);
 
     useEffect(() => {
-        axios.get('pa/0').then(res => {
+        axios.get('/pa/0').then(res => {
             setProjects(res.data);
             setIsLoading(false);
         })
@@ -31,19 +31,19 @@ function MainPage() {
         const fetchMenuContent = async () => [
             {
                 title: 'Solution',
-                tags: (await axios.get('solution')).data.map(item => ({id: item.sid, name: item.sname}))
+                tags: (await axios.get('/solution')).data.map(item => ({id: item.sid, name: item.sname}))
             },
             {
                 title: 'Vertical',
-                tags: (await axios.get('vertical')).data.map(item => ({id: item.vid, name: item.vname}))
+                tags: (await axios.get('/vertical')).data.map(item => ({id: item.vid, name: item.vname}))
             },
             {
                 title: 'Product',
-                tags: (await axios.get('product')).data.map(item => ({id: item.pid, name: item.pname}))
+                tags: (await axios.get('/product')).data.map(item => ({id: item.pid, name: item.pname}))
             },
             {
                 title: 'Type',
-                tags: (await axios.get('type')).data.map(item => ({id: item.tid, name: item.typename}))
+                tags: (await axios.get('/type')).data.map(item => ({id: item.tid, name: item.typename}))
             }
         ];
 
