@@ -43,9 +43,9 @@ class Announcement(SQLModel, table=True):
 
 class Detail(SQLModel, table=True):
     __tablename__ = 'DetailLink'
-    ppid: int = Field(primary_key=True)
+    ppid: int = Field(nullable=False)
     description: str = Field(max_length=255)
-    url: str = Field(max_length=255)
+    url: str = Field(primary_key=True, max_length=255)
     type: str = Field(max_length=255)
 
 
@@ -53,16 +53,16 @@ class PA(SQLModel, table=True):
     __tablename__ = 'PAList'
     ppid: int = Field(primary_key=True)
     Heading: str = Field(max_length=255)
-    Summary: str = Field(max_length=255)
-    Product: str = Field(max_length=255)
-    Solutions: str = Field(max_length=255)
-    Vertical: str = Field(max_length=255)
-    Image1Url: str = Field(max_length=255)
-    ProductType: str = Field(max_length=255)
-    DetailPage: str = Field(max_length=255)
-    metaDesc: str = Field(max_length=255)
-    metaKeyword: str = Field(max_length=255)
-    islive: bool = Field(default=True)
+    Summary: str = Field(default=None)
+    Product: str = Field(default=None)
+    Solutions: str = Field(default=None)
+    Vertical: str = Field(default=None)
+    Image1Url: str = Field(default=None)
+    ProductType: str = Field(default=None)
+    DetailPage: str = Field(default=None)
+    metaDesc: str = Field(default=None)
+    metaKeyword: str = Field(default=None)
+    islive: bool = Field(default=False)
     isnew: bool = Field(default=True)
 
 
@@ -70,7 +70,7 @@ class Product(SQLModel, table=True):
     __tablename__ = 'ProductList'
     pid: str = Field(primary_key=True)
     pname: str = Field(max_length=255)
-    plink: str = Field(max_length=255)
+    plink: str
 
 
 class Solution(SQLModel, table=True):
