@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
@@ -89,3 +89,22 @@ class Vertical(SQLModel, table=True):
     __tablename__ = 'VerticalList'
     vid: str = Field(primary_key=True)
     vname: str = Field(max_length=255)
+
+
+class Category(SQLModel, table=True):
+    __tablename__ = 'categories'
+    categoryId: int = Field(default=None, primary_key=True)
+    categoryName: str
+
+    tags: List["Tag"] = Relationship(back_populates="category")
+
+
+class Tag(SQLModel, table=True):
+    __tablename__ = 'tags'
+    tagId: int = Field(default=None, primary_key=True)
+    tagName: str
+    tagNameShort: str
+    categoryId: Optional[int] = Field(default=None,
+                                      foreign_key="categories.categoryId")
+
+    category: Optional[Category] = Relationship(back_populates="tags")
