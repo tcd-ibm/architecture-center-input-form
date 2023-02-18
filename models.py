@@ -1,0 +1,129 @@
+from typing import Optional, List
+from uuid import UUID
+from sqlmodel import SQLModel, Field, Relationship
+
+
+class UserBase(SQLModel):
+    email: str = Field(default=None, primary_key=True)
+    username: Optional[str] = None
+
+
+class UserSignup(UserBase):
+    password: str = Field(default=None)
+
+
+# table = True => in database
+class User(UserBase, table=True):
+    __tablename__ = 'users'
+    hashed_password: str = None
+    id: UUID = Field(default=None)
+    is_active: bool = Field(default=True)
+    role: int = Field(default=0)
+    projects: List["Project"] = Relationship(back_populates="user")
+
+
+class UserUpdate(UserBase):
+    email: Optional[str] = None
+    password: Optional[str] = None
+
+
+class Token(SQLModel):
+    access_token: str
+    token_type: str
+
+
+class Announcement(SQLModel, table=True):
+    __tablename__ = 'AnnouncementList'
+    aid: int = Field(primary_key=True, nullable=False)
+    title: str = Field(max_length=255)
+    titleLink: str = Field(max_length=255)
+    date: str = Field(max_length=255)
+    announcementType: str = Field(max_length=255)
+    desc: str = Field(max_length=255)
+
+
+class Detail(SQLModel, table=True):
+    __tablename__ = 'DetailLink'
+    ppid: int = Field(nullable=False)
+    description: str = Field(max_length=255)
+    url: str = Field(primary_key=True, max_length=255)
+    type: str = Field(max_length=255)
+
+
+class PA(SQLModel, table=True):
+    __tablename__ = 'PAList'
+    ppid: int = Field(primary_key=True)
+    Heading: str = Field(max_length=255)
+    Summary: str = Field(default=None)
+    Product: str = Field(default=None)
+    Solutions: str = Field(default=None)
+    Vertical: str = Field(default=None)
+    Image1Url: str = Field(default=None)
+    ProductType: str = Field(default=None)
+    DetailPage: str = Field(default=None)
+    islive: bool = Field(default=False)
+    isnew: bool = Field(default=True)
+    metaDesc: str = Field(default=None)
+    metaKeyword: str = Field(default=None)
+
+
+class Product(SQLModel, table=True):
+    __tablename__ = 'ProductList'
+    pid: str = Field(primary_key=True)
+    pname: str = Field(max_length=255)
+    plink: str
+
+
+class Solution(SQLModel, table=True):
+    __tablename__ = 'SolutionList'
+    sid: str = Field(primary_key=True)
+    sname: str = Field(max_length=255)
+
+
+class Type(SQLModel, table=True):
+    __tablename__ = 'TypeList'
+    tid: str = Field(primary_key=True)
+    typename: str = Field(max_length=255)
+
+
+class Vertical(SQLModel, table=True):
+    __tablename__ = 'VerticalList'
+    vid: str = Field(primary_key=True)
+    vname: str = Field(max_length=255)
+
+
+class Category(SQLModel, table=True):
+    __tablename__ = 'categories'
+    categoryId: int = Field(default=None, primary_key=True)
+    categoryName: str
+
+    tags: List["Tag"] = Relationship(back_populates="category")
+
+
+class project_tags(SQLModel, table=True):
+    project_id: UUID = Field(default=None, foreign_key="projects.id", primary_key=True)
+    tag_id: int = Field(default=None, foreign_key="tags.tagId", primary_key=True)
+
+
+class Tag(SQLModel, table=True):
+    __tablename__ = 'tags'
+    tagId: int = Field(default=None, primary_key=True)
+    tagName: str
+    tagNameShort: str
+    categoryId: Optional[int] = Field(default=None, foreign_key="categories.categoryId")
+    projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags)
+    category: Optional[Category] = Relationship(back_populates="tags")
+
+
+class Project(SQLModel, table=True):
+    __tablename__ = 'projects'
+    id: UUID = Field(primary_key=True, default=None)
+    email: Optional[str] = Field(foreign_key="users.email")
+    title: str
+    link: str
+    description: str
+    content: str
+    date: str
+    is_live: bool = Field(default=False)
+    user: User = Relationship(back_populates="projects")
+    tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
