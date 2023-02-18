@@ -7,7 +7,7 @@ function LoginFormEmailStep(props, ref) {
     const { onSubmit } = props;
 
     const componentProps = {
-        subheadingContentNode: <>Don't have an account? <Link>Sign up</Link></>,
+        subheadingContentNode: <>Don't have an account? <Link href='/signup'>Sign up</Link></>,
         inputType: 'email',
         rememberIdCheckbox: true,
         buttonText: `Continue`,

@@ -7,7 +7,7 @@ function LoginFormPasswordStep(props, ref) {
     const { email, onSubmit } = props;
 
     const componentProps = {
-        subheadingContentNode: <>Logging in as {email} <Link>Not you?</Link></>,
+        subheadingContentNode: <>Logging in as {email} <Link href='/login'>Not you?</Link></>,
         inputType: 'password',
         rememberIdCheckbox: false,
         buttonText: `Log in`,
