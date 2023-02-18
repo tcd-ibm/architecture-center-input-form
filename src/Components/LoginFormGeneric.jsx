@@ -11,7 +11,7 @@ function LoginFormGeneric(props, ref) {
 
     return (
         <Tile className='loginFormTile'>
-            <FluidForm>
+            <FluidForm onSubmit={onSubmit}>
                 <div className='innerContainer'>
                     <p className='heading'>Log in</p>
                     <p>{subheadingContentNode}</p>
@@ -43,7 +43,7 @@ function LoginFormGeneric(props, ref) {
                 <div className='buttonContainer'>
                     <div className='flexColumn'></div>
                     <div className='flexColumn'>
-                        <Button renderIcon={ArrowRight} className='button' onClick={onSubmit}>{buttonText}</Button>
+                        <Button renderIcon={ArrowRight} className='button' type='submit'>{buttonText}</Button>
                     </div>
                 </div>
             </FluidForm>
