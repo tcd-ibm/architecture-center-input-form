@@ -9,9 +9,14 @@ import PasswordInput from './PasswordInput';
 function LoginFormGeneric(props, ref) {
     const {subheadingContentNode, errorText, inputType, rememberIdCheckbox, buttonText, onSubmit} = props;
 
+    const onSubmitWrapper = event => {
+        event.preventDefault();
+        onSubmit();
+    };
+
     return (
         <Tile className='loginFormTile'>
-            <FluidForm onSubmit={onSubmit}>
+            <FluidForm onSubmit={onSubmitWrapper}>
                 <div className='innerContainer'>
                     <p className='heading'>Log in</p>
                     <p>{subheadingContentNode}</p>
