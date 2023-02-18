@@ -6,6 +6,7 @@ import './index.scss'
 
 import MainPage from './routes/MainPage';
 import AddProjectPage from './routes/AddProjectPage';
+import LoginPage from './routes/LoginPage';
 
 axios.defaults.baseURL = 'http://localhost:5297/api/v1/'
 
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
   {
     path: '/add',
     element: <AddProjectPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />
   }
 ]);
 
