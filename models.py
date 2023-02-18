@@ -1,6 +1,6 @@
 from typing import Optional, List
 from uuid import UUID
-from sqlmodel import SQLModel, Field, Relationship, Identity
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
@@ -13,12 +13,13 @@ class UserSignup(UserBase):
 
 
 # table = True => in database
-class Users(UserBase, table=True):
+class User(UserBase, table=True):
+    __tablename__ = 'users'
     hashed_password: str = None
     id: UUID = Field(default=None)
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
-    projects: List["Project"] = Relationship(back_populates="users")
+    projects: List["Project"] = Relationship(back_populates="user")
 
 
 class UserUpdate(UserBase):
@@ -33,7 +34,7 @@ class Token(SQLModel):
 
 class Announcement(SQLModel, table=True):
     __tablename__ = 'AnnouncementList'
-    aid: int = Field(Identity(start=1, increment=1), primary_key=True, nullable=False)
+    aid: int = Field(primary_key=True, nullable=False)
     title: str = Field(max_length=255)
     titleLink: str = Field(max_length=255)
     date: str = Field(max_length=255)
@@ -51,7 +52,7 @@ class Detail(SQLModel, table=True):
 
 class PA(SQLModel, table=True):
     __tablename__ = 'PAList'
-    ppid: int = Field(Identity(start=1, increment=1), primary_key=True)
+    ppid: int = Field(primary_key=True)
     Heading: str = Field(max_length=255)
     Summary: str = Field(default=None)
     Product: str = Field(default=None)
@@ -96,7 +97,12 @@ class Category(SQLModel, table=True):
     categoryId: int = Field(default=None, primary_key=True)
     categoryName: str
 
-    tags: List["Tag"] = Relationship(back_populates="categories")
+    tags: List["Tag"] = Relationship(back_populates="category")
+
+
+class project_tags(SQLModel, table=True):
+    project_id: UUID = Field(default=None, foreign_key="projects.id", primary_key=True)
+    tag_id: int = Field(default=None, foreign_key="tags.tagId", primary_key=True)
 
 
 class Tag(SQLModel, table=True):
@@ -104,20 +110,20 @@ class Tag(SQLModel, table=True):
     tagId: int = Field(default=None, primary_key=True)
     tagName: str
     tagNameShort: str
-    categoryId: Optional[int] = Field(default=None,
-                                      foreign_key="categories.categoryId")
-
+    categoryId: Optional[int] = Field(default=None, foreign_key="categories.categoryId")
+    projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags)
     category: Optional[Category] = Relationship(back_populates="tags")
 
 
-class Project(SQLModel):
+class Project(SQLModel, table=True):
     __tablename__ = 'projects'
-    id: UUID = Field(default=None, primary_key=True)
-    user_email: str = Field(foreign_key="users.email")
+    id: UUID = Field(primary_key=True, default=None)
+    email: Optional[str] = Field(foreign_key="users.email")
     title: str
     link: str
     description: str
     content: str
     date: str
     is_live: bool = Field(default=False)
-    tags: List[Tag] = Relationship(back_populates="project")
+    user: User = Relationship(back_populates="projects")
+    tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)

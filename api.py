@@ -11,7 +11,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import Users, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, Project
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, Project
 
 from datetime import timedelta, datetime
 
@@ -74,27 +74,25 @@ def _decode_token(token: str) -> dict:
         raise unauthorized_error("Could not validate credentials")
 
 
-async def get_all_users_db(session: AsyncSession = Depends(get_session)) -> List[Users]:
-    result = await session.execute(select(Users))
+async def get_all_users_db(session: AsyncSession = Depends(get_session)) -> List[User]:
+    result = await session.execute(select(User))
     users = result.scalars().all()
-    return [Users(**user.__dict__) for user in users]
+    return [User(**user.__dict__) for user in users]
 
 
 async def get_user_db(
-    username: str, session: AsyncSession = Depends(get_session)) -> Users:
-    result = await session.execute(select(Users).where(Users.email == username))
-    if not result.scalars().first():
-        result = await session.execute(select(Users).where(Users.username == username))
+    email: str, session: AsyncSession = Depends(get_session)) -> User:
+    result = await session.execute(select(User).where(User.email == email))
 
     return result.scalar_one_or_none()
 
     # users = result.scalars().all()
-    # return [Users(**user.__dict__) for user in users]
+    # return [User(**user.__dict__) for user in users]
 
 
 async def get_current_user(token: str = Depends(oauth2_bearer),
                            session: AsyncSession = Depends(
-                               get_session)) -> Users:
+                               get_session)) -> User:
     error = unauthorized_error("Could not validate credentials")
     payload = _decode_token(token=token)
 
@@ -132,7 +130,7 @@ async def add_user(user: UserSignup,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Password invalid, should be at least 8 characters")
 
-    new_user = Users(email=user.email,
+    new_user = User(email=user.email,
                      hashed_password=get_password_hash(user.password + SALT),
                      id=str(uuid4()))
 
@@ -145,7 +143,7 @@ async def add_user(user: UserSignup,
 @router.post("/user/update")
 async def modify_user(user: UserUpdate,
                       session: AsyncSession = Depends(get_session),
-                      current_user: Users = Depends(get_current_user)):
+                      current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -158,7 +156,7 @@ async def modify_user(user: UserUpdate,
                 k, v = "hashed_password", get_password_hash(v + SALT)
             elif k == "email":
                 result = await session.execute(
-                    select(Users).where(Users.email == v))
+                    select(User).where(User.email == v))
                 searched_user = result.scalar_one_or_none()
                 if searched_user and searched_user.id != current_user.id:  # if the queried user with same email is not user self
                     raise HTTPException(
@@ -176,13 +174,13 @@ async def modify_user(user: UserUpdate,
 
 @router.post('/user/delete')
 async def delete_user(session: AsyncSession = Depends(get_session),
-                      current_user: Users = Depends(get_current_user)):
+                      current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
     result = await session.execute(
-        select(Users).where(Users.id == current_user.id))
+        select(User).where(User.id == current_user.id))
     original_instance = result.scalar_one_or_none()
     if not original_instance:
         raise Exception("User not found")
@@ -211,14 +209,14 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
 
 # Private Endpoints for test only
 @router.get("/user/private")
-async def get_private_endpoint(current_user: Users = Depends(get_current_user)):
+async def get_private_endpoint(current_user: User = Depends(get_current_user)):
     user_data = current_user.__dict__
     user_data.pop("hashed_password")
     return user_data
 
 
 @router.get("/user/private/admin")
-async def get_private_admin_endpoint(current_user: Users = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+async def get_private_admin_endpoint(current_user: User = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
     if not current_user.role:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -231,7 +229,7 @@ async def get_private_admin_endpoint(current_user: Users = Depends(get_current_u
 @router.post("/user/project")
 async def add_project(project: Project,
                       session: AsyncSession = Depends(get_session),
-                      current_user: Users = Depends(get_current_user)):
+                      current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
