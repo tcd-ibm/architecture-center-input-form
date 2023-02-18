@@ -11,11 +11,13 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import Users, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical
+from models import Users, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, Project
 
 from datetime import timedelta, datetime
 
 from typing import List
+
+import re
 
 # openssl rand -hex 32
 SECRET_KEY = "d8e632e42229356dbbcd5fdc366a05e9bfaca0193ba016e4fd6cf03307d90241"
@@ -79,8 +81,11 @@ async def get_all_users_db(session: AsyncSession = Depends(get_session)) -> List
 
 
 async def get_user_db(
-    email: str, session: AsyncSession = Depends(get_session)) -> Users:
-    result = await session.execute(select(Users).where(Users.email == email))
+    username: str, session: AsyncSession = Depends(get_session)) -> Users:
+    result = await session.execute(select(Users).where(Users.email == username))
+    if not result.scalars().first():
+        result = await session.execute(select(Users).where(Users.username == username))
+
     return result.scalar_one_or_none()
 
     # users = result.scalars().all()
@@ -114,14 +119,18 @@ async def on_startup():
 @router.post("/user/signup")
 async def add_user(user: UserSignup,
                    session: AsyncSession = Depends(get_session)):
+    if not user.email or not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", user.email):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Email invalid")
+
     existed_user = await get_user_db(user.email, session)
     if existed_user is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Email registered already")
 
-    if not user.password:
+    if not user.password or len(user.password) < 8:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Password invalid")
+                            detail="Password invalid, should be at least 8 characters")
 
     new_user = Users(email=user.email,
                      hashed_password=get_password_hash(user.password + SALT),
@@ -201,14 +210,14 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
 
 
 # Private Endpoints for test only
-@router.get("/private")
+@router.get("/user/private")
 async def get_private_endpoint(current_user: Users = Depends(get_current_user)):
     user_data = current_user.__dict__
     user_data.pop("hashed_password")
     return user_data
 
 
-@router.get("/private/admin")
+@router.get("/user/private/admin")
 async def get_private_admin_endpoint(current_user: Users = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
     if not current_user.role:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -217,6 +226,23 @@ async def get_private_admin_endpoint(current_user: Users = Depends(get_current_u
     for user in all_users:
         user.__dict__.pop("hashed_password")
     return all_users
+
+
+@router.post("/user/project")
+async def add_project(project: Project,
+                      session: AsyncSession = Depends(get_session),
+                      current_user: Users = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    data = project.dict(exclude_unset=True)
+    new_project = Project(**data, id=str(uuid4()))
+
+    session.add(new_project)
+    await session.commit()
+    await session.refresh(new_project)
+    return True
 
 
 @router.get("/announcement/{aid}", response_model=List[Announcement])

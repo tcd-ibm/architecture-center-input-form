@@ -1,6 +1,6 @@
 from typing import Optional, List
 from uuid import UUID
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Identity
 
 
 class UserBase(SQLModel):
@@ -18,6 +18,7 @@ class Users(UserBase, table=True):
     id: UUID = Field(default=None)
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
+    projects: List["Project"] = Relationship(back_populates="users")
 
 
 class UserUpdate(UserBase):
@@ -32,7 +33,7 @@ class Token(SQLModel):
 
 class Announcement(SQLModel, table=True):
     __tablename__ = 'AnnouncementList'
-    aid: int = Field(primary_key=True, nullable=False)
+    aid: int = Field(Identity(start=1, increment=1), primary_key=True, nullable=False)
     title: str = Field(max_length=255)
     titleLink: str = Field(max_length=255)
     date: str = Field(max_length=255)
@@ -50,7 +51,7 @@ class Detail(SQLModel, table=True):
 
 class PA(SQLModel, table=True):
     __tablename__ = 'PAList'
-    ppid: int = Field(primary_key=True)
+    ppid: int = Field(Identity(start=1, increment=1), primary_key=True)
     Heading: str = Field(max_length=255)
     Summary: str = Field(default=None)
     Product: str = Field(default=None)
@@ -95,7 +96,7 @@ class Category(SQLModel, table=True):
     categoryId: int = Field(default=None, primary_key=True)
     categoryName: str
 
-    tags: List["Tag"] = Relationship(back_populates="category")
+    tags: List["Tag"] = Relationship(back_populates="categories")
 
 
 class Tag(SQLModel, table=True):
@@ -107,3 +108,16 @@ class Tag(SQLModel, table=True):
                                       foreign_key="categories.categoryId")
 
     category: Optional[Category] = Relationship(back_populates="tags")
+
+
+class Project(SQLModel):
+    __tablename__ = 'projects'
+    id: UUID = Field(default=None, primary_key=True)
+    user_email: str = Field(foreign_key="users.email")
+    title: str
+    link: str
+    description: str
+    content: str
+    date: str
+    is_live: bool = Field(default=False)
+    tags: List[Tag] = Relationship(back_populates="project")
