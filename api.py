@@ -188,19 +188,18 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
         raise unauthorized_error("Incorrect username or password")
 
     token = _create_token(
-        data={"sub": form.username},
+        data={"sub": form.username, "role": user.role},
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     response = {"access_token": token, "token_type": "bearer"}
     return response
 
 
-''' # Private Endpoints for test only
+# Private Endpoints for test only
 @router.get("/private")
 async def getPrivateEndPoint(current_user: Users = Depends(get_current_user)):
     user_data = current_user.__dict__
     user_data.pop("hashed_password")
     return user_data
-'''
 
 
 @router.get("/announcement/{aid}", response_model=List[Announcement])

@@ -6,7 +6,6 @@ from sqlmodel import SQLModel, Field, Relationship
 class UserBase(SQLModel):
     email: str = Field(default=None, primary_key=True)
     username: Optional[str] = None
-    phone: Optional[str] = None
 
 
 class UserSignup(UserBase):
@@ -15,10 +14,10 @@ class UserSignup(UserBase):
 
 # table = True => in database
 class Users(UserBase, table=True):
-    phone: Optional[str] = None
     hashed_password: str = None
     id: UUID = Field(default=None)
     is_active: bool = Field(default=True)
+    role: int = Field(default=0)
 
 
 class UserUpdate(UserBase):
