@@ -41,7 +41,7 @@ function LoginFormGeneric(props, ref) {
 
                     { rememberIdCheckbox ?
                         <div><Checkbox labelText='Remember ID' id='remember-id-checkbox' className='checkbox' /></div> :
-                        <div style={{visibility: 'hidden'}}><Checkbox id='remember-id-checkbox' className='checkbox' /></div>
+                        <div style={{visibility: 'hidden'}}><Checkbox labelText='Remember ID' id='remember-id-checkbox' className='checkbox' /></div>
                     }
                     
                 </div>
