@@ -33,10 +33,10 @@ function LoginFormGeneric(props, ref) {
                     }
                     
                     { inputType === 'email' &&
-                        <EmailInput className='input' ref={ref} />
+                        <EmailInput autoFocus className='input' ref={ref} />
                     }
                     { inputType === 'password' &&
-                        <PasswordInput className='input' ref={ref} />
+                        <PasswordInput autoFocus className='input' ref={ref} />
                     }
 
                     { rememberIdCheckbox ?
