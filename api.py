@@ -72,6 +72,12 @@ def _decode_token(token: str) -> dict:
         raise unauthorized_error("Could not validate credentials")
 
 
+async def get_all_users_db(session: AsyncSession = Depends(get_session)) -> List[Users]:
+    result = await session.execute(select(Users))
+    users = result.scalars().all()
+    return [Users(**user.__dict__) for user in users]
+
+
 async def get_user_db(
     email: str, session: AsyncSession = Depends(get_session)) -> Users:
     result = await session.execute(select(Users).where(Users.email == email))
@@ -196,10 +202,21 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
 
 # Private Endpoints for test only
 @router.get("/private")
-async def getPrivateEndPoint(current_user: Users = Depends(get_current_user)):
+async def get_private_endpoint(current_user: Users = Depends(get_current_user)):
     user_data = current_user.__dict__
     user_data.pop("hashed_password")
     return user_data
+
+
+@router.get("/private/admin")
+async def get_private_admin_endpoint(current_user: Users = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+    if not current_user.role:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+    all_users = await get_all_users_db(session)
+    for user in all_users:
+        user.__dict__.pop("hashed_password")
+    return all_users
 
 
 @router.get("/announcement/{aid}", response_model=List[Announcement])
