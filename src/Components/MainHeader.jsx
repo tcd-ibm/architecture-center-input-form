@@ -21,14 +21,14 @@ function MainHeader() {
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
-                    <HeaderNavigation>
+                    <HeaderNavigation aria-label="Account options">
                         <HeaderMenuItem onClick={() => setUser(null)}>
                             Log out
                         </HeaderMenuItem>
                     </HeaderNavigation>
                 }
                 { !user &&
-                    <HeaderNavigation>
+                    <HeaderNavigation aria-label="Account options">
                         <HeaderMenuItem href="/signup">
                             Sign up
                         </HeaderMenuItem>
