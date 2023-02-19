@@ -1,9 +1,14 @@
+import { useContext } from 'react';
 import { Header, HeaderName, HeaderNavigation, HeaderMenuItem, HeaderGlobalBar } from '@carbon/react';
+
+import AuthContext from '../context/AuthContext';
 
 //TODO replace standard hrefs with react-router Link component or equivalent
 //TODO replace the login and signup links when proper design ready
 
 function MainHeader() {
+    const [user, setUser] = useContext(AuthContext);
+
     return (
         <Header aria-label="Amazing SwEng Project">
             <HeaderName href="/" prefix="">
@@ -15,14 +20,23 @@ function MainHeader() {
                 </HeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar>
-                <HeaderNavigation>
-                    <HeaderMenuItem href="/signup">
-                        Sign up
-                    </HeaderMenuItem>
-                    <HeaderMenuItem href="/login">
-                        Log in
-                    </HeaderMenuItem>
-                </HeaderNavigation>
+                { user &&
+                    <HeaderNavigation>
+                        <HeaderMenuItem onClick={() => setUser(null)}>
+                            Log out
+                        </HeaderMenuItem>
+                    </HeaderNavigation>
+                }
+                { !user &&
+                    <HeaderNavigation>
+                        <HeaderMenuItem href="/signup">
+                            Sign up
+                        </HeaderMenuItem>
+                        <HeaderMenuItem href="/login">
+                            Log in
+                        </HeaderMenuItem>
+                    </HeaderNavigation>
+                }
             </HeaderGlobalBar>
         </Header>
     );
