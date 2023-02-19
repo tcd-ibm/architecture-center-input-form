@@ -7,7 +7,7 @@ import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
 
 function LoginFormGeneric(props, ref) {
-    const {subheadingContentNode, errorText, inputType, rememberIdCheckbox, buttonText, onSubmit} = props;
+    const {subheadingContentNode, errorText, setErrorText, inputType, rememberIdCheckbox, buttonText, onSubmit} = props;
 
     const onSubmitWrapper = event => {
         event.preventDefault();
@@ -27,16 +27,17 @@ function LoginFormGeneric(props, ref) {
                             subtitle={errorText}
                             lowContrast={true}
                             className='notification'
+                            onCloseButtonClick={() => setErrorText(null)}
                         />
                         :
                         <div className='notificationPlaceholder'></div>
                     }
                     
                     { inputType === 'email' &&
-                        <EmailInput autoFocus className='input' ref={ref} />
+                        <EmailInput autoFocus className='input' id='email' ref={ref} />
                     }
                     { inputType === 'password' &&
-                        <PasswordInput autoFocus className='input' ref={ref} />
+                        <PasswordInput autoFocus className='input' id='password' ref={ref} />
                     }
 
                     { rememberIdCheckbox ?
