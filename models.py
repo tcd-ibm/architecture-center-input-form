@@ -1,10 +1,11 @@
 from typing import Optional, List
 from uuid import UUID
+from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
-    email: str = Field(default=None, primary_key=True)
+    email: str = Field(primary_key=True, nullable=False, max_length=255)
     username: Optional[str] = None
 
 
@@ -94,20 +95,20 @@ class Vertical(SQLModel, table=True):
 
 class Category(SQLModel, table=True):
     __tablename__ = 'categories'
-    categoryId: int = Field(default=None, primary_key=True)
+    categoryId: int = Field(primary_key=True, nullable=False)
     categoryName: str
 
     tags: List["Tag"] = Relationship(back_populates="category")
 
 
 class project_tags(SQLModel, table=True):
-    project_id: UUID = Field(default=None, foreign_key="projects.id", primary_key=True)
-    tag_id: int = Field(default=None, foreign_key="tags.tagId", primary_key=True)
+    project_id: UUID = Field(foreign_key="projects.id", primary_key=True, nullable=False)
+    tag_id: int = Field(foreign_key="tags.tagId", primary_key=True, nullable=False)
 
 
 class Tag(SQLModel, table=True):
     __tablename__ = 'tags'
-    tagId: int = Field(default=None, primary_key=True)
+    tagId: int = Field(primary_key=True, nullable=False)
     tagName: str
     tagNameShort: str
     categoryId: Optional[int] = Field(default=None, foreign_key="categories.categoryId")
@@ -115,15 +116,24 @@ class Tag(SQLModel, table=True):
     category: Optional[Category] = Relationship(back_populates="tags")
 
 
+class ProjectBase(SQLModel):
+    title: str
+    link: str
+    description: str
+    content: str
+    date: datetime
+    tags: List[int]  # tagId
+
+
 class Project(SQLModel, table=True):
     __tablename__ = 'projects'
-    id: UUID = Field(primary_key=True, default=None)
+    id: UUID = Field(primary_key=True, nullable=False)
     email: Optional[str] = Field(foreign_key="users.email")
     title: str
     link: str
     description: str
     content: str
-    date: str
+    date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)

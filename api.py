@@ -11,7 +11,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, Project
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag
 
 from datetime import timedelta, datetime
 
@@ -227,7 +227,7 @@ async def get_private_admin_endpoint(current_user: User = Depends(get_current_us
 
 
 @router.post("/user/project")
-async def add_project(project: Project,
+async def add_project(project: ProjectBase,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
     if not current_user:
@@ -235,7 +235,20 @@ async def add_project(project: Project,
                             detail="Unauthorized")
 
     data = project.dict(exclude_unset=True)
-    new_project = Project(**data, id=str(uuid4()))
+    tags = []
+    for tagId in data["tags"]:
+        if not isinstance(tagId, int):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Tag must be an integer")
+        r = await session.execute(select(Tag).where(Tag.tagId == tagId))
+        tag = r.scalar_one_or_none()
+        if not tag:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Tag with ID {tagId} not found")
+        tags.append(tag)
+
+    data["tags"] = tags
+    new_project = Project(**data, id=str(uuid4()), user=current_user, email=current_user.email)
 
     session.add(new_project)
     await session.commit()
