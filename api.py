@@ -12,7 +12,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags
 
 from datetime import timedelta, datetime
 
@@ -300,8 +300,8 @@ async def fetch_tag(request: Request,
     return r.scalars().all()
 
 
-@router.get("/tags", response_model=List[Category])
-async def fetch_tags(session: AsyncSession = Depends(get_session)) -> List[Category]:
+@router.get("/tags", response_model=List[CategoryWithTags])
+async def fetch_tags(session: AsyncSession = Depends(get_session)) -> List[CategoryWithTags]:
 
     r = await session.execute(select(Category).options(selectinload(Category.tags)).order_by(Category.categoryId))
     categories = r.scalars().all()

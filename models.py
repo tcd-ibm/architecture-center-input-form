@@ -93,12 +93,19 @@ class Vertical(SQLModel, table=True):
     vname: str = Field(max_length=255)
 
 
-class Category(SQLModel, table=True):
-    __tablename__ = 'categories'
+class CategoryBase(SQLModel):
     categoryId: int = Field(primary_key=True, nullable=False)
     categoryName: str
 
+
+class Category(CategoryBase, table=True):
+    __tablename__ = 'categories'
+
     tags: List["Tag"] = Relationship(back_populates="category")
+
+
+class CategoryWithTags(CategoryBase):
+    tags: List["Tag"] = []
 
 
 class project_tags(SQLModel, table=True):
@@ -137,3 +144,6 @@ class Project(SQLModel, table=True):
     is_live: bool = Field(default=False)
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
+
+
+CategoryWithTags.update_forward_refs()
