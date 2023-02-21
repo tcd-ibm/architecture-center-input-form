@@ -111,9 +111,9 @@ class Tag(SQLModel, table=True):
     tagId: int = Field(primary_key=True, nullable=False)
     tagName: str
     tagNameShort: str
-    categoryId: Optional[int] = Field(default=None, foreign_key="categories.categoryId")
+    categoryId: int = Field(default=None, foreign_key="categories.categoryId")
     projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags)
-    category: Optional[Category] = Relationship(back_populates="tags")
+    category: Category = Relationship(back_populates="tags")
 
 
 class ProjectBase(SQLModel):
@@ -128,7 +128,7 @@ class ProjectBase(SQLModel):
 class Project(SQLModel, table=True):
     __tablename__ = 'projects'
     id: UUID = Field(primary_key=True, nullable=False)
-    email: Optional[str] = Field(foreign_key="users.email")
+    email: str = Field(foreign_key="users.email")
     title: str
     link: str
     description: str

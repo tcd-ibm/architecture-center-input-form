@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload, undefer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from passlib.context import CryptContext
@@ -11,7 +12,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category
 
 from datetime import timedelta, datetime
 
@@ -289,6 +290,24 @@ async def fetch_pa(request: Request,
     ) if ppid else await session.execute(
         select(PA).filter_by(**request.query_params._dict).order_by(PA.ppid))
     return r.scalars().all()
+
+
+@router.get("/tag/{tagId}", response_model=List[Tag])
+async def fetch_tag(request: Request,
+                    session: AsyncSession = Depends(get_session),
+                    tagId: int = 0) -> List[Tag]:
+    r = await session.execute(select(Tag).filter_by(**request.query_params._dict, tagId=tagId))
+    return r.scalars().all()
+
+
+@router.get("/tags", response_model=List[Category])
+async def fetch_tags(session: AsyncSession = Depends(get_session)) -> List[Category]:
+
+    r = await session.execute(select(Category).options(selectinload(Category.tags)).order_by(Category.categoryId))
+    categories = r.scalars().all()
+    for category in categories:
+        print(category.tags)
+    return categories
 
 
 @router.get("/product", response_model=List[Product])
