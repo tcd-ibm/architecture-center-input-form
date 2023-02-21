@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload, undefer
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from passlib.context import CryptContext
@@ -304,10 +304,7 @@ async def fetch_tag(request: Request,
 async def fetch_tags(session: AsyncSession = Depends(get_session)) -> List[CategoryWithTags]:
 
     r = await session.execute(select(Category).options(selectinload(Category.tags)).order_by(Category.categoryId))
-    categories = r.scalars().all()
-    for category in categories:
-        print(category.tags)
-    return categories
+    return r.scalars().all()
 
 
 @router.get("/product", response_model=List[Product])
