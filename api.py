@@ -12,7 +12,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags
 
 from datetime import timedelta, datetime
 
@@ -260,6 +260,17 @@ async def add_project(project: ProjectBase,
     await session.commit()
     await session.refresh(new_project)
     return True
+
+
+@router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
+async def get_projects(session: AsyncSession = Depends(get_session),
+                       current_user: User = Depends(get_current_user)) -> List[ProjectWithUserAndTags]:
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(select(Project).options(selectinload(Project.user), selectinload(Project.tags)).order_by(Project.id))
+    return r.scalars().all()
 
 
 @router.get("/announcement/{aid}", response_model=List[Announcement])

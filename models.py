@@ -23,6 +23,12 @@ class User(UserBase, table=True):
     projects: List["Project"] = Relationship(back_populates="user")
 
 
+class UserInfo(UserBase):
+    email: str
+    username: Optional[str] = None
+    is_active: bool
+
+
 class UserUpdate(UserBase):
     email: Optional[str] = None
     password: Optional[str] = None
@@ -127,23 +133,28 @@ class ProjectBase(SQLModel):
     title: str
     link: str
     description: str
-    content: str
     date: datetime
     tags: List[int]  # tagId
 
 
-class Project(SQLModel, table=True):
+class Project(ProjectBase, table=True):
     __tablename__ = 'projects'
     id: UUID = Field(primary_key=True, nullable=False)
-    email: str = Field(foreign_key="users.email")
-    title: str
-    link: str
-    description: str
     content: str
+    email: str = Field(foreign_key="users.email")
     date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
 
 
+class ProjectWithUserAndTags(ProjectBase):
+    id: UUID
+    email: str
+    is_live: bool
+    user: UserInfo | None = None
+    tags: List["Tag"] = []
+
+
+ProjectWithUserAndTags.update_forward_refs()
 CategoryWithTags.update_forward_refs()
