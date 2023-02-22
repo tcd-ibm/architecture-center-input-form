@@ -27,6 +27,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 SALT = "fa3e1b071f78d55d833c2df51a3089e5"
 
+DEFAULT_PAGE = 1
+
+DEFAULT_PAGE_SIZE = 30
 MAX_PAGE_SIZE = 50
 # templates = Jinja2Templates(directory="templates")
 
@@ -279,8 +282,8 @@ async def add_project(project: ProjectBase,
 
 @router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
 async def get_user_projects(
-    per_page: int = 30,
-    page: int = 1,
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ) -> List[ProjectWithUserAndTags]:
@@ -299,8 +302,8 @@ async def get_user_projects(
 
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
 async def get_all_projects(
-    per_page: int = 30,
-    page: int = 1,
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
     session: AsyncSession = Depends(get_session),
 ) -> List[ProjectWithUserAndTags]:
 
