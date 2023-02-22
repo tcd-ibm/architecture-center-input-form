@@ -1,4 +1,4 @@
-import { Tile, Link, Tag } from '@carbon/react';
+import { ClickableTile, Link, Tag } from '@carbon/react';
 import './card.scss';
 
 const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
@@ -8,7 +8,7 @@ export default function Card({projectData}) {
   if(!projectData.islive) return null;
   
   return (
-    <Tile className='tile'>
+    <ClickableTile className='tile' href="/details">
       {/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
       <Link size='lg' className='titleLink'>{projectData.Heading}</Link>
       <p>{projectData.Summary}</p>
@@ -26,6 +26,6 @@ export default function Card({projectData}) {
             <Tag type="cool-gray" title="Clear Filter" key={projectData.ppid + producttag}>{producttag}</Tag>
         )}
       </div>
-    </Tile>
+    </ClickableTile>
   );
 }
