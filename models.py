@@ -133,6 +133,7 @@ class ProjectBase(SQLModel):
     title: str
     link: str
     description: str
+    content: str
     date: datetime
     tags: List[int]  # tagId
 
@@ -140,7 +141,6 @@ class ProjectBase(SQLModel):
 class Project(ProjectBase, table=True):
     __tablename__ = 'projects'
     id: UUID = Field(primary_key=True, nullable=False)
-    content: str
     email: str = Field(foreign_key="users.email")
     date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
@@ -148,10 +148,13 @@ class Project(ProjectBase, table=True):
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
 
 
-class ProjectWithUserAndTags(ProjectBase):
+class ProjectWithUserAndTags(SQLModel):
     id: UUID
-    email: str
+    title: str
+    link: str
+    description: str
     is_live: bool
+    date: datetime
     user: UserInfo | None = None
     tags: List["Tag"] = []
 
