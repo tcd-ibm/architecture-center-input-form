@@ -13,11 +13,20 @@ function PasswordInput(props, ref) {
         }
     }), []);
 
+    const handleInputChange = (event) => {
+        const value = event.target.value;
+        props.onInputChange(value)
+    }
+
     const [invalidText, setInvalidText] = useState(null);
 
     const validate = () => {
-        if(!inputRef.current.value) {
+        if (!inputRef.current.value) {
             setInvalidText('Password is required');
+            return false;
+        }
+        if (inputRef.current.value.length < 8) {
+            setInvalidText('Password must be at least 8 characters');
             return false;
         } 
         setInvalidText(null);
@@ -32,6 +41,7 @@ function PasswordInput(props, ref) {
             invalidText={invalidText}
             ref={inputRef}
             onBlur={validate}
+            onChange={handleInputChange}
             {...props}
         />
     );

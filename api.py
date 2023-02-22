@@ -138,7 +138,12 @@ async def add_user(user: UserSignup,
     session.add(new_user)
     await session.commit()
     await session.refresh(new_user)
-    return True
+
+    token = _create_token(
+        data={"sub": user.username, "role": 0},
+        expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    response = {"access_token": token, "token_type": "bearer"}
+    return response
 
 
 @router.post("/user/update")

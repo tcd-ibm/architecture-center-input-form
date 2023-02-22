@@ -13,13 +13,18 @@ function EmailInput(props, ref) {
         }
     }), []);
 
+    const handleInputChange = (event) => {
+        const value = event.target.value;
+        props.onInputChange(value)
+    }
+    
     const [invalidText, setInvalidText] = useState(null);
 
     const validate = () => {
         if(!inputRef.current.value) {
             setInvalidText('Email is required');
             return false;
-        } 
+        }
         if(!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(inputRef.current.value)) {
             setInvalidText('Enter a valid email address');
             return false;
@@ -36,6 +41,7 @@ function EmailInput(props, ref) {
             invalidText={invalidText}
             ref={inputRef}
             onBlur={validate}
+            onChange={handleInputChange}
             {...props}
         />
     );
