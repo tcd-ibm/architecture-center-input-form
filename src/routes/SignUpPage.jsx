@@ -1,73 +1,46 @@
-import { useState, useRef, useContext, useEffect } from 'react'
+import { useState, useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import MainHeader from '@/Components/MainHeader';
 import EmailInput from '@/Components/EmailInput';
-import PasswordInput from '@/Components/PasswordInput';
+import ValidatedPasswordInput from '../Components/ValidatedPasswordInput';
+import ValidatedPasswordConfirmationInput from '../Components/ValidatedPasswordConfirmationInput';
 
 import { ArrowRight } from '@carbon/icons-react';
-import { Content, Tile, Form, Button, InlineNotification, Link } from '@carbon/react';
+import { Content, Tile, Button, InlineNotification, Link, FluidForm } from '@carbon/react';
 
 import AuthContext from '@/context/AuthContext';
 import User from '@/utils/User';
 
-import './loginPage.scss';
+import './SignUpPage.scss';
 
 function SignUpPage() {
 
     const [user, setUser] = useContext(AuthContext);
 
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-
-    const [emailErrorText, setEmailErrorText] = useState(null);
-    const [passwordErrorText, setPasswordErrorText] = useState(null);
-    const [confirmPasswordErrorText, setConfirmPasswordErrorText] = useState(null);
-
-    const [canSubmit, setCanSubmit] = useState(false);
+    const [errorText, setErrorText] = useState(null);
 
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
     const confirmPasswordRef = useRef(null);
 
-    const handleEmailInputChange = (value) => {
-        emailRef.current.validate() ? setEmail(value) : setEmail(null)
-    }
-    const handlePasswordInputChange = (value) => {
-        passwordRef.current.validate() ? setPassword(value) : setPassword(null)
-    }
-    const handleConfirmPasswordInputChange = (value) => {
-        confirmPasswordRef.current.validate() ? setConfirmPassword(value) : setConfirmPassword(null)
-    }
-
-    useEffect(() => {
-        if (!(Boolean)(email && password && confirmPassword)) {
-            setCanSubmit(false)
-            return
-        }
-        if (password !== confirmPassword) {
-            setConfirmPasswordErrorText('Passwords do not match')
-            setCanSubmit(false)
-            return
-        }
-        setConfirmPasswordErrorText(null)
-        setCanSubmit(true)
-    }, [email, password, confirmPassword])
-
     const navigate = useNavigate();
-    const onSubmitWrapper = async event => {
+
+    const handleSubmit = async event => {
 
         event.preventDefault()
 
-        if (!email || !password || !confirmPassword) return
+        if(!emailRef.current.validate()) return;
+        if(!passwordRef.current.validate()) return;
+        if(!confirmPasswordRef.current.validate()) return;
 
         const requestData = {
-            email: email,
+            email: emailRef.current.value,
             username: '',
-            password: password
+            password: passwordRef.current.value
         }
+
         try {
             const response = await axios.post('/user/signup', requestData, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
             setUser(new User(response.data.access_token));
@@ -78,94 +51,72 @@ function SignUpPage() {
             if (error?.response?.status === 400) {
                 const detail = error.response.data.detail
                 if (detail == 'Email registered already')
-                    setEmailErrorText(detail)
+                    setErrorText(detail)
                 else if (detail == 'Password invalid, should be at least 8 characters')
-                    setPasswordErrorText(detail)
+                    setErrorText(detail)
                 else
-                    setConfirmPasswordErrorText(detail)
+                    setErrorText(detail)
             }
         }
     }
 
+    if(user) {
+        navigate('/', { replace: true });
+    }
+
     return (
         <>
-            <MainHeader />
-            <Content style={{ display: "flex", justifyContent: "center" }}>
-                <Tile className='loginFormTile'>
-                    <Form onSubmit={onSubmitWrapper}>
-                        {user ? <p>Logged in already? <Link href='/'>index</Link></p> : <></>}
-                        <div className='loginInnerContainer'>
-                            {emailErrorText ?
-                                <InlineNotification
-                                    height='2rem'
-                                    title='Error:'
-                                    subtitle={emailErrorText}
-                                    lowContrast={true}
-                                    className='notification'
-                                    onCloseButtonClick={() => setEmailErrorText(null)}
-                                />
-                                :
-                                <div className='notificationPlaceholder'></div>
-                            }
-                            <EmailInput
-                                className="input"
-                                id="email"
-                                labelText="Email"
-                                placeholder="Enter your Email"
-                                onInputChange={handleEmailInputChange}
-                                ref={emailRef}
-                            />
-                            {passwordErrorText ?
-                                <InlineNotification
-                                    height='2rem'
-                                    title='Error:'
-                                    subtitle={passwordErrorText}
-                                    lowContrast={true}
-                                    className='notification'
-                                    onCloseButtonClick={() => setPasswordErrorText(null)}
-                                />
-                                :
-                                <div className='notificationPlaceholder'></div>
-                            }
-                            <PasswordInput
-                                labelText="Password"
-                                className="input"
-                                id="password"
-                                placeholder="Enter your password"
-                                onInputChange={handlePasswordInputChange}
-                                ref={passwordRef}
-                            />
-                            {confirmPasswordErrorText ?
+        <MainHeader />
+        <Content className='signupFormContainer'>
+            <Tile className='signupFormTile'>
+                <FluidForm onSubmit={handleSubmit}>
+                    <div className='innerContainer'>
+                        <p className='heading'>Sign up</p>
+                        <p>Already have an account? <Link href='/login'>Log in</Link></p>
 
-                                <InlineNotification
-                                    height='2rem'
-                                    title='Error:'
-                                    subtitle={confirmPasswordErrorText}
-                                    lowContrast={true}
-                                    className='notification'
-                                    onCloseButtonClick={() => setConfirmPasswordErrorText(null)}
-                                />
-                                :
-                                <div className='notificationPlaceholder'></div>
-                            }
-                            <PasswordInput
-                                labelText="Confirm Password"
-                                className="input"
-                                id="confirmPassword"
-                                placeholder="Re-enter your password"
-                                onInputChange={handleConfirmPasswordInputChange}
-                                ref={confirmPasswordRef}
+                        { errorText ?
+                            <InlineNotification
+                                title='Error:'
+                                subtitle={errorText}
+                                lowContrast={true}
+                                className='notification'
+                                onCloseButtonClick={() => setErrorText(null)}
                             />
+                            :
+                            <div className='notificationPlaceholder'></div>
+                        }
+
+                        <EmailInput 
+                            autoFocus 
+                            className='input' 
+                            id='email' 
+                            ref={emailRef} 
+                        />
+
+                        <ValidatedPasswordInput 
+                            className='input' 
+                            id='password' 
+                            ref={passwordRef} 
+                            onChange={() => confirmPasswordRef.current.validate()} 
+                        />
+
+                        <ValidatedPasswordConfirmationInput 
+                            className='input' 
+                            id='passwordConfirmation' 
+                            primaryRef={passwordRef} 
+                            ref={confirmPasswordRef} 
+                        />
+
+                    </div>
+                    <div className='buttonContainer'>
+                        <div className='flexColumn'></div>
+                        <div className='flexColumn'>
+                            <Button renderIcon={ArrowRight} className='button' type='submit'>Sign up</Button>
                         </div>
-                        <div className='buttonContainer'>
-                            <div className='flexColumn'></div>
-                            <div className='flexColumn'>
-                                <Button renderIcon={ArrowRight} className='button' type='submit' disabled={!canSubmit}>Register</Button>
-                            </div>
-                        </div>
-                    </Form>
-                </Tile>
-            </Content>
+                    </div>
+                </FluidForm>
+            </Tile>
+        </Content>
         </>
     )
 }
