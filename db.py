@@ -22,7 +22,4 @@ async def get_session() -> AsyncSession:
         engine, class_=AsyncSession, expire_on_commit=False
     )
     async with async_session() as session:
-        try:
-            yield session
-        finally:
-            session.close()
+        yield session

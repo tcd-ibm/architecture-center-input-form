@@ -1,7 +1,8 @@
 import { useState, useRef, useImperativeHandle, forwardRef } from "react";
 import { TextInput } from "@carbon/react";
 
-function EmailInput(props, ref) {
+function ValidatedPasswordConfirmationInput(props, ref) {
+    const { primaryRef, ...remainingProps } = props;
 
     const inputRef = useRef();
     useImperativeHandle(ref, () => ({
@@ -12,16 +13,12 @@ function EmailInput(props, ref) {
             return inputRef.current.value;
         }
     }), []);
-    
+
     const [invalidText, setInvalidText] = useState(null);
 
     const validate = () => {
-        if(!inputRef.current.value) {
-            setInvalidText('Email is required');
-            return false;
-        }
-        if(!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(inputRef.current.value)) {
-            setInvalidText('Enter a valid email address');
+        if(inputRef.current.value !== primaryRef.current.value) {
+            setInvalidText('Passwords do not match');
             return false;
         }
         setInvalidText(null);
@@ -30,17 +27,17 @@ function EmailInput(props, ref) {
 
     return (
         <TextInput 
-            type='email'
-            labelText='Email'
+            type='password'
+            labelText='Confirm password'
             invalid={Boolean(invalidText)}
             invalidText={invalidText}
             ref={inputRef}
-            onBlur={validate}
-            {...props}
+            onChange={validate}
+            {...remainingProps}
         />
     );
 }
 
-EmailInput = forwardRef(EmailInput);
+ValidatedPasswordConfirmationInput = forwardRef(ValidatedPasswordConfirmationInput);
 
-export default EmailInput;
+export default ValidatedPasswordConfirmationInput;
