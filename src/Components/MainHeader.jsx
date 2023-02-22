@@ -1,9 +1,10 @@
 import { useContext } from 'react';
-import { Header, HeaderName, HeaderNavigation, HeaderMenuItem, HeaderGlobalBar } from '@carbon/react';
+import { Header, HeaderName, HeaderNavigation, HeaderGlobalBar } from '@carbon/react';
 
 import AuthContext from '../context/AuthContext';
+import CustomHeaderMenuItem from './CustomHeaderMenuItem';
 
-//TODO replace standard hrefs with react-router Link component or equivalent
+//TODO replace HeaderName react-router Link component or equivalent
 //TODO replace the login and signup links when proper design ready
 
 function MainHeader() {
@@ -15,26 +16,26 @@ function MainHeader() {
                 Amazing SwEng Project
             </HeaderName>
             <HeaderNavigation aria-label="Amazing SwEng Project">
-                <HeaderMenuItem href="/add">
+                <CustomHeaderMenuItem href="/add">
                     Add new project
-                </HeaderMenuItem>
+                </CustomHeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
                     <HeaderNavigation aria-label="Account options">
-                        <HeaderMenuItem onClick={() => setUser(null)}>
+                        <CustomHeaderMenuItem onClick={() => setUser(null)}>
                             Log out
-                        </HeaderMenuItem>
+                        </CustomHeaderMenuItem>
                     </HeaderNavigation>
                 }
                 { !user &&
                     <HeaderNavigation aria-label="Account options">
-                        <HeaderMenuItem href="/signup">
+                        <CustomHeaderMenuItem href="/signup">
                             Sign up
-                        </HeaderMenuItem>
-                        <HeaderMenuItem href="/login">
+                        </CustomHeaderMenuItem>
+                        <CustomHeaderMenuItem href="/login">
                             Log in
-                        </HeaderMenuItem>
+                        </CustomHeaderMenuItem>
                     </HeaderNavigation>
                 }
             </HeaderGlobalBar>

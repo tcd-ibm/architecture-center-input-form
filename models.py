@@ -1,10 +1,11 @@
 from typing import Optional, List
 from uuid import UUID
+from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
-    email: str = Field(default=None, primary_key=True)
+    email: str = Field(primary_key=True, nullable=False, max_length=255)
     username: Optional[str] = None
 
 
@@ -20,6 +21,12 @@ class User(UserBase, table=True):
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
     projects: List["Project"] = Relationship(back_populates="user")
+
+
+class UserInfo(UserBase):
+    email: str
+    username: Optional[str] = None
+    is_active: bool
 
 
 class UserUpdate(UserBase):
@@ -92,38 +99,65 @@ class Vertical(SQLModel, table=True):
     vname: str = Field(max_length=255)
 
 
-class Category(SQLModel, table=True):
-    __tablename__ = 'categories'
-    categoryId: int = Field(default=None, primary_key=True)
+class CategoryBase(SQLModel):
+    categoryId: int = Field(primary_key=True, nullable=False)
     categoryName: str
+
+
+class Category(CategoryBase, table=True):
+    __tablename__ = 'categories'
 
     tags: List["Tag"] = Relationship(back_populates="category")
 
 
+class CategoryWithTags(CategoryBase):
+    tags: List["Tag"] = []
+
+
 class project_tags(SQLModel, table=True):
-    project_id: UUID = Field(default=None, foreign_key="projects.id", primary_key=True)
-    tag_id: int = Field(default=None, foreign_key="tags.tagId", primary_key=True)
+    project_id: UUID = Field(foreign_key="projects.id", primary_key=True, nullable=False)
+    tag_id: int = Field(foreign_key="tags.tagId", primary_key=True, nullable=False)
 
 
 class Tag(SQLModel, table=True):
     __tablename__ = 'tags'
-    tagId: int = Field(default=None, primary_key=True)
+    tagId: int = Field(primary_key=True, nullable=False)
     tagName: str
     tagNameShort: str
-    categoryId: Optional[int] = Field(default=None, foreign_key="categories.categoryId")
+    categoryId: int = Field(default=None, foreign_key="categories.categoryId")
     projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags)
-    category: Optional[Category] = Relationship(back_populates="tags")
+    category: Category = Relationship(back_populates="tags")
 
 
-class Project(SQLModel, table=True):
-    __tablename__ = 'projects'
-    id: UUID = Field(primary_key=True, default=None)
-    email: Optional[str] = Field(foreign_key="users.email")
+class ProjectBase(SQLModel):
     title: str
     link: str
     description: str
     content: str
-    date: str
+    date: datetime
+    tags: List[int]  # tagId
+
+
+class Project(ProjectBase, table=True):
+    __tablename__ = 'projects'
+    id: UUID = Field(primary_key=True, nullable=False)
+    email: str = Field(foreign_key="users.email")
+    date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
+
+
+class ProjectWithUserAndTags(SQLModel):
+    id: UUID
+    title: str
+    link: str
+    description: str
+    is_live: bool
+    date: datetime
+    user: UserInfo | None = None
+    tags: List["Tag"] = []
+
+
+ProjectWithUserAndTags.update_forward_refs()
+CategoryWithTags.update_forward_refs()

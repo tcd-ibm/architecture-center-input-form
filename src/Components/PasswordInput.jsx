@@ -19,7 +19,7 @@ function PasswordInput(props, ref) {
         if(!inputRef.current.value) {
             setInvalidText('Password is required');
             return false;
-        } 
+        }
         setInvalidText(null);
         return true;
     };
