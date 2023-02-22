@@ -284,6 +284,7 @@ async def add_project(project: ProjectBase,
 async def get_user_projects(
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
+    keyword: str = "",
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ) -> List[ProjectWithUserAndTags]:
@@ -292,7 +293,7 @@ async def get_user_projects(
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).where(Project.email == current_user.email).options(selectinload(Project.user),
+        select(Project).where(Project.email == current_user.email).filter(Project.title.like(f'%{keyword}%')).options(selectinload(Project.user),
                                 selectinload(Project.tags)).order_by(
                                     Project.id).offset(
                                         max((page - 1) * per_page,
@@ -304,11 +305,12 @@ async def get_user_projects(
 async def get_all_projects(
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
+    keyword: str = "",
     session: AsyncSession = Depends(get_session),
 ) -> List[ProjectWithUserAndTags]:
 
     r = await session.execute(
-        select(Project).options(selectinload(Project.user),
+        select(Project).filter(Project.title.like(f'%{keyword}%')).options(selectinload(Project.user),
                                 selectinload(Project.tags)).order_by(
                                     Project.id).offset(
                                         max((page - 1) * per_page,
