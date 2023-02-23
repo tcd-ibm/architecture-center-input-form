@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MainHeader from '@/Components/MainHeader';
 import { Tile, Content, Link, Grid, Column, Tag } from '@carbon/react';
+import { ArrowRight } from '@carbon/icons-react';
 import Asciidoctor from 'asciidoctor';
 import './ProjectDetails.scss';
 
@@ -16,7 +17,7 @@ function ProjectDetails({}) {
             <Content className="contentBox">
                 <Tile className="titleBox">
                     <h1>Sample Heading</h1>
-                    <Link href="https://google.com" renderIcon="arrow--right">Project link</Link>
+                    <Link href="https://google.com" size="lg" renderIcon={ArrowRight}>Project link</Link>
                 </Tile>
                 <Grid className="contentsGrid">
                     <Column sm={4} md={6} lg={12}>
