@@ -339,12 +339,12 @@ async def get_all_projects(
             subquery = select(
                 project_tags.project_id, project_tags.tag_id,
                 Tag.tagName.label('tag_tagName')).join(Tag).filter(
-                    Tag.tagId.in_(tag_ids)).subquery()
+                    Tag.tagId.in_(tag_ids)) .subquery()
 
             r = await session.execute(
                 select(Project).outerjoin(subquery,
                                           Project.id == subquery.c.project_id).group_by(Project.id)
-                    .filter(Project.title.like(f'%{keyword}%'), and_(*[or_(*[subquery.c.tag_id == tagId for tagId in tagIds]) for tagIds in tag_ids_by_category])).options(
+                    .filter(Project.title.like(f'%{keyword}%'), *[or_(*[subquery.c.tag_id == tagId for tagId in tagIds]) for tagIds in tag_ids_by_category]).options(
                         selectinload(Project.user),
                         selectinload(Project.tags)).order_by(
                             Project.id).offset(max(
