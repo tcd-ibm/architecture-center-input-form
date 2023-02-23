@@ -3,8 +3,10 @@ from fastapi import APIRouter, Request, Depends, HTTPException, status
 # from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
+from sqlalchemy import func
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import and_, or_
+from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from passlib.context import CryptContext
@@ -12,7 +14,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, project_tags
 
 from datetime import timedelta, datetime
 
@@ -293,11 +295,12 @@ async def get_user_projects(
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).where(Project.email == current_user.email).filter(Project.title.like(f'%{keyword}%')).options(selectinload(Project.user),
-                                selectinload(Project.tags)).order_by(
-                                    Project.id).offset(
-                                        max((page - 1) * per_page,
-                                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
+        select(Project).where(Project.email == current_user.email).filter(
+            Project.title.like(f'%{keyword}%')).options(
+                selectinload(Project.user),
+                selectinload(Project.tags)).order_by(Project.id).offset(
+                    max((page - 1) * per_page,
+                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
     return r.scalars().all()
 
 
@@ -306,15 +309,60 @@ async def get_all_projects(
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
+    tags: str = "",
     session: AsyncSession = Depends(get_session),
 ) -> List[ProjectWithUserAndTags]:
 
+    if tags:
+        try:
+            tag_ids = [int(tag) for tag in tags.split(',')]
+            r = await session.execute(
+                select(Tag).options(joinedload(Tag.category)).filter(
+                    Tag.tagId.in_(tag_ids)))
+            tagInstances = r.scalars().all()
+            for tag in tag_ids:
+                if tag not in [
+                        tagInstance.tagId for tagInstance in tagInstances
+                ]:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Tag with ID {tag} not found")
+
+            r = await session.execute(select(func.count(Category.categoryId)))
+            num_categories = r.scalar_one_or_none()
+
+            tag_ids_by_category = [[
+                tag.tagId for tag in tagInstances
+                if tag.categoryId == categoryId
+            ] for categoryId in range(1, num_categories + 1)]
+
+            subquery = select(
+                project_tags.project_id, project_tags.tag_id,
+                Tag.tagName.label('tag_tagName')).join(Tag).filter(
+                    Tag.tagId.in_(tag_ids)).subquery()
+
+            r = await session.execute(
+                select(Project).outerjoin(subquery,
+                                          Project.id == subquery.c.project_id).group_by(Project.id)
+                    .filter(Project.title.like(f'%{keyword}%'), and_(*[or_(*[subquery.c.tag_id == tagId for tagId in tagIds]) for tagIds in tag_ids_by_category])).options(
+                        selectinload(Project.user),
+                        selectinload(Project.tags)).order_by(
+                            Project.id).offset(max(
+                                (page - 1) * per_page,
+                                0)).limit(min(per_page, MAX_PAGE_SIZE)))
+
+            return r.scalars().all()
+        except ValueError as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Tags must be integers")
+
     r = await session.execute(
-        select(Project).filter(Project.title.like(f'%{keyword}%')).options(selectinload(Project.user),
-                                selectinload(Project.tags)).order_by(
-                                    Project.id).offset(
-                                        max((page - 1) * per_page,
-                                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
+        select(Project).filter(Project.title.like(f'%{keyword}%')).options(
+            selectinload(Project.user),
+            selectinload(Project.tags)).order_by(Project.id).offset(
+                max((page - 1) * per_page,
+                    0)).limit(min(per_page, MAX_PAGE_SIZE)))
     return r.scalars().all()
 
 
