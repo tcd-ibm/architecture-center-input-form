@@ -7,7 +7,7 @@ function AddProjectPage() {
     return (
         <>
         <MainHeader />
-        <Content style={{marginLeft: '20px', marginRight: '20px'}}>
+        <Content style={{marginLeft: '5%', marginRight: '5%'}}>
             <h1 style={{marginBottom: '10px'}}>Add New Project</h1>
             <FormGroup>
                 <Stack gap={5}>
