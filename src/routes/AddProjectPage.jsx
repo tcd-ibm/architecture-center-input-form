@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Content, Form, TextInput, TextArea, Button } from '@carbon/react';
+import { Content, Form, FormGroup, TextInput, Stack, Tile, TextArea, Button } from '@carbon/react';
 
 import MainHeader from '@/Components/MainHeader';
 import DocEditor from '@/Components/AsciidocEditor';
@@ -64,28 +64,35 @@ function AddProjectPage() {
     return (
         <>
         <MainHeader />
-        <Content>
+        <Content style={{marginLeft: '5%', marginRight: '5%'}}>
             <Form onSubmit={handleSubmit}>
-                <TextInput labelText='Project title' id='title' ref={titleInputRef} disabled={true} value='Test' />
-                <TextInput labelText='github link' id='link' ref={linkInputRef} disabled={true} value='https://example.com' />
-                <TextInput labelText='Completion date' id='date' ref={completionDateInputRef} disabled={true} value='2023-01-01' />
+            <Stack gap={6}>
+                <h1>Add New Project</h1>
+                <TextInput labelText="Project Title" id='title' ref={titleInputRef} required />
+                <TextInput labelText="Link to Project" id='link' ref={linkInputRef} placeholder='https://example.com'/>
+                <TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />
                 <TextArea
                     labelText='Preview description'
                     rows={4}
                     id='previewDescription'
                     ref={previewDescriptionInputRef}
-                    disabled={true}
-                    value='An omnichannel approach provides a unified customer experience across platforms, creating a single view for customers to interact with their own information.'
+                    disabled={false}
+                    placeholder='An omnichannel approach provides a unified customer experience across platforms, creating a single view for customers to interact with their own information.'
                 />
+                <Tile>
+                    <h4 style={{marginBottom: '10px'}}>Main Content</h4>
+                    <DocEditor />
+                </Tile>
                 <TextArea
                     labelText='Main content'
                     rows={8}
                     id='mainContent'
                     ref={contentInputRef}
-                    disabled={true}
+                    disabled={false}
                     value={`This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item\n\n[,ruby]\n----\nputs 'Hello, World!'\n----`}
                 />
                 <Button type='submit'>Save</Button>
+            </Stack>
             </Form>
             {/* <DocEditor /> */}
         </Content>
