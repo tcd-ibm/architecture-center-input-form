@@ -328,7 +328,7 @@ async def get_all_projects(
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"Tag with ID {tag} not found")
-            '''
+
             r = await session.execute(select(func.count(Category.categoryId)))
             num_categories = r.scalar_one_or_none()
 
@@ -336,13 +336,15 @@ async def get_all_projects(
                 tag.tagId for tag in tagInstances
                 if tag.categoryId == categoryId
             ] for categoryId in range(1, num_categories + 1)]
-            '''
-            subquery = select(project_tags.project_id,
-                              project_tags.tag_id).filter(
-                                  project_tags.tag_id.in_(tag_ids)).subquery()
 
-            query = select(Project).join(
-                subquery, Project.id == subquery.c.project_id).group_by(
+            conditions = []
+            for i, tag_list in enumerate(tag_ids_by_category):
+                if tag_list:
+                    conditions.append(
+                        and_(Project.tags.any(Tag.categoryId == (i + 1)),
+                             Project.tags.any(Tag.tagId.in_(tag_list))))
+
+            query = select(Project).group_by(
                     Project.id).filter(
                         Project.title.like(f'%{keyword}%')).options(
                             selectinload(Project.user),
@@ -350,6 +352,8 @@ async def get_all_projects(
                                 Project.id).offset(
                                     max((page - 1) * per_page,
                                         0)).limit(min(per_page, MAX_PAGE_SIZE))
+
+            query = query.filter(and_(*conditions)) if conditions else query
 
             r = await session.execute(query)
 
