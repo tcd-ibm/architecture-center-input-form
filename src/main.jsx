@@ -9,6 +9,7 @@ import AddProjectPage from './routes/AddProjectPage';
 import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
+import ProjectDetails from './routes/ProjectDetails';
 
 import AuthContextProvider from './context/AuthContextProvider';
 
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: '/signup',
     element: <SignUpPage />
+  },
+  {
+    path: '/details',
+    element: <ProjectDetails />,
   }
 ]);
  
