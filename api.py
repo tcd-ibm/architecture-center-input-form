@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from sqlalchemy import func
 from sqlalchemy.future import select
-from sqlalchemy.sql import and_, or_
+from sqlalchemy.sql import and_, or_, any_
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -316,6 +316,7 @@ async def get_all_projects(
     if tags:
         try:
             tag_ids = [int(tag) for tag in tags.split(',')]
+
             r = await session.execute(
                 select(Tag).options(joinedload(Tag.category)).filter(
                     Tag.tagId.in_(tag_ids)))
@@ -327,7 +328,7 @@ async def get_all_projects(
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"Tag with ID {tag} not found")
-
+            '''
             r = await session.execute(select(func.count(Category.categoryId)))
             num_categories = r.scalar_one_or_none()
 
@@ -335,21 +336,22 @@ async def get_all_projects(
                 tag.tagId for tag in tagInstances
                 if tag.categoryId == categoryId
             ] for categoryId in range(1, num_categories + 1)]
+            '''
+            subquery = select(project_tags.project_id,
+                              project_tags.tag_id).filter(
+                                  project_tags.tag_id.in_(tag_ids)).subquery()
 
-            subquery = select(
-                project_tags.project_id, project_tags.tag_id,
-                Tag.tagName.label('tag_tagName')).join(Tag).filter(
-                    Tag.tagId.in_(tag_ids)) .subquery()
+            query = select(Project).join(
+                subquery, Project.id == subquery.c.project_id).group_by(
+                    Project.id).filter(
+                        Project.title.like(f'%{keyword}%')).options(
+                            selectinload(Project.user),
+                            selectinload(Project.tags)).order_by(
+                                Project.id).offset(
+                                    max((page - 1) * per_page,
+                                        0)).limit(min(per_page, MAX_PAGE_SIZE))
 
-            r = await session.execute(
-                select(Project).outerjoin(subquery,
-                                          Project.id == subquery.c.project_id).group_by(Project.id)
-                    .filter(Project.title.like(f'%{keyword}%'), *[or_(*[subquery.c.tag_id == tagId for tagId in tagIds]) for tagIds in tag_ids_by_category]).options(
-                        selectinload(Project.user),
-                        selectinload(Project.tags)).order_by(
-                            Project.id).offset(max(
-                                (page - 1) * per_page,
-                                0)).limit(min(per_page, MAX_PAGE_SIZE)))
+            r = await session.execute(query)
 
             return r.scalars().all()
         except ValueError as e:
