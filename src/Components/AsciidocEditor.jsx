@@ -2,8 +2,12 @@ import { useState } from 'react';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-asciidoc';
-import 'prismjs/themes/prism.css';
 import Asciidoctor from 'asciidoctor';
+
+// eslint-disable-next-line custom-rules/no-global-css
+import 'prismjs/themes/prism.css';
+
+// eslint-disable-next-line custom-rules/no-global-css
 import './asciidocEditor.scss';
 
 

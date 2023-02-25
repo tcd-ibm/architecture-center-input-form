@@ -3,7 +3,7 @@ import MainHeader from '@/Components/MainHeader';
 import { Tile, Content, Link, Grid, Column, Tag } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import Asciidoctor from 'asciidoctor';
-import './ProjectDetails.scss';
+import styles from './ProjectDetails.module.scss';
 
 const asciidoctor = Asciidoctor();
 
@@ -14,14 +14,14 @@ function ProjectDetails() {
     return (
         <>
             <MainHeader />
-            <Content className='contentBox'>
-                <Tile className='titleBox'>
+            <Content className={styles.contentBox}>
+                <Tile className={styles.titleBox}>
                     <h1>Sample Heading</h1>
                     <Link href='https://google.com' size='lg' renderIcon={ArrowRight}>Project link</Link>
                 </Tile>
-                <Grid className='contentsGrid'>
+                <Grid className={styles.contentsGrid}>
                     <Column sm={4} md={6} lg={12}>
-                        <div className='descriptionBody' dangerouslySetInnerHTML={{ __html: asciidoctor.convert(desc) }} />
+                        <div className={styles.descriptionBody} dangerouslySetInnerHTML={{ __html: asciidoctor.convert(desc) }} />
                     </Column>
                     <Column sm={0} md={2} lg={4}>
                         <Tile>

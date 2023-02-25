@@ -25,6 +25,6 @@
       "quotes": ["error", "single"],
       "semi": "error",
 
-      "custom-rules/no-global-css": "warn"
+      "custom-rules/no-global-css": "error"
     }
 }

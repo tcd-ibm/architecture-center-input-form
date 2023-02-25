@@ -1,3 +1,5 @@
+// TODO refactor
+// eslint-disable-next-line custom-rules/no-global-css
 import './PageNotFound.scss';
 
 function PageNotFound() {

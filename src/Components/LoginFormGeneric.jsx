@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { Tile, FluidForm, InlineNotification, Checkbox, Button } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
-import './LoginFormGeneric.scss';
+import styles from './LoginFormGeneric.module.scss';
 
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
@@ -15,10 +15,10 @@ function LoginFormGeneric(props, ref) {
     };
 
     return (
-        <Tile className='loginFormTile'>
+        <Tile className={styles.loginFormTile}>
             <FluidForm onSubmit={onSubmitWrapper}>
-                <div className='innerContainer'>
-                    <p className='heading'>Log in</p>
+                <div className={styles.innerContainer}>
+                    <p className={styles.heading}>Log in</p>
                     <p>{subheadingContentNode}</p>
                     
                     { errorText ?
@@ -26,30 +26,30 @@ function LoginFormGeneric(props, ref) {
                             title='Error:'
                             subtitle={errorText}
                             lowContrast={true}
-                            className='notification'
+                            className={styles.notification}
                             onCloseButtonClick={() => setErrorText(null)}
                         />
                         :
-                        <div className='notificationPlaceholder'></div>
+                        <div className={styles.notificationPlaceholder}></div>
                     }
                     
                     { inputType === 'email' &&
-                        <EmailInput autoFocus className='input' id='email' ref={ref} />
+                        <EmailInput autoFocus className={styles.input} id='email' ref={ref} />
                     }
                     { inputType === 'password' &&
-                        <PasswordInput autoFocus className='input' id='password' ref={ref} />
+                        <PasswordInput autoFocus className={styles.input} id='password' ref={ref} />
                     }
 
                     { rememberIdCheckbox ?
-                        <div><Checkbox labelText='Remember ID' id='remember-id-checkbox' className='checkbox' /></div> :
-                        <div style={{visibility: 'hidden'}}><Checkbox labelText='Remember ID' id='remember-id-checkbox' className='checkbox' /></div>
+                        <div><Checkbox labelText='Remember ID' id='remember-id-checkbox' className={styles.checkbox} /></div> :
+                        <div style={{visibility: 'hidden'}}><Checkbox labelText='Remember ID' id='remember-id-checkbox' className={styles.checkbox} /></div>
                     }
                     
                 </div>
-                <div className='buttonContainer'>
-                    <div className='flexColumn'></div>
-                    <div className='flexColumn'>
-                        <Button renderIcon={ArrowRight} className='button' type='submit'>{buttonText}</Button>
+                <div className={styles.buttonContainer}>
+                    <div className={styles.flexColumn}></div>
+                    <div className={styles.flexColumn}>
+                        <Button renderIcon={ArrowRight} className={styles.button} type='submit'>{buttonText}</Button>
                     </div>
                 </div>
             </FluidForm>

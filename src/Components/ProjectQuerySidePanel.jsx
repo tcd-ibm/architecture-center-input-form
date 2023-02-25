@@ -1,5 +1,5 @@
 import { SideNav, Stack, Search, Accordion, AccordionItem, Checkbox } from '@carbon/react';
-import './ProjectQuerySidePanel.scss';
+import styles from './ProjectQuerySidePanel.module.scss';
 
 function ProjectQuerySidePanel({menuContent, filterTagList, handleFilterChange}) {
     return (
@@ -9,7 +9,7 @@ function ProjectQuerySidePanel({menuContent, filterTagList, handleFilterChange})
             isChildOfHeader={false}
             aria-label='Search and filter'>
 
-            <Stack gap={5} className='innerContainer'>
+            <Stack gap={5} className={styles.innerContainer}>
                 <Search
                     labelText='Search'
                     placeholder='Search'

@@ -13,7 +13,7 @@ import { Content, Tile, Button, InlineNotification, Link, FluidForm } from '@car
 import AuthContext from '@/context/AuthContext';
 import User from '@/utils/User';
 
-import './SignUpPage.scss';
+import styles from './SignUpPage.module.scss';
 
 function SignUpPage() {
 
@@ -67,11 +67,11 @@ function SignUpPage() {
     return (
         <>
         <MainHeader />
-        <Content className='signupFormContainer'>
-            <Tile className='signupFormTile'>
+        <Content className={styles.signupFormContainer}>
+            <Tile className={styles.signupFormTile}>
                 <FluidForm onSubmit={handleSubmit}>
-                    <div className='innerContainer'>
-                        <p className='heading'>Sign up</p>
+                    <div className={styles.innerContainer}>
+                        <p className={styles.heading}>Sign up</p>
                         <p>Already have an account? <Link href='/login'>Log in</Link></p>
 
                         { errorText ?
@@ -79,39 +79,39 @@ function SignUpPage() {
                                 title='Error:'
                                 subtitle={errorText}
                                 lowContrast={true}
-                                className='notification'
+                                className={styles.notification}
                                 onCloseButtonClick={() => setErrorText(null)}
                             />
                             :
-                            <div className='notificationPlaceholder'></div>
+                            <div className={styles.notificationPlaceholder}></div>
                         }
 
                         <EmailInput 
                             autoFocus 
-                            className='input' 
+                            className={styles.input}
                             id='email' 
                             ref={emailRef} 
                         />
 
                         <ValidatedPasswordInput 
-                            className='input' 
+                            className={styles.input} 
                             id='password' 
                             ref={passwordRef} 
                             onChange={() => confirmPasswordRef.current.validate()} 
                         />
 
                         <ValidatedPasswordConfirmationInput 
-                            className='input' 
+                            className={styles.input}
                             id='passwordConfirmation' 
                             primaryRef={passwordRef} 
                             ref={confirmPasswordRef} 
                         />
 
                     </div>
-                    <div className='buttonContainer'>
-                        <div className='flexColumn'></div>
-                        <div className='flexColumn'>
-                            <Button renderIcon={ArrowRight} className='button' type='submit'>Sign up</Button>
+                    <div className={styles.buttonContainer}>
+                        <div className={styles.flexColumn}></div>
+                        <div className={styles.flexColumn}>
+                            <Button renderIcon={ArrowRight} className={styles.button} type='submit'>Sign up</Button>
                         </div>
                     </div>
                 </FluidForm>
