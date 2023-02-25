@@ -1,5 +1,5 @@
-import { useState, useRef, useImperativeHandle, forwardRef } from "react";
-import { TextInput } from "@carbon/react";
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { TextInput } from '@carbon/react';
 
 function EmailInput(props, ref) {
 
@@ -41,6 +41,4 @@ function EmailInput(props, ref) {
     );
 }
 
-EmailInput = forwardRef(EmailInput);
-
-export default EmailInput;
+export default forwardRef(EmailInput);

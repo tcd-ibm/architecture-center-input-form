@@ -11,29 +11,29 @@ function MainHeader() {
     const [user, setUser] = useContext(AuthContext);
 
     return (
-        <Header aria-label="Amazing SwEng Project">
-            <HeaderName href="/" prefix="">
+        <Header aria-label='Amazing SwEng Project'>
+            <HeaderName href='/' prefix=''>
                 Amazing SwEng Project
             </HeaderName>
-            <HeaderNavigation aria-label="Amazing SwEng Project">
-                <CustomHeaderMenuItem href="/add">
+            <HeaderNavigation aria-label='Amazing SwEng Project'>
+                <CustomHeaderMenuItem href='/add'>
                     Add new project
                 </CustomHeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
-                    <HeaderNavigation aria-label="Account options">
+                    <HeaderNavigation aria-label='Account options'>
                         <CustomHeaderMenuItem onClick={() => setUser(null)}>
                             Log out
                         </CustomHeaderMenuItem>
                     </HeaderNavigation>
                 }
                 { !user &&
-                    <HeaderNavigation aria-label="Account options">
-                        <CustomHeaderMenuItem href="/signup">
+                    <HeaderNavigation aria-label='Account options'>
+                        <CustomHeaderMenuItem href='/signup'>
                             Sign up
                         </CustomHeaderMenuItem>
-                        <CustomHeaderMenuItem href="/login">
+                        <CustomHeaderMenuItem href='/login'>
                             Log in
                         </CustomHeaderMenuItem>
                     </HeaderNavigation>

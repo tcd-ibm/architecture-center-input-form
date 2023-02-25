@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Content } from '@carbon/react';
-import './MainPage.scss';
+import styles from './MainPage.module.scss';
 
 import MainHeader from '@/Components/MainHeader';
 import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
@@ -53,7 +53,7 @@ function MainPage() {
 
     useEffect(() => {
         if(filterTagList.length > 0) {
-            let results = [];
+            const results = [];
             for (const tag of filterTagList) {
                 for (const item of projects) {
                 if (item.ProductType.includes(tag) || item.Solutions.includes(tag) || item.Vertical.includes(tag) || item.Product.includes(tag)) {
@@ -75,7 +75,7 @@ function MainPage() {
             setFilterTagList(filterTagList.filter((item) => item !== id));
         }
 
-    }
+    };
     
     return (
         <>
@@ -83,7 +83,7 @@ function MainPage() {
         <ProjectQuerySidePanel menuContent={queryMenuContent} filterTagList={filterTagList} handleFilterChange={handleFilterChange} />
         <Content>
             { isLoading ? <div>Loading...</div> : 
-                <div id="cardContainer">
+                <div id={styles.cardContainer}>
                     {filteredProjects.map((projectData, index) => (
                         <Card projectData={projectData} key={index} />
                     ))}

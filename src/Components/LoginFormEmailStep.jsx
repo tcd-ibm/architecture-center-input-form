@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
-import { Link } from "@carbon/react";
+import { forwardRef } from 'react';
+import { Link } from '@carbon/react';
 
-import LoginFormGeneric from "./LoginFormGeneric";
+import LoginFormGeneric from './LoginFormGeneric';
 
 function LoginFormEmailStep(props, ref) {
     const { onSubmit } = props;
@@ -10,7 +10,7 @@ function LoginFormEmailStep(props, ref) {
         subheadingContentNode: <>Don't have an account? <Link href='/signup'>Sign up</Link></>,
         inputType: 'email',
         rememberIdCheckbox: true,
-        buttonText: `Continue`,
+        buttonText: 'Continue',
         onSubmit: onSubmit
     };
 
@@ -19,6 +19,4 @@ function LoginFormEmailStep(props, ref) {
     );
 }
 
-LoginFormEmailStep = forwardRef(LoginFormEmailStep);
-
-export default LoginFormEmailStep;
+export default forwardRef(LoginFormEmailStep);

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Content, Form, FormGroup, TextInput, Stack, Tile, TextArea, Button } from '@carbon/react';
+import { Content, Form, TextInput, Stack, Tile, TextArea, Button } from '@carbon/react';
 
 import MainHeader from '@/Components/MainHeader';
 import DocEditor from '@/Components/AsciidocEditor';
@@ -40,7 +40,7 @@ function AddProjectPage() {
         .catch(error => {
             console.log(error);
         });
-    }, []);
+    }, [navigate, user]);
 
     const handleSubmit = async event => {
         event.preventDefault();
@@ -54,12 +54,12 @@ function AddProjectPage() {
         };
 
         try {
-            const response = await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+            await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
             navigate('/');
         } catch(error) {
             console.log(error);
         }
-    }
+    };
 
     return (
         <>
@@ -68,8 +68,8 @@ function AddProjectPage() {
             <Form onSubmit={handleSubmit}>
             <Stack gap={6}>
                 <h1>Add New Project</h1>
-                <TextInput labelText="Project Title" id='title' ref={titleInputRef} required />
-                <TextInput labelText="Link to Project" id='link' ref={linkInputRef} placeholder='https://example.com'/>
+                <TextInput labelText='Project Title' id='title' ref={titleInputRef} required />
+                <TextInput labelText='Link to Project' id='link' ref={linkInputRef} placeholder='https://example.com'/>
                 <TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />
                 <TextArea
                     labelText='Preview description'
@@ -89,7 +89,7 @@ function AddProjectPage() {
                     id='mainContent'
                     ref={contentInputRef}
                     disabled={false}
-                    value={`This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item\n\n[,ruby]\n----\nputs 'Hello, World!'\n----`}
+                    value='This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
                 />
                 <Button type='submit'>Save</Button>
             </Stack>

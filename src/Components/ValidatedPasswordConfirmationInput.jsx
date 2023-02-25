@@ -1,5 +1,5 @@
-import { useState, useRef, useImperativeHandle, forwardRef } from "react";
-import { TextInput } from "@carbon/react";
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { TextInput } from '@carbon/react';
 
 function ValidatedPasswordConfirmationInput(props, ref) {
     const { primaryRef, ...remainingProps } = props;
@@ -38,6 +38,4 @@ function ValidatedPasswordConfirmationInput(props, ref) {
     );
 }
 
-ValidatedPasswordConfirmationInput = forwardRef(ValidatedPasswordConfirmationInput);
-
-export default ValidatedPasswordConfirmationInput;
+export default forwardRef(ValidatedPasswordConfirmationInput);

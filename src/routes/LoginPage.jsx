@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import qs from 'qs';
 import { Content } from '@carbon/react';
-import './LoginPage.scss';
+import styles from './LoginPage.module.scss';
 
 import MainHeader from '@/Components/MainHeader';
 import LoginFormEmailStep from '@/Components/LoginFormEmailStep';
@@ -42,14 +42,14 @@ function LoginPage() {
                 navigate('/', {replace: true});
             } catch(error) {
                 if(error?.response?.status === 401) {
-                    setErrorText('Incorrect email or password. Try again.')
+                    setErrorText('Incorrect email or password. Try again.');
                 } else {
-                    setErrorText('Unknown error occurred. Try again.')
+                    setErrorText('Unknown error occurred. Try again.');
                 }
             }
 
         }
-    }
+    };
 
     if(user) {
         navigate('/', {replace: true});
@@ -59,7 +59,7 @@ function LoginPage() {
         <>
         <MainHeader />
         <Content>
-            <div className='loginFormContainer'>
+            <div className={styles.loginFormContainer}>
                 { email ?
                     <LoginFormPasswordStep email={email} onSubmit={getPassword} errorText={errorText} setErrorText={setErrorText} ref={inputRef} /> :
                     <LoginFormEmailStep onSubmit={getEmail} ref={inputRef} />

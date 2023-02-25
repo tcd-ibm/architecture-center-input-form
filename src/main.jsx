@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import axios from 'axios';
+
+// eslint-disable-next-line custom-rules/no-global-css
 import './index.scss';
 
 import MainPage from './routes/MainPage';
