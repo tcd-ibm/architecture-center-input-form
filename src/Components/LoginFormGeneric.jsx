@@ -57,6 +57,4 @@ function LoginFormGeneric(props, ref) {
     );
 }
 
-LoginFormGeneric = forwardRef(LoginFormGeneric);
-
-export default LoginFormGeneric;
+export default forwardRef(LoginFormGeneric);

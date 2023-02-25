@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Content, Form, FormGroup, TextInput, Stack, Tile, TextArea, Button } from '@carbon/react';
+import { Content, Form, TextInput, Stack, Tile, TextArea, Button } from '@carbon/react';
 
 import MainHeader from '@/Components/MainHeader';
 import DocEditor from '@/Components/AsciidocEditor';
@@ -40,7 +40,7 @@ function AddProjectPage() {
         .catch(error => {
             console.log(error);
         });
-    }, []);
+    }, [navigate, user]);
 
     const handleSubmit = async event => {
         event.preventDefault();
@@ -54,7 +54,7 @@ function AddProjectPage() {
         };
 
         try {
-            const response = await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+            await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
             navigate('/');
         } catch(error) {
             console.log(error);

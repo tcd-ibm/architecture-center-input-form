@@ -19,6 +19,4 @@ function LoginFormEmailStep(props, ref) {
     );
 }
 
-LoginFormEmailStep = forwardRef(LoginFormEmailStep);
-
-export default LoginFormEmailStep;
+export default forwardRef(LoginFormEmailStep);

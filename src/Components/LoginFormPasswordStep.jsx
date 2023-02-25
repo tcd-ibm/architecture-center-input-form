@@ -21,6 +21,4 @@ function LoginFormPasswordStep(props, ref) {
     );
 }
 
-LoginFormPasswordStep = forwardRef(LoginFormPasswordStep);
-
-export default LoginFormPasswordStep;
+export default forwardRef(LoginFormPasswordStep);

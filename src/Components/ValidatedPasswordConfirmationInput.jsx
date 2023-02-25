@@ -38,6 +38,4 @@ function ValidatedPasswordConfirmationInput(props, ref) {
     );
 }
 
-ValidatedPasswordConfirmationInput = forwardRef(ValidatedPasswordConfirmationInput);
-
-export default ValidatedPasswordConfirmationInput;
+export default forwardRef(ValidatedPasswordConfirmationInput);

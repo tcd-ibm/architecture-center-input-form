@@ -50,9 +50,9 @@ function SignUpPage() {
             console.error(error);
             if (error?.response?.status === 400) {
                 const detail = error.response.data.detail
-                if (detail == 'Email registered already')
+                if (detail === 'Email registered already')
                     setErrorText(detail)
-                else if (detail == 'Password invalid, should be at least 8 characters')
+                else if (detail === 'Password invalid, should be at least 8 characters')
                     setErrorText(detail)
                 else
                     setErrorText(detail)

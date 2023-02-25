@@ -1,7 +1,7 @@
 import { ClickableTile, Link, Tag } from '@carbon/react';
 import './card.scss';
 
-const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
+//const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
 
 export default function Card({projectData}) {
 

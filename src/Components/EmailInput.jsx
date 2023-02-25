@@ -41,6 +41,4 @@ function EmailInput(props, ref) {
     );
 }
 
-EmailInput = forwardRef(EmailInput);
-
-export default EmailInput;
+export default forwardRef(EmailInput);

@@ -37,6 +37,4 @@ function PasswordInput(props, ref) {
     );
 }
 
-PasswordInput = forwardRef(PasswordInput);
-
-export default PasswordInput;
+export default forwardRef(PasswordInput);

@@ -7,7 +7,7 @@ import './ProjectDetails.scss';
 
 const asciidoctor = Asciidoctor();
 
-function ProjectDetails({}) {
+function ProjectDetails() {
 
     const [desc, setDesc] = useState(`=== Section Title\nHello 123\n\n_test_\n\n*Testing*`);
 
