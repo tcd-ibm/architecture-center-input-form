@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
-import { Link } from "@carbon/react";
+import { forwardRef } from 'react';
+import { Link } from '@carbon/react';
 
-import LoginFormGeneric from "./LoginFormGeneric";
+import LoginFormGeneric from './LoginFormGeneric';
 
 function LoginFormPasswordStep(props, ref) {
     const { email, onSubmit, errorText, setErrorText } = props;

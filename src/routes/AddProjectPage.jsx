@@ -59,7 +59,7 @@ function AddProjectPage() {
         } catch(error) {
             console.log(error);
         }
-    }
+    };
 
     return (
         <>
@@ -68,8 +68,8 @@ function AddProjectPage() {
             <Form onSubmit={handleSubmit}>
             <Stack gap={6}>
                 <h1>Add New Project</h1>
-                <TextInput labelText="Project Title" id='title' ref={titleInputRef} required />
-                <TextInput labelText="Link to Project" id='link' ref={linkInputRef} placeholder='https://example.com'/>
+                <TextInput labelText='Project Title' id='title' ref={titleInputRef} required />
+                <TextInput labelText='Link to Project' id='link' ref={linkInputRef} placeholder='https://example.com'/>
                 <TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />
                 <TextArea
                     labelText='Preview description'
@@ -89,7 +89,7 @@ function AddProjectPage() {
                     id='mainContent'
                     ref={contentInputRef}
                     disabled={false}
-                    value={`This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item\n\n[,ruby]\n----\nputs 'Hello, World!'\n----`}
+                    value='This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
                 />
                 <Button type='submit'>Save</Button>
             </Stack>

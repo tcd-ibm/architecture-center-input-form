@@ -11,14 +11,14 @@ const asciidoctor = Asciidoctor();
 
 const hightlightWithLineNumbers = (input, language) =>
   highlight(input, language)
-    .split("\n")
+    .split('\n')
     .map((line, i) => `<span class='lineNumber'>${i + 1}</span>${line}`)
-    .join("\n");
+    .join('\n');
 
 function DocEditor() {
 
   const [code, setCode] = useState(
-    `This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item\n\n[,ruby]\n----\nputs 'Hello, World!'\n----`
+    'This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
   );
 
   return (

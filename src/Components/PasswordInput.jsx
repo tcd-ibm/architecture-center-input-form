@@ -1,5 +1,5 @@
-import { useState, useRef, useImperativeHandle, forwardRef } from "react";
-import { TextInput } from "@carbon/react";
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { TextInput } from '@carbon/react';
 
 function PasswordInput(props, ref) {
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useContext } from 'react'
+import { useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -29,7 +29,7 @@ function SignUpPage() {
 
     const handleSubmit = async event => {
 
-        event.preventDefault()
+        event.preventDefault();
 
         if(!emailRef.current.validate()) return;
         if(!passwordRef.current.validate()) return;
@@ -39,7 +39,7 @@ function SignUpPage() {
             email: emailRef.current.value,
             username: '',
             password: passwordRef.current.value
-        }
+        };
 
         try {
             const response = await axios.post('/user/signup', requestData, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
@@ -49,16 +49,16 @@ function SignUpPage() {
         } catch (error) {
             console.error(error);
             if (error?.response?.status === 400) {
-                const detail = error.response.data.detail
+                const detail = error.response.data.detail;
                 if (detail === 'Email registered already')
-                    setErrorText(detail)
+                    setErrorText(detail);
                 else if (detail === 'Password invalid, should be at least 8 characters')
-                    setErrorText(detail)
+                    setErrorText(detail);
                 else
-                    setErrorText(detail)
+                    setErrorText(detail);
             }
         }
-    }
+    };
 
     if(user) {
         navigate('/', { replace: true });
@@ -118,7 +118,7 @@ function SignUpPage() {
             </Tile>
         </Content>
         </>
-    )
+    );
 }
 
 export default SignUpPage;

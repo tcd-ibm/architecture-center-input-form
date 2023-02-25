@@ -1,4 +1,4 @@
-import './PageNotFound.scss'
+import './PageNotFound.scss';
 
 function PageNotFound() {
 return (
@@ -9,6 +9,6 @@ return (
     <br></br>
     <h4>Please click <a href='/'>here</a> to return to the Home Page.</h4>
   </div>
-)
+);
 }
-export default PageNotFound
+export default PageNotFound;

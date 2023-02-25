@@ -9,17 +9,17 @@ const asciidoctor = Asciidoctor();
 
 function ProjectDetails() {
 
-    const [desc, setDesc] = useState(`=== Section Title\nHello 123\n\n_test_\n\n*Testing*`);
+    const [desc, setDesc] = useState('=== Section Title\nHello 123\n\n_test_\n\n*Testing*');
 
     return (
         <>
             <MainHeader />
-            <Content className="contentBox">
-                <Tile className="titleBox">
+            <Content className='contentBox'>
+                <Tile className='titleBox'>
                     <h1>Sample Heading</h1>
-                    <Link href="https://google.com" size="lg" renderIcon={ArrowRight}>Project link</Link>
+                    <Link href='https://google.com' size='lg' renderIcon={ArrowRight}>Project link</Link>
                 </Tile>
-                <Grid className="contentsGrid">
+                <Grid className='contentsGrid'>
                     <Column sm={4} md={6} lg={12}>
                         <div className='descriptionBody' dangerouslySetInnerHTML={{ __html: asciidoctor.convert(desc) }} />
                     </Column>
@@ -28,12 +28,12 @@ function ProjectDetails() {
                             <h3>Tags</h3>
                             <div className='tags'>
                                 
-                                <Tag type="red">{'Example tag'}</Tag>
-                                <Tag type="magenta">{'Example tag'}</Tag>
-                                <Tag type="red">{'Example'}</Tag>
-                                <Tag type="cool-gray">{'Example tag 123'}</Tag>
-                                <Tag type="blue">{'Examples'}</Tag>
-                                <Tag type="magenta">{'Tag'}</Tag>
+                                <Tag type='red'>{'Example tag'}</Tag>
+                                <Tag type='magenta'>{'Example tag'}</Tag>
+                                <Tag type='red'>{'Example'}</Tag>
+                                <Tag type='cool-gray'>{'Example tag 123'}</Tag>
+                                <Tag type='blue'>{'Examples'}</Tag>
+                                <Tag type='magenta'>{'Tag'}</Tag>
                                 {/* {projectData.ProductType.split(",").map(typetag =>
                                     <Tag type="red" title="Clear Filter" key={projectData.ppid + typetag}>{typetag}</Tag>
                                 )}

@@ -13,17 +13,17 @@ export default function Card({projectData}) {
       <Link size='lg' className='titleLink'>{projectData.Heading}</Link>
       <p>{projectData.Summary}</p>
       <div className='tags'>
-        { projectData.ProductType.split(",").map(typetag =>
-            <Tag type="red" title="Clear Filter" key={projectData.ppid + typetag}>{typetag}</Tag>
+        { projectData.ProductType.split(',').map(typetag =>
+            <Tag type='red' title='Clear Filter' key={projectData.ppid + typetag}>{typetag}</Tag>
         )}
-        { projectData.Solutions.split(",").map(solutiontag =>
-            <Tag type="magenta" title="Clear Filter" key={projectData.ppid + solutiontag}>{solutiontag}</Tag>
+        { projectData.Solutions.split(',').map(solutiontag =>
+            <Tag type='magenta' title='Clear Filter' key={projectData.ppid + solutiontag}>{solutiontag}</Tag>
         )}
-        { projectData.Vertical.split(",").map(verticaltag =>
-            <Tag type="warm-gray" title="Clear Filter" key={projectData.ppid + verticaltag} >{verticaltag}</Tag>
+        { projectData.Vertical.split(',').map(verticaltag =>
+            <Tag type='warm-gray' title='Clear Filter' key={projectData.ppid + verticaltag} >{verticaltag}</Tag>
         )}
-        { projectData.Product.split(",").map(producttag =>
-            <Tag type="cool-gray" title="Clear Filter" key={projectData.ppid + producttag}>{producttag}</Tag>
+        { projectData.Product.split(',').map(producttag =>
+            <Tag type='cool-gray' title='Clear Filter' key={projectData.ppid + producttag}>{producttag}</Tag>
         )}
       </div>
     </ClickableTile>

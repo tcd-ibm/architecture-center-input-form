@@ -42,14 +42,14 @@ function LoginPage() {
                 navigate('/', {replace: true});
             } catch(error) {
                 if(error?.response?.status === 401) {
-                    setErrorText('Incorrect email or password. Try again.')
+                    setErrorText('Incorrect email or password. Try again.');
                 } else {
-                    setErrorText('Unknown error occurred. Try again.')
+                    setErrorText('Unknown error occurred. Try again.');
                 }
             }
 
         }
-    }
+    };
 
     if(user) {
         navigate('/', {replace: true});
