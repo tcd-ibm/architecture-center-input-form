@@ -3,6 +3,9 @@
       "eslint:recommended",
       "react-app"
     ],
+    "plugins": [
+      "custom-rules"
+    ],
     "rules": {
       "array-callback-return": "error",
       "no-await-in-loop": "warn",
@@ -20,6 +23,8 @@
       "brace-style": "error",
       "jsx-quotes": ["error", "prefer-single"],
       "quotes": ["error", "single"],
-      "semi": "error"
+      "semi": "error",
+
+      "custom-rules/no-global-css": "warn"
     }
 }
