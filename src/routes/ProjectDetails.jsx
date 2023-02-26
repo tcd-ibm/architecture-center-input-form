@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
+import axios from 'axios';
 import MainHeader from '@/Components/MainHeader';
 import { Tile, Content, Link, Grid, Column, Tag } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
@@ -8,6 +10,21 @@ import styles from './ProjectDetails.module.scss';
 const asciidoctor = Asciidoctor();
 
 function ProjectDetails() {
+
+    const { projectId } = useParams();
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [project, setProject] = useState();
+
+    useEffect(() => {
+        axios.get(`/projects/${projectId}`).then(res => {
+            setProject(res.data);
+            setIsLoading(false);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, [projectId]);
 
     const [desc, setDesc] = useState('=== Section Title\nHello 123\n\n_test_\n\n*Testing*');
 

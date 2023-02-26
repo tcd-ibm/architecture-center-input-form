@@ -6,7 +6,7 @@ import styles from './Card.module.scss';
 export default function Card({projectData}) {
 
   return (
-    <ClickableTile className={styles.tile} href='./details'>
+    <ClickableTile className={styles.tile} href={`./details/${projectData.id}`}>
       {/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
       <Link size='lg' className={styles.titleLink}>{projectData.title}</Link>
       <p>{projectData.description}</p>
