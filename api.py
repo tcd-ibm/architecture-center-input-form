@@ -282,6 +282,47 @@ async def add_project(project: ProjectBase,
     return True
 
 
+@router.get("/user/project/{id}")
+async def get_user_project(id: str,
+                           session: AsyncSession = Depends(get_session),
+                           current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(
+        select(Project).where(Project.id == id).options(
+            selectinload(Project.user), selectinload(Project.tags)))
+    project = r.scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project not found")
+    if project.email != current_user.email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    return project
+
+
+@router.get("/project/{id}", response_model=ProjectWithUserAndTags)
+async def get_project_by_id(
+    id: str,
+    session: AsyncSession = Depends(get_session),
+) -> ProjectWithUserAndTags:
+    if not id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Project ID is required")
+
+    r = await session.execute(
+        select(Project).where(Project.id == id).options(
+            selectinload(Project.user), selectinload(Project.tags)))
+    project = r.scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project not found")
+    return project
+
+
 @router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
 async def get_user_projects(
     per_page: int = DEFAULT_PAGE_SIZE,
