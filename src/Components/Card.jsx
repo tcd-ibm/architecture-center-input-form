@@ -5,25 +5,14 @@ import styles from './Card.module.scss';
 
 export default function Card({projectData}) {
 
-  if(!projectData.islive) return null;
-  
   return (
-    <ClickableTile className={styles.tile} href='./details'>
+    <ClickableTile className={styles.tile} href={`./details/${projectData.id}`}>
       {/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
-      <Link size='lg' className={styles.titleLink}>{projectData.Heading}</Link>
-      <p>{projectData.Summary}</p>
+      <Link size='lg' className={styles.titleLink}>{projectData.title}</Link>
+      <p>{projectData.description}</p>
       <div className={styles.tags}>
-        { projectData.ProductType.split(',').map(typetag =>
-            <Tag type='red' title='Clear Filter' key={projectData.ppid + typetag}>{typetag}</Tag>
-        )}
-        { projectData.Solutions.split(',').map(solutiontag =>
-            <Tag type='magenta' title='Clear Filter' key={projectData.ppid + solutiontag}>{solutiontag}</Tag>
-        )}
-        { projectData.Vertical.split(',').map(verticaltag =>
-            <Tag type='warm-gray' title='Clear Filter' key={projectData.ppid + verticaltag} >{verticaltag}</Tag>
-        )}
-        { projectData.Product.split(',').map(producttag =>
-            <Tag type='cool-gray' title='Clear Filter' key={projectData.ppid + producttag}>{producttag}</Tag>
+        {projectData.tags.map(tagItem => 
+          <Tag type='magenta' title='Clear Filter' key={tagItem.tagId}>{tagItem.tagName}</Tag>
         )}
       </div>
     </ClickableTile>
