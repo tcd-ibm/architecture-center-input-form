@@ -150,6 +150,7 @@ class Project(ProjectBase, table=True):
 
 class ProjectWithUserAndTags(SQLModel):
     id: UUID
+    email: str
     title: str
     link: str
     description: str
@@ -157,6 +158,10 @@ class ProjectWithUserAndTags(SQLModel):
     date: datetime
     user: UserInfo | None = None
     tags: List["Tag"] = []
+
+
+class ProjectFull(ProjectWithUserAndTags):
+    content: str
 
 
 ProjectWithUserAndTags.update_forward_refs()
