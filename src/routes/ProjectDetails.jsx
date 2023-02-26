@@ -26,8 +26,6 @@ function ProjectDetails() {
         });
     }, [projectId]);
 
-    const [desc, setDesc] = useState('=== Section Title\nHello 123\n\n_test_\n\n*Testing*');
-
     return (
         <>
             <MainHeader />
@@ -40,7 +38,7 @@ function ProjectDetails() {
                     </Tile>
                     <Grid className={styles.contentsGrid}>
                         <Column sm={4} md={6} lg={12}>
-                            <div className={styles.descriptionBody} dangerouslySetInnerHTML={{ __html: asciidoctor.convert(desc) }} />
+                            <div className={styles.descriptionBody} dangerouslySetInnerHTML={{ __html: asciidoctor.convert(project.content) }} />
                         </Column>
                         <Column sm={0} md={2} lg={4}>
                             <Tile>
