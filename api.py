@@ -154,7 +154,7 @@ async def add_user(user: UserSignup,
             "role": 0
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response = {"access_token": token, "token_type": "bearer"}
+    response = {"access_token": token, "token_type": "bearer", "role": 0}
     return response
 
 
@@ -224,7 +224,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
             "role": user.role
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response = {"access_token": token, "token_type": "bearer"}
+    response = {"access_token": token, "token_type": "bearer", "role": user.role}
     return response
 
 
