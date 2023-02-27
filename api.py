@@ -14,7 +14,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, project_tags, ProjectFull
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull
 
 from datetime import timedelta, datetime
 
@@ -158,7 +158,7 @@ async def add_user(user: UserSignup,
     return response
 
 
-@router.post("/user/update")
+@router.put("/user/update/{id}")
 async def modify_user(user: UserUpdate,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
@@ -190,18 +190,29 @@ async def modify_user(user: UserUpdate,
     return True
 
 
-@router.post('/user/delete')
-async def delete_user(session: AsyncSession = Depends(get_session),
+@router.delete('/user/delete/{id}')
+async def delete_user(id: str, session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
+    if not id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid user id")
+
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
     result = await session.execute(
-        select(User).where(User.id == current_user.id))
+        select(User).where(User.id == id))
     original_instance = result.scalar_one_or_none()
+
     if not original_instance:
-        raise Exception("User not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="User not found")
+
+    is_admin = True if current_user.role else False
+    if not is_admin and original_instance.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
 
     await session.delete(original_instance)
     await session.commit()
@@ -249,10 +260,10 @@ async def get_private_admin_endpoint(
     return all_users
 
 
-@router.post("/user/project", response_model=ProjectFull)
+@router.post("/user/project")
 async def add_project(project: ProjectBase,
                       session: AsyncSession = Depends(get_session),
-                      current_user: User = Depends(get_current_user)) -> ProjectFull:
+                      current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -282,22 +293,102 @@ async def add_project(project: ProjectBase,
     return True
 
 
-@router.get("/user/project/{id}", response_model=ProjectFull)
-async def get_user_project(id: str,
-                           session: AsyncSession = Depends(get_session),
-                           current_user: User = Depends(get_current_user)) -> ProjectFull:
+@router.delete("/user/project/{id}")
+async def delete_project(id: str,
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).where(Project.id == id).options(
-            selectinload(Project.user), selectinload(Project.tags)))
+        select(Project).options(selectinload(Project.user), selectinload(Project.tags)).where(Project.id == id))
+    originalProject = r.scalar_one_or_none()
+
+    if not originalProject:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Project with ID {id} not found")
+
+    is_admin = True if current_user.role else False
+    if not is_admin and originalProject.user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    await session.delete(originalProject)
+    await session.commit()
+    await session.flush()
+    return True
+
+
+@router.put("/user/project/{id}")
+async def modify_project(project: ProjectBase,
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(
+        select(Project).options(selectinload(Project.user), selectinload(Project.tags)).where(Project.id == project.id))
+    originalProject = r.scalar_one_or_none()
+
+    if not originalProject:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Project with ID {project.id} not found")
+
+    is_admin = True if current_user.role else False
+
+    if originalProject.user.id != current_user.id and not is_admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    data = project.dict(exclude_unset=True)
+    for k, v in data.items():
+        if v is not None:
+            if k == "tags":
+                tags = []
+                for tagId in v:
+                    if not isinstance(tagId, int):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Tag must be an integer")
+                    r = await session.execute(
+                        select(Tag).where(Tag.tagId == tagId))
+                    tag = r.scalar_one_or_none()
+                    if not tag:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Tag with ID {tagId} not found")
+                    tags.append(tag)
+                setattr(originalProject, k, tags)
+            else:
+                setattr(originalProject, k, v)
+
+    originalProject.date = datetime.now()
+    session.add(originalProject)
+    await session.commit()
+    await session.refresh(originalProject)
+    return True
+
+
+@router.get("/user/project/{id}", response_model=ProjectFull)
+async def get_project(id: str,
+                      session: AsyncSession = Depends(get_session),
+                      current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(
+        select(Project).options(selectinload(Project.user), selectinload(Project.tags)).where(Project.id == id))
     project = r.scalar_one_or_none()
+
     if not project:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Project not found")
-    if project.email != current_user.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Project with ID {id} not found")
+
+    is_admin = True if current_user.role else False
+    if not is_admin and project.user.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
