@@ -33,7 +33,7 @@ function ProjectDetails() {
                 { isLoading ? <div>Loading...</div> : 
                     <>
                     <Tile className={styles.titleBox}>
-                        <h1>{project.title}</h1>
+                        <h1 className={styles.titleHeading}>{project.title}</h1>
                         <Link href={project.link} size='lg' renderIcon={ArrowRight}>Project link</Link>
                     </Tile>
                     <Grid className={styles.contentsGrid}>
