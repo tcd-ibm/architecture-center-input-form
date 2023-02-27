@@ -138,6 +138,10 @@ class ProjectBase(SQLModel):
     tags: List[int]  # tagId
 
 
+class ProjectUpdate(ProjectBase):
+    is_live: bool
+
+
 class Project(ProjectBase, table=True):
     __tablename__ = 'projects'
     id: UUID = Field(primary_key=True, nullable=False)

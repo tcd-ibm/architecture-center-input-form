@@ -14,7 +14,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull
+from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate
 
 from datetime import timedelta, datetime
 
@@ -321,7 +321,7 @@ async def delete_project(id: str,
 
 
 @router.put("/user/project/{id}")
-async def modify_project(project: ProjectBase,
+async def modify_project(project: ProjectUpdate,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
     if not current_user:
@@ -345,13 +345,19 @@ async def modify_project(project: ProjectBase,
     data = project.dict(exclude_unset=True)
     for k, v in data.items():
         if v is not None:
-            if k == "tags":
+            if k == "is_live":
+                if not is_admin:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Unauthorized")
+                setattr(originalProject, k, v)
+            elif k == "tags":
                 tags = []
                 for tagId in v:
                     if not isinstance(tagId, int):
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Tag must be an integer")
+                            detail=f"TagId {tagId} must be an integer")
                     r = await session.execute(
                         select(Tag).where(Tag.tagId == tagId))
                     tag = r.scalar_one_or_none()
