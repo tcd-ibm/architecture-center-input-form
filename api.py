@@ -191,7 +191,8 @@ async def modify_user(user: UserUpdate,
 
 
 @router.delete('/user/delete/{id}')
-async def delete_user(id: str, session: AsyncSession = Depends(get_session),
+async def delete_user(id: str,
+                      session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
     if not id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -201,8 +202,7 @@ async def delete_user(id: str, session: AsyncSession = Depends(get_session),
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
-    result = await session.execute(
-        select(User).where(User.id == id))
+    result = await session.execute(select(User).where(User.id == id))
     original_instance = result.scalar_one_or_none()
 
     if not original_instance:
@@ -235,7 +235,11 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
             "role": user.role
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response = {"access_token": token, "token_type": "bearer", "role": user.role}
+    response = {
+        "access_token": token,
+        "token_type": "bearer",
+        "role": user.role
+    }
     return response
 
 
@@ -302,7 +306,9 @@ async def delete_project(id: str,
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).options(selectinload(Project.user), selectinload(Project.tags)).where(Project.id == id))
+        select(Project).options(selectinload(Project.user),
+                                selectinload(
+                                    Project.tags)).where(Project.id == id))
     originalProject = r.scalar_one_or_none()
 
     if not originalProject:
@@ -329,7 +335,9 @@ async def modify_project(project: ProjectUpdate,
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).options(selectinload(Project.user), selectinload(Project.tags)).where(Project.id == project.id))
+        select(Project).options(
+            selectinload(Project.user),
+            selectinload(Project.tags)).where(Project.id == project.id))
     originalProject = r.scalar_one_or_none()
 
     if not originalProject:
@@ -386,7 +394,9 @@ async def get_project(id: str,
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).options(selectinload(Project.user), selectinload(Project.tags)).where(Project.id == id))
+        select(Project).options(selectinload(Project.user),
+                                selectinload(
+                                    Project.tags)).where(Project.id == id))
     project = r.scalar_one_or_none()
 
     if not project:
@@ -425,8 +435,8 @@ async def query_user_projects(
 
 @router.get("/project/{id}", response_model=ProjectFull)
 async def get_project_by_id(
-    id: str,
-    session: AsyncSession = Depends(get_session),
+        id: str,
+        session: AsyncSession = Depends(get_session),
 ) -> ProjectFull:
     if not id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -479,17 +489,18 @@ async def query_all_projects(
             for i, tag_list in enumerate(tag_ids_by_category):
                 if tag_list:
                     conditions.append(
-                        and_(Project.tags.any(Tag.categoryId == (i + 1)),
-                             Project.tags.any(Tag.tagId.in_(tag_list))))
+                        and_(
+                            Project.tags.any(
+                                and_(Tag.categoryId == (i + 1),
+                                     Project.tags.any(
+                                         Tag.tagId.in_(tag_list)))), ))
 
-            query = select(Project).group_by(
-                    Project.id).filter(
-                        Project.title.like(f'%{keyword}%')).options(
-                            selectinload(Project.user),
-                            selectinload(Project.tags)).order_by(
-                                Project.id).offset(
-                                    max((page - 1) * per_page,
-                                        0)).limit(min(per_page, MAX_PAGE_SIZE))
+            query = select(Project).group_by(Project.id).filter(
+                Project.title.like(f'%{keyword}%')).options(
+                    selectinload(Project.user),
+                    selectinload(Project.tags)).order_by(Project.id).offset(
+                        max((page - 1) * per_page,
+                            0)).limit(min(per_page, MAX_PAGE_SIZE))
 
             query = query.filter(and_(*conditions)) if conditions else query
 
