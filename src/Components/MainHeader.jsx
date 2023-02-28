@@ -19,6 +19,11 @@ function MainHeader() {
                 <CustomHeaderMenuItem href='/add'>
                     Add new project
                 </CustomHeaderMenuItem>
+                { user?.isAdmin() &&
+                    <CustomHeaderMenuItem href='/adminpanel'>
+                        Admin panel
+                    </CustomHeaderMenuItem>
+                }
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&

@@ -4,7 +4,7 @@ class User {
     }
 
     isAdmin() {
-        return false;
+        return true;
     }
 }
 
