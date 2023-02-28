@@ -1,11 +1,11 @@
 '''API v1 for the database'''
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 # from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from sqlalchemy import func
 from sqlalchemy.future import select
-from sqlalchemy.sql import and_, or_, any_
+from sqlalchemy.sql import and_
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +14,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate
+from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate
 
 from datetime import timedelta, datetime
 
@@ -413,23 +413,96 @@ async def get_project(id: str,
 
 @router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
 async def query_user_projects(
+    response: Response,
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
+    tags: str = "",
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ) -> List[ProjectWithUserAndTags]:
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
+    if tags:
+        try:
+            tag_ids = [int(tag) for tag in tags.split(',')]
+
+            r = await session.execute(
+                select(Tag).options(joinedload(Tag.category)).filter(
+                    Tag.tagId.in_(tag_ids)))
+            tagInstances = r.scalars().all()
+            for tag in tag_ids:
+                if tag not in [
+                        tagInstance.tagId for tagInstance in tagInstances
+                ]:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Tag with ID {tag} not found")
+
+            r = await session.execute(select(func.count(Category.categoryId)))
+            num_categories = r.scalar_one_or_none()
+
+            tag_ids_by_category = [[
+                tag.tagId for tag in tagInstances
+                if tag.categoryId == categoryId
+            ] for categoryId in range(1, num_categories + 1)]
+
+            conditions = []
+            for i, tag_list in enumerate(tag_ids_by_category):
+                if tag_list:
+                    conditions.append(
+                        and_(
+                            Project.tags.any(
+                                and_(Tag.categoryId == (i + 1),
+                                     Project.tags.any(
+                                         Tag.tagId.in_(tag_list)))), ))
+
+            query = select(func.count(Project.id)).filter(
+                Project.email == current_user.email,
+                Project.title.like(f'%{keyword}%'))
+            query = query.filter(and_(*conditions)) if conditions else query
+            count = (await session.execute(query)).scalar_one_or_none()
+
+            query = select(Project).group_by(Project.id).filter(
+                Project.email == current_user.email,
+                Project.title.like(f'%{keyword}%')).options(
+                    selectinload(Project.user),
+                    selectinload(Project.tags)).order_by(Project.id).offset(
+                        max((page - 1) * per_page,
+                            0)).limit(min(per_page, MAX_PAGE_SIZE))
+
+            query = query.filter(and_(*conditions)) if conditions else query
+
+            r = await session.execute(query)
+            response.headers['X-Total-Count'] = str(count)
+            response.headers['X-Total-Pages'] = str(count // per_page +
+                                                    (1 if count %
+                                                     per_page else 0))
+            return r.scalars().all()
+        except ValueError as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Tags must be integers")
+
+    query = select(func.count(
+        Project.id)).where(Project.email == current_user.email).filter(
+            Project.title.like(f'%{keyword}%'))
+
+    r = await session.execute(query)
+    count = r.scalar_one_or_none()
+
+    query = select(Project).where(Project.email == current_user.email).filter(
+        Project.title.like(f'%{keyword}%')).options(selectinload(
+            Project.user), selectinload(Project.tags)).order_by(Project.id)
 
     r = await session.execute(
-        select(Project).where(Project.email == current_user.email).filter(
-            Project.title.like(f'%{keyword}%')).options(
-                selectinload(Project.user),
-                selectinload(Project.tags)).order_by(Project.id).offset(
-                    max((page - 1) * per_page,
-                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
+        query.offset(max((page - 1) * per_page,
+                         0)).limit(min(per_page, MAX_PAGE_SIZE)))
+
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str((count // per_page) +
+                                            (1 if count % per_page else 0))
     return r.scalars().all()
 
 
@@ -454,6 +527,7 @@ async def get_project_by_id(
 
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
 async def query_all_projects(
+    response: Response,
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
@@ -495,6 +569,11 @@ async def query_all_projects(
                                      Project.tags.any(
                                          Tag.tagId.in_(tag_list)))), ))
 
+            query = select(func.count(Project.id)).filter(
+                Project.title.like(f'%{keyword}%'))
+            query = query.filter(and_(*conditions)) if conditions else query
+            count = (await session.execute(query)).scalar_one_or_none()
+
             query = select(Project).group_by(Project.id).filter(
                 Project.title.like(f'%{keyword}%')).options(
                     selectinload(Project.user),
@@ -505,12 +584,23 @@ async def query_all_projects(
             query = query.filter(and_(*conditions)) if conditions else query
 
             r = await session.execute(query)
-
+            response.headers['X-Total-Count'] = str(count)
+            response.headers['X-Total-Pages'] = str(count // per_page +
+                                                    (1 if count %
+                                                     per_page else 0))
             return r.scalars().all()
         except ValueError as e:
             print(e)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Tags must be integers")
+
+    query = select(func.count(Project.id)).filter(
+        Project.title.like(f'%{keyword}%'))
+    count = (await session.execute(query)).scalar_one_or_none()
+
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
 
     r = await session.execute(
         select(Project).filter(Project.title.like(f'%{keyword}%')).options(
@@ -518,41 +608,6 @@ async def query_all_projects(
             selectinload(Project.tags)).order_by(Project.id).offset(
                 max((page - 1) * per_page,
                     0)).limit(min(per_page, MAX_PAGE_SIZE)))
-    return r.scalars().all()
-
-
-@router.get("/announcement/{aid}", response_model=List[Announcement])
-async def fetch_announcement(request: Request,
-                             session: AsyncSession = Depends(get_session),
-                             aid: int = 0) -> List[Announcement]:
-    r = await session.execute(
-        select(Announcement).filter_by(**request.query_params._dict, aid=aid)
-    ) if aid else await session.execute(
-        select(Announcement).filter_by(
-            **request.query_params._dict).order_by(Announcement.aid))
-    return r.scalars().all()
-
-
-@router.get("/detail/{ppid}", response_model=List[Detail])
-async def fetch_detail(request: Request,
-                       session: AsyncSession = Depends(get_session),
-                       ppid: int = 0) -> List[Detail]:
-    r = await session.execute(
-        select(Detail).filter_by(**request.query_params._dict, ppid=ppid)
-    ) if ppid else await session.execute(
-        select(Detail).filter_by(
-            **request.query_params._dict).order_by(Detail.ppid))
-    return r.scalars().all()
-
-
-@router.get("/pa/{ppid}", response_model=List[PA])
-async def fetch_pa(request: Request,
-                   session: AsyncSession = Depends(get_session),
-                   ppid: int = 0) -> List[PA]:
-    r = await session.execute(
-        select(PA).filter_by(**request.query_params._dict, ppid=ppid)
-    ) if ppid else await session.execute(
-        select(PA).filter_by(**request.query_params._dict).order_by(PA.ppid))
     return r.scalars().all()
 
 
@@ -572,44 +627,4 @@ async def fetch_tags(session: AsyncSession = Depends(
     r = await session.execute(
         select(Category).options(selectinload(Category.tags)).order_by(
             Category.categoryId))
-    return r.scalars().all()
-
-
-@router.get("/product", response_model=List[Product])
-async def fetch_product(
-    request: Request, session: AsyncSession = Depends(get_session)
-) -> List[Product]:
-    r = await session.execute(
-        select(Product).filter_by(**request.query_params._dict).order_by(
-            Product.pid))
-    return r.scalars().all()
-
-
-@router.get("/solution", response_model=List[Solution])
-async def fetch_solution(
-    request: Request, session: AsyncSession = Depends(get_session)
-) -> List[Solution]:
-    r = await session.execute(
-        select(Solution).filter_by(**request.query_params._dict).order_by(
-            Solution.sid))
-    return r.scalars().all()
-
-
-@router.get("/type", response_model=List[Type])
-async def fetch_type(
-    request: Request,
-    session: AsyncSession = Depends(get_session)) -> List[Type]:
-    r = await session.execute(
-        select(Type).filter_by(**request.query_params._dict).order_by(Type.tid)
-    )
-    return r.scalars().all()
-
-
-@router.get("/vertical", response_model=List[Vertical])
-async def fetch_vertical(
-    request: Request, session: AsyncSession = Depends(get_session)
-) -> List[Vertical]:
-    r = await session.execute(
-        select(Vertical).filter_by(**request.query_params._dict).order_by(
-            Vertical.vid))
     return r.scalars().all()
