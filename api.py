@@ -163,7 +163,7 @@ async def add_user(user: UserSignup,
 
 
 @router.put("/user/update")
-async def modify_user(user: UserUpdate,
+async def update_user(user: UserUpdate,
                       id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
@@ -199,14 +199,14 @@ async def modify_user(user: UserUpdate,
 
             setattr(user_to_update, k, v)
 
-    session.add(current_user)
+    session.add(user_to_update)
     await session.commit(
     )  # flush is actually not needed here since commit will flush automatically
     await session.flush()
     return True
 
 
-@router.delete('/user/delete/{id}')
+@router.delete('/user/delete')
 async def delete_user(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
