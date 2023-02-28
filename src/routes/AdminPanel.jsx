@@ -1,6 +1,8 @@
-import { Content, SideNav, SideNavItems, SideNavLink} from '@carbon/react';
+import { Content, SideNav, SideNavItems } from '@carbon/react';
 import { Outlet } from 'react-router';
+
 import MainHeader from '@/Components/MainHeader';
+import CustomSideNavLink from '@/Components/CustomSideNavLink';
 
 function AdminPanel() {
     return (
@@ -13,21 +15,21 @@ function AdminPanel() {
             aria-label='Admin panel navigation'>
 
             <SideNavItems>
-                <SideNavLink isActive>
+                <CustomSideNavLink href='showcase'>
                     Showcase settings
-                </SideNavLink>
-                <SideNavLink>
+                </CustomSideNavLink>
+                <CustomSideNavLink href='content'>
                     Content settings
-                </SideNavLink>
-                <SideNavLink>
+                </CustomSideNavLink>
+                <CustomSideNavLink href='users'>
                     Manage users
-                </SideNavLink>
-                <SideNavLink>
+                </CustomSideNavLink>
+                <CustomSideNavLink href='projects'>
                     Manage projects
-                </SideNavLink>
-                <SideNavLink>
+                </CustomSideNavLink>
+                <CustomSideNavLink href='statistics'>
                     Statistics
-                </SideNavLink>
+                </CustomSideNavLink>
             </SideNavItems>
             
         </SideNav>
