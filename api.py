@@ -50,6 +50,10 @@ async def startup():
     await init_db()
 
 
+def is_admin(user: User) -> bool:
+    return True if user.role else False
+
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password + SALT, hashed_password)
 
@@ -158,13 +162,25 @@ async def add_user(user: UserSignup,
     return response
 
 
-@router.put("/user/update/{id}")
+@router.put("/user/update")
 async def modify_user(user: UserUpdate,
+                      id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
+
+    r = await session.execute(select(User).where(User.id == id))
+    user_to_update = r.scalar_one_or_none()
+
+    if not user_to_update:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User not found")
+
+    if not is_admin(current_user) and user_to_update.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="non-admin user can only update self")
 
     data = user.dict(exclude_unset=True)
     for k, v in data.items():
@@ -181,7 +197,7 @@ async def modify_user(user: UserUpdate,
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"email {v} registered already")
 
-            setattr(current_user, k, v)
+            setattr(user_to_update, k, v)
 
     session.add(current_user)
     await session.commit(
@@ -209,10 +225,9 @@ async def delete_user(id: str,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="User not found")
 
-    is_admin = True if current_user.role else False
-    if not is_admin and original_instance.id != current_user.id:
+    if not is_admin(current_user) and original_instance.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Unauthorized")
+                            detail="Non-admin user can only delete self")
 
     await session.delete(original_instance)
     await session.commit()
@@ -297,7 +312,7 @@ async def add_project(project: ProjectBase,
     return True
 
 
-@router.delete("/user/project/{id}")
+@router.delete("/user/project")
 async def delete_project(id: str,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
@@ -315,8 +330,7 @@ async def delete_project(id: str,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Project with ID {id} not found")
 
-    is_admin = True if current_user.role else False
-    if not is_admin and originalProject.user.id != current_user.id:
+    if not is_admin(current_user) and originalProject.user.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
@@ -326,8 +340,9 @@ async def delete_project(id: str,
     return True
 
 
-@router.put("/user/project/{id}")
+@router.put("/user/project")
 async def modify_project(project: ProjectUpdate,
+                         id: str,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
     if not current_user:
@@ -337,16 +352,14 @@ async def modify_project(project: ProjectUpdate,
     r = await session.execute(
         select(Project).options(
             selectinload(Project.user),
-            selectinload(Project.tags)).where(Project.id == project.id))
+            selectinload(Project.tags)).where(Project.id == id))
     originalProject = r.scalar_one_or_none()
 
     if not originalProject:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Project with ID {project.id} not found")
+                            detail=f"Project with ID {id} not found")
 
-    is_admin = True if current_user.role else False
-
-    if originalProject.user.id != current_user.id and not is_admin:
+    if originalProject.user.id != current_user.id and not is_admin(current_user):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
@@ -354,7 +367,7 @@ async def modify_project(project: ProjectUpdate,
     for k, v in data.items():
         if v is not None:
             if k == "is_live":
-                if not is_admin:
+                if not is_admin(current_user):
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         detail="Unauthorized")
@@ -385,7 +398,7 @@ async def modify_project(project: ProjectUpdate,
     return True
 
 
-@router.get("/user/project/{id}", response_model=ProjectFull)
+@router.get("/user/project", response_model=ProjectFull)
 async def get_project(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
@@ -403,8 +416,7 @@ async def get_project(id: str,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Project with ID {id} not found")
 
-    is_admin = True if current_user.role else False
-    if not is_admin and project.user.id != current_user.id:
+    if not is_admin(current_user) and project.user.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
