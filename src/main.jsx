@@ -12,6 +12,12 @@ import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
 import ProjectDetails from './routes/ProjectDetails';
+import AdminPanel from './routes/AdminPanel';
+import ShowcaseSettingsPage from './routes/adminpanel/ShowcaseSettingsPage';
+import ContentSettingsPage from './routes/adminpanel/ContentSettingsPage';
+import ManageUsersPage from './routes/adminpanel/ManageUsersPage';
+import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
+import StatisticsPage from './routes/adminpanel/StatisticsPage';
 
 import AuthContextProvider from './context/AuthContextProvider';
 
@@ -38,6 +44,32 @@ const router = createBrowserRouter([
   {
     path: '/details/:projectId',
     element: <ProjectDetails />,
+  },
+  {
+    path: '/adminpanel',
+    element: <AdminPanel />,
+    children: [
+      {
+        path: 'showcase',
+        element: <ShowcaseSettingsPage />
+      },
+      {
+        path: 'content',
+        element: <ContentSettingsPage />
+      },
+      {
+        path: 'users',
+        element: <ManageUsersPage />
+      },
+      {
+        path: 'projects',
+        element: <ManageProjectsPage />
+      },
+      {
+        path: 'statistics',
+        element: <StatisticsPage />
+      }
+    ]
   }
 ]);
  
