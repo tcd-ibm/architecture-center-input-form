@@ -32,6 +32,7 @@ class UserInfo(UserBase):
 class UserUpdate(UserBase):
     email: Optional[str] = None
     password: Optional[str] = None
+    new_password: Optional[str] = None
 
 
 class Token(SQLModel):

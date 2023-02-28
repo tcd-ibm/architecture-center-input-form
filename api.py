@@ -183,10 +183,18 @@ async def update_user(user: UserUpdate,
                             detail="non-admin user can only update self")
 
     data = user.dict(exclude_unset=True)
+    if not verify_password(data["password"], user_to_update.hashed_password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Password invalid")
+    data.pop("password")
+
     for k, v in data.items():
         if v is not None:
-
-            if k == "password":
+            if k == "new_password":
+                if len(v) < 8:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Password invalid, should be at least 8 characters")
                 k, v = "hashed_password", get_password_hash(v + SALT)
             elif k == "email":
                 result = await session.execute(
@@ -330,7 +338,8 @@ async def delete_project(id: str,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Project with ID {id} not found")
 
-    if not is_admin(current_user) and originalProject.user.id != current_user.id:
+    if not is_admin(
+            current_user) and originalProject.user.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
@@ -350,16 +359,17 @@ async def modify_project(project: ProjectUpdate,
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).options(
-            selectinload(Project.user),
-            selectinload(Project.tags)).where(Project.id == id))
+        select(Project).options(selectinload(Project.user),
+                                selectinload(
+                                    Project.tags)).where(Project.id == id))
     originalProject = r.scalar_one_or_none()
 
     if not originalProject:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Project with ID {id} not found")
 
-    if originalProject.user.id != current_user.id and not is_admin(current_user):
+    if originalProject.user.id != current_user.id and not is_admin(
+            current_user):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
