@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Content, Form, TextInput, Stack, Tile, TextArea, Button } from '@carbon/react';
+import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag } from '@carbon/react';
 
 import MainHeader from '@/Components/MainHeader';
 import DocEditor from '@/Components/AsciidocEditor';
@@ -21,7 +21,8 @@ function AddProjectPage() {
     const [user, setUser] = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const [tags, setTags] = useState(null);
+    const [input, setInput] = useState('');
+    const [tags, setTags] = useState([]);
 
     const titleInputRef = useRef();
     const linkInputRef = useRef();
@@ -61,6 +62,28 @@ function AddProjectPage() {
         }
     };
 
+    const handleClick = () => {
+        const id = tags.length + 1;
+        setTags((prev) => [
+          ...prev,
+          {
+            id: id,
+            task: input,
+            complete: false,
+          }
+        ]);
+        setInput('');
+    };
+
+    const handleComplete = (id) => {
+        const list = tags.map((task) => {
+            if (task.id !== id) {
+                return { ...task };
+            } else return {};
+        });
+        setTags(list);
+    };
+
     return (
         <>
         <MainHeader />
@@ -79,18 +102,31 @@ function AddProjectPage() {
                     disabled={false}
                     placeholder='An omnichannel approach provides a unified customer experience across platforms, creating a single view for customers to interact with their own information.'
                 />
+                <Tile style={{padding: '20px'}}>
+                    <h4 style={{marginBottom: '10px'}}>Add Tags</h4>
+                    <div style={{display: 'flex', alignItems: 'center', flexDirection: 'row', marginBottom: '10px'}}>
+                        <TextInput placeholder='Enter tag here' value={input} onInput={(e) =>setInput(e.target.value)} style={{marginRight: '10px'}} />
+                        <Button onClick={() => handleClick()} size='md' kind='secondary' >Add</Button>
+                    </div>
+                    <div>
+                      {tags.map((todo) => {
+                        return (
+                          <Tag
+                            type='magenta'
+                            title='Clear Filter'
+                            key={todo.id}
+                            onClick={() => handleComplete(todo.id)}
+                          >
+                            {todo.task}
+                          </Tag>
+                        );
+                      })}
+                    </div>
+                </Tile>
                 <Tile>
                     <h4 style={{marginBottom: '10px'}}>Main Content</h4>
                     <DocEditor />
                 </Tile>
-                <TextArea
-                    labelText='Main content'
-                    rows={8}
-                    id='mainContent'
-                    ref={contentInputRef}
-                    disabled={false}
-                    value='This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
-                />
                 <Button type='submit'>Save</Button>
             </Stack>
             </Form>
