@@ -129,6 +129,9 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
     if user.password_version != payload.get("password_version"):
         raise unauthorized_error("Password updated, please login again")
 
+    if user.role != payload.get("role"):
+        raise unauthorized_error("Role updated, please login again")
+
     return user
 
 
@@ -205,8 +208,10 @@ async def update_user(user: UserUpdate,
                 if len(v) < 8:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Password invalid, should be at least 8 characters")
-                if get_password_hash(v + SALT) == user_to_update.hashed_password:
+                        detail=
+                        "Password invalid, should be at least 8 characters")
+                if get_password_hash(v +
+                                     SALT) == user_to_update.hashed_password:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Password not changed")
