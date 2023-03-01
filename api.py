@@ -342,7 +342,7 @@ async def add_project(project: ProjectBase,
     return True
 
 
-@router.delete("/user/project")
+@router.delete("/user/project/{id}")
 async def delete_project(id: str,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
@@ -371,7 +371,7 @@ async def delete_project(id: str,
     return True
 
 
-@router.put("/user/project")
+@router.put("/user/project/{id}")
 async def modify_project(project: ProjectUpdate,
                          id: str,
                          session: AsyncSession = Depends(get_session),
@@ -430,7 +430,7 @@ async def modify_project(project: ProjectUpdate,
     return True
 
 
-@router.get("/user/project", response_model=ProjectFull)
+@router.get("/user/project/{id}", response_model=ProjectFull)
 async def get_project(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
