@@ -78,7 +78,6 @@ class ProjectBase(SQLModel):
     link: str
     description: str
     content: str
-    date: datetime
     tags: List[int]  # tagId
 
 
