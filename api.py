@@ -180,7 +180,7 @@ async def create_user(user: UserSignup,
     return response
 
 
-@router.put("/user/update")
+@router.put("/user/update", response_model=User)
 async def update_user(user: UserUpdate,
                       id: str,
                       session: AsyncSession = Depends(get_session),
@@ -234,7 +234,9 @@ async def update_user(user: UserUpdate,
     await session.commit(
     )  # flush is actually not needed here since commit will flush automatically
     await session.flush()
-    return True
+    user_data = user_to_update.__dict__
+    user_data.pop("hashed_password")
+    return user_data
 
 
 @router.delete('/user/delete')
@@ -263,7 +265,7 @@ async def delete_user(id: str,
     await session.delete(original_instance)
     await session.commit()
     await session.flush()
-    return True
+    return {"status": "success"}
 
 
 @router.post('/user/token',
@@ -310,7 +312,7 @@ async def get_private_endpoint(current_user: User = Depends(get_current_user),
 
 
 @router.post("/user/project")
-async def add_project(project: ProjectBase,
+async def create_project(project: ProjectBase,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
     if not current_user:
@@ -333,13 +335,14 @@ async def add_project(project: ProjectBase,
     data["tags"] = tags
     new_project = Project(**data,
                           id=str(uuid4()),
-                          user=current_user,
-                          email=current_user.email)
+                          user_id=current_user.id,
+                          date=datetime.utcnow(),
+                          user=current_user)
 
     session.add(new_project)
     await session.commit()
     await session.refresh(new_project)
-    return True
+    return new_project
 
 
 @router.delete("/user/project/{id}")
@@ -368,10 +371,10 @@ async def delete_project(id: str,
     await session.delete(originalProject)
     await session.commit()
     await session.flush()
-    return True
+    return {"status": "success"}
 
 
-@router.put("/user/project/{id}")
+@router.put("/user/project/{id}", response_model=ProjectWithUserAndTags)
 async def modify_project(project: ProjectUpdate,
                          id: str,
                          session: AsyncSession = Depends(get_session),
@@ -427,7 +430,7 @@ async def modify_project(project: ProjectUpdate,
     session.add(originalProject)
     await session.commit()
     await session.refresh(originalProject)
-    return True
+    return originalProject
 
 
 @router.get("/user/project/{id}", response_model=ProjectFull)
@@ -503,13 +506,13 @@ async def query_user_projects(
                                          Tag.tagId.in_(tag_list)))), ))
 
             query = select(func.count(Project.id)).filter(
-                Project.email == current_user.email,
+                Project.user_id == current_user.id,
                 Project.title.like(f'%{keyword}%'))
             query = query.filter(and_(*conditions)) if conditions else query
             count = (await session.execute(query)).scalar_one_or_none()
 
             query = select(Project).group_by(Project.id).filter(
-                Project.email == current_user.email,
+                Project.user_id == current_user.id,
                 Project.title.like(f'%{keyword}%')).options(
                     selectinload(Project.user),
                     selectinload(Project.tags)).order_by(Project.id).offset(
@@ -530,13 +533,13 @@ async def query_user_projects(
                                 detail="Tags must be integers")
 
     query = select(func.count(
-        Project.id)).where(Project.email == current_user.email).filter(
+        Project.id)).where(Project.user_id == current_user.id).filter(
             Project.title.like(f'%{keyword}%'))
 
     r = await session.execute(query)
     count = r.scalar_one_or_none()
 
-    query = select(Project).where(Project.email == current_user.email).filter(
+    query = select(Project).where(Project.user_id == current_user.id).filter(
         Project.title.like(f'%{keyword}%')).options(selectinload(
             Project.user), selectinload(Project.tags)).order_by(Project.id)
 
