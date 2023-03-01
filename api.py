@@ -1,11 +1,11 @@
 '''API v1 for the database'''
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 # from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from sqlalchemy import func
 from sqlalchemy.future import select
-from sqlalchemy.sql import and_, or_, any_
+from sqlalchemy.sql import and_
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,13 +14,16 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Announcement, Detail, PA, Product, Solution, Type, Vertical, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, project_tags, ProjectFull
+from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate
 
 from datetime import timedelta, datetime
 
 from typing import List
 
 import re
+
+API_PREFIX = "/api/v1"
+router = APIRouter(prefix=API_PREFIX)
 
 # openssl rand -hex 32
 SECRET_KEY = "d8e632e42229356dbbcd5fdc366a05e9bfaca0193ba016e4fd6cf03307d90241"
@@ -38,16 +41,18 @@ MAX_PAGE_SIZE = 50
 # 这里是 tokenUrl，而不是 token_url，是为了和 OAuth2 规范统一
 # tokenUrl 是为了指定 OpenAPI 前端登录时的接口地址
 # OAuthPasswordBearer 把 Authorization Header 的 Bearer 取出来，然后传给 tokenUrl
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/user/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-router = APIRouter()
 
 
 @router.on_event("startup")
 async def startup():
     await init_db()
+
+
+def is_admin(user: User) -> bool:
+    return True if user.role else False
 
 
 def verify_password(plain_password, hashed_password):
@@ -88,7 +93,13 @@ async def get_all_users_db(session: AsyncSession = Depends(
     return [User(**user.__dict__) for user in users]
 
 
-async def get_user_db(
+async def get_user_with_id_db(
+    user_id: int, session: AsyncSession = Depends(get_session)) -> User:
+    result = await session.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
+
+
+async def get_user_with_email_db(
     email: str, session: AsyncSession = Depends(get_session)) -> User:
     result = await session.execute(select(User).where(User.email == email))
 
@@ -111,9 +122,13 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
     if expires < int(datetime.utcnow().timestamp()):
         raise unauthorized_error("Token expired")
 
-    user = await get_user_db(username, session)
+    user = await get_user_with_email_db(username, session)
     if user is None:
-        raise error
+        raise unauthorized_error(f"User {username} not found, probably email changed")
+
+    if user.password_version != payload.get("password_version"):
+        raise unauthorized_error("Password updated, please login again")
+
     return user
 
 
@@ -123,14 +138,14 @@ async def on_startup():
 
 
 @router.post("/user/signup")
-async def add_user(user: UserSignup,
-                   session: AsyncSession = Depends(get_session)):
+async def create_user(user: UserSignup,
+                      session: AsyncSession = Depends(get_session)):
     if not user.email or not re.match(
             r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", user.email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Email invalid")
 
-    existed_user = await get_user_db(user.email, session)
+    existed_user = await get_user_with_email_db(user.email, session)
     if existed_user is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Email registered already")
@@ -142,6 +157,9 @@ async def add_user(user: UserSignup,
 
     new_user = User(email=user.email,
                     hashed_password=get_password_hash(user.password + SALT),
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                    password_version=0,
                     id=str(uuid4()))
 
     session.add(new_user)
@@ -151,6 +169,7 @@ async def add_user(user: UserSignup,
     token = _create_token(
         data={
             "sub": user.username,
+            "password_version": 0,
             "role": 0
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -158,19 +177,40 @@ async def add_user(user: UserSignup,
     return response
 
 
-@router.post("/user/update")
-async def modify_user(user: UserUpdate,
+@router.put("/user/update")
+async def update_user(user: UserUpdate,
+                      id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
+    r = await session.execute(select(User).where(User.id == id))
+    user_to_update = r.scalar_one_or_none()
+
+    if not user_to_update:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User not found")
+
+    if not is_admin(current_user) and user_to_update.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="non-admin user can only update self")
+
     data = user.dict(exclude_unset=True)
+
     for k, v in data.items():
         if v is not None:
-
             if k == "password":
+                if len(v) < 8:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Password invalid, should be at least 8 characters")
+                if get_password_hash(v + SALT) == user_to_update.hashed_password:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Password not changed")
+                user_to_update.password_version += 1
                 k, v = "hashed_password", get_password_hash(v + SALT)
             elif k == "email":
                 result = await session.execute(
@@ -181,27 +221,39 @@ async def modify_user(user: UserUpdate,
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"email {v} registered already")
 
-            setattr(current_user, k, v)
+            setattr(user_to_update, k, v)
 
-    session.add(current_user)
+    user_to_update.updated_at = datetime.utcnow()
+
+    session.add(user_to_update)
     await session.commit(
     )  # flush is actually not needed here since commit will flush automatically
     await session.flush()
     return True
 
 
-@router.post('/user/delete')
-async def delete_user(session: AsyncSession = Depends(get_session),
+@router.delete('/user/delete')
+async def delete_user(id: str,
+                      session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
+    if not id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid user id")
+
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
-    result = await session.execute(
-        select(User).where(User.id == current_user.id))
+    result = await session.execute(select(User).where(User.id == id))
     original_instance = result.scalar_one_or_none()
+
     if not original_instance:
-        raise Exception("User not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="User not found")
+
+    if not is_admin(current_user) and original_instance.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Non-admin user can only delete self")
 
     await session.delete(original_instance)
     await session.commit()
@@ -214,45 +266,48 @@ async def delete_user(session: AsyncSession = Depends(get_session),
              response_model=Token)
 async def login(form: OAuth2PasswordRequestForm = Depends(),
                 session: AsyncSession = Depends(get_session)):
-    user = await get_user_db(form.username, session)
+    user = await get_user_with_email_db(form.username, session)
     if not user or not verify_password(form.password, user.hashed_password):
         raise unauthorized_error("Incorrect username or password")
 
     token = _create_token(
         data={
             "sub": form.username,
+            "password_version": user.password_version,
             "role": user.role
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response = {"access_token": token, "token_type": "bearer", "role": user.role}
+    response = {
+        "access_token": token,
+        "token_type": "bearer",
+        "role": user.role
+    }
     return response
 
 
 # Private Endpoints for test only
-@router.get("/user/private")
-async def get_private_endpoint(current_user: User = Depends(get_current_user)):
-    user_data = current_user.__dict__
-    user_data.pop("hashed_password")
-    return user_data
-
-
-@router.get("/user/private/admin")
-async def get_private_admin_endpoint(
-        current_user: User = Depends(get_current_user),
-        session: AsyncSession = Depends(get_session)):
-    if not current_user.role:
+@router.get("/user/info")
+async def get_private_endpoint(current_user: User = Depends(get_current_user),
+                               session: AsyncSession = Depends(get_session)):
+    if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
+
+    if not is_admin(current_user):
+        user_data = current_user.__dict__
+        user_data.pop("hashed_password")
+        return user_data
+
     all_users = await get_all_users_db(session)
     for user in all_users:
         user.__dict__.pop("hashed_password")
     return all_users
 
 
-@router.post("/user/project", response_model=ProjectFull)
+@router.post("/user/project")
 async def add_project(project: ProjectBase,
                       session: AsyncSession = Depends(get_session),
-                      current_user: User = Depends(get_current_user)) -> ProjectFull:
+                      current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -282,22 +337,113 @@ async def add_project(project: ProjectBase,
     return True
 
 
-@router.get("/user/project/{id}", response_model=ProjectFull)
-async def get_user_project(id: str,
-                           session: AsyncSession = Depends(get_session),
-                           current_user: User = Depends(get_current_user)) -> ProjectFull:
+@router.delete("/user/project")
+async def delete_project(id: str,
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
     r = await session.execute(
-        select(Project).where(Project.id == id).options(
-            selectinload(Project.user), selectinload(Project.tags)))
+        select(Project).options(selectinload(Project.user),
+                                selectinload(
+                                    Project.tags)).where(Project.id == id))
+    originalProject = r.scalar_one_or_none()
+
+    if not originalProject:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Project with ID {id} not found")
+
+    if not is_admin(
+            current_user) and originalProject.user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    await session.delete(originalProject)
+    await session.commit()
+    await session.flush()
+    return True
+
+
+@router.put("/user/project")
+async def modify_project(project: ProjectUpdate,
+                         id: str,
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(
+        select(Project).options(selectinload(Project.user),
+                                selectinload(
+                                    Project.tags)).where(Project.id == id))
+    originalProject = r.scalar_one_or_none()
+
+    if not originalProject:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Project with ID {id} not found")
+
+    if originalProject.user.id != current_user.id and not is_admin(
+            current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    data = project.dict(exclude_unset=True)
+    for k, v in data.items():
+        if v is not None:
+            if k == "is_live":
+                if not is_admin(current_user):
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Unauthorized")
+                setattr(originalProject, k, v)
+            elif k == "tags":
+                tags = []
+                for tagId in v:
+                    if not isinstance(tagId, int):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"TagId {tagId} must be an integer")
+                    r = await session.execute(
+                        select(Tag).where(Tag.tagId == tagId))
+                    tag = r.scalar_one_or_none()
+                    if not tag:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Tag with ID {tagId} not found")
+                    tags.append(tag)
+                setattr(originalProject, k, tags)
+            else:
+                setattr(originalProject, k, v)
+
+    originalProject.date = datetime.now()
+    session.add(originalProject)
+    await session.commit()
+    await session.refresh(originalProject)
+    return True
+
+
+@router.get("/user/project", response_model=ProjectFull)
+async def get_project(id: str,
+                      session: AsyncSession = Depends(get_session),
+                      current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(
+        select(Project).options(selectinload(Project.user),
+                                selectinload(
+                                    Project.tags)).where(Project.id == id))
     project = r.scalar_one_or_none()
+
     if not project:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Project not found")
-    if project.email != current_user.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Project with ID {id} not found")
+
+    if not is_admin(current_user) and project.user.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
@@ -306,30 +452,103 @@ async def get_user_project(id: str,
 
 @router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
 async def query_user_projects(
+    response: Response,
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
+    tags: str = "",
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ) -> List[ProjectWithUserAndTags]:
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
+    if tags:
+        try:
+            tag_ids = [int(tag) for tag in tags.split(',')]
+
+            r = await session.execute(
+                select(Tag).options(joinedload(Tag.category)).filter(
+                    Tag.tagId.in_(tag_ids)))
+            tagInstances = r.scalars().all()
+            for tag in tag_ids:
+                if tag not in [
+                        tagInstance.tagId for tagInstance in tagInstances
+                ]:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Tag with ID {tag} not found")
+
+            r = await session.execute(select(func.count(Category.categoryId)))
+            num_categories = r.scalar_one_or_none()
+
+            tag_ids_by_category = [[
+                tag.tagId for tag in tagInstances
+                if tag.categoryId == categoryId
+            ] for categoryId in range(1, num_categories + 1)]
+
+            conditions = []
+            for i, tag_list in enumerate(tag_ids_by_category):
+                if tag_list:
+                    conditions.append(
+                        and_(
+                            Project.tags.any(
+                                and_(Tag.categoryId == (i + 1),
+                                     Project.tags.any(
+                                         Tag.tagId.in_(tag_list)))), ))
+
+            query = select(func.count(Project.id)).filter(
+                Project.email == current_user.email,
+                Project.title.like(f'%{keyword}%'))
+            query = query.filter(and_(*conditions)) if conditions else query
+            count = (await session.execute(query)).scalar_one_or_none()
+
+            query = select(Project).group_by(Project.id).filter(
+                Project.email == current_user.email,
+                Project.title.like(f'%{keyword}%')).options(
+                    selectinload(Project.user),
+                    selectinload(Project.tags)).order_by(Project.id).offset(
+                        max((page - 1) * per_page,
+                            0)).limit(min(per_page, MAX_PAGE_SIZE))
+
+            query = query.filter(and_(*conditions)) if conditions else query
+
+            r = await session.execute(query)
+            response.headers['X-Total-Count'] = str(count)
+            response.headers['X-Total-Pages'] = str(count // per_page +
+                                                    (1 if count %
+                                                     per_page else 0))
+            return r.scalars().all()
+        except ValueError as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Tags must be integers")
+
+    query = select(func.count(
+        Project.id)).where(Project.email == current_user.email).filter(
+            Project.title.like(f'%{keyword}%'))
+
+    r = await session.execute(query)
+    count = r.scalar_one_or_none()
+
+    query = select(Project).where(Project.email == current_user.email).filter(
+        Project.title.like(f'%{keyword}%')).options(selectinload(
+            Project.user), selectinload(Project.tags)).order_by(Project.id)
 
     r = await session.execute(
-        select(Project).where(Project.email == current_user.email).filter(
-            Project.title.like(f'%{keyword}%')).options(
-                selectinload(Project.user),
-                selectinload(Project.tags)).order_by(Project.id).offset(
-                    max((page - 1) * per_page,
-                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
+        query.offset(max((page - 1) * per_page,
+                         0)).limit(min(per_page, MAX_PAGE_SIZE)))
+
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str((count // per_page) +
+                                            (1 if count % per_page else 0))
     return r.scalars().all()
 
 
 @router.get("/project/{id}", response_model=ProjectFull)
 async def get_project_by_id(
-    id: str,
-    session: AsyncSession = Depends(get_session),
+        id: str,
+        session: AsyncSession = Depends(get_session),
 ) -> ProjectFull:
     if not id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -347,6 +566,7 @@ async def get_project_by_id(
 
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
 async def query_all_projects(
+    response: Response,
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
@@ -382,27 +602,44 @@ async def query_all_projects(
             for i, tag_list in enumerate(tag_ids_by_category):
                 if tag_list:
                     conditions.append(
-                        and_(Project.tags.any(Tag.categoryId == (i + 1)),
-                             Project.tags.any(Tag.tagId.in_(tag_list))))
+                        and_(
+                            Project.tags.any(
+                                and_(Tag.categoryId == (i + 1),
+                                     Project.tags.any(
+                                         Tag.tagId.in_(tag_list)))), ))
 
-            query = select(Project).group_by(
-                    Project.id).filter(
-                        Project.title.like(f'%{keyword}%')).options(
-                            selectinload(Project.user),
-                            selectinload(Project.tags)).order_by(
-                                Project.id).offset(
-                                    max((page - 1) * per_page,
-                                        0)).limit(min(per_page, MAX_PAGE_SIZE))
+            query = select(func.count(Project.id)).filter(
+                Project.title.like(f'%{keyword}%'))
+            query = query.filter(and_(*conditions)) if conditions else query
+            count = (await session.execute(query)).scalar_one_or_none()
+
+            query = select(Project).group_by(Project.id).filter(
+                Project.title.like(f'%{keyword}%')).options(
+                    selectinload(Project.user),
+                    selectinload(Project.tags)).order_by(Project.id).offset(
+                        max((page - 1) * per_page,
+                            0)).limit(min(per_page, MAX_PAGE_SIZE))
 
             query = query.filter(and_(*conditions)) if conditions else query
 
             r = await session.execute(query)
-
+            response.headers['X-Total-Count'] = str(count)
+            response.headers['X-Total-Pages'] = str(count // per_page +
+                                                    (1 if count %
+                                                     per_page else 0))
             return r.scalars().all()
         except ValueError as e:
             print(e)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Tags must be integers")
+
+    query = select(func.count(Project.id)).filter(
+        Project.title.like(f'%{keyword}%'))
+    count = (await session.execute(query)).scalar_one_or_none()
+
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
 
     r = await session.execute(
         select(Project).filter(Project.title.like(f'%{keyword}%')).options(
@@ -410,41 +647,6 @@ async def query_all_projects(
             selectinload(Project.tags)).order_by(Project.id).offset(
                 max((page - 1) * per_page,
                     0)).limit(min(per_page, MAX_PAGE_SIZE)))
-    return r.scalars().all()
-
-
-@router.get("/announcement/{aid}", response_model=List[Announcement])
-async def fetch_announcement(request: Request,
-                             session: AsyncSession = Depends(get_session),
-                             aid: int = 0) -> List[Announcement]:
-    r = await session.execute(
-        select(Announcement).filter_by(**request.query_params._dict, aid=aid)
-    ) if aid else await session.execute(
-        select(Announcement).filter_by(
-            **request.query_params._dict).order_by(Announcement.aid))
-    return r.scalars().all()
-
-
-@router.get("/detail/{ppid}", response_model=List[Detail])
-async def fetch_detail(request: Request,
-                       session: AsyncSession = Depends(get_session),
-                       ppid: int = 0) -> List[Detail]:
-    r = await session.execute(
-        select(Detail).filter_by(**request.query_params._dict, ppid=ppid)
-    ) if ppid else await session.execute(
-        select(Detail).filter_by(
-            **request.query_params._dict).order_by(Detail.ppid))
-    return r.scalars().all()
-
-
-@router.get("/pa/{ppid}", response_model=List[PA])
-async def fetch_pa(request: Request,
-                   session: AsyncSession = Depends(get_session),
-                   ppid: int = 0) -> List[PA]:
-    r = await session.execute(
-        select(PA).filter_by(**request.query_params._dict, ppid=ppid)
-    ) if ppid else await session.execute(
-        select(PA).filter_by(**request.query_params._dict).order_by(PA.ppid))
     return r.scalars().all()
 
 
@@ -464,44 +666,4 @@ async def fetch_tags(session: AsyncSession = Depends(
     r = await session.execute(
         select(Category).options(selectinload(Category.tags)).order_by(
             Category.categoryId))
-    return r.scalars().all()
-
-
-@router.get("/product", response_model=List[Product])
-async def fetch_product(
-    request: Request, session: AsyncSession = Depends(get_session)
-) -> List[Product]:
-    r = await session.execute(
-        select(Product).filter_by(**request.query_params._dict).order_by(
-            Product.pid))
-    return r.scalars().all()
-
-
-@router.get("/solution", response_model=List[Solution])
-async def fetch_solution(
-    request: Request, session: AsyncSession = Depends(get_session)
-) -> List[Solution]:
-    r = await session.execute(
-        select(Solution).filter_by(**request.query_params._dict).order_by(
-            Solution.sid))
-    return r.scalars().all()
-
-
-@router.get("/type", response_model=List[Type])
-async def fetch_type(
-    request: Request,
-    session: AsyncSession = Depends(get_session)) -> List[Type]:
-    r = await session.execute(
-        select(Type).filter_by(**request.query_params._dict).order_by(Type.tid)
-    )
-    return r.scalars().all()
-
-
-@router.get("/vertical", response_model=List[Vertical])
-async def fetch_vertical(
-    request: Request, session: AsyncSession = Depends(get_session)
-) -> List[Vertical]:
-    r = await session.execute(
-        select(Vertical).filter_by(**request.query_params._dict).order_by(
-            Vertical.vid))
     return r.scalars().all()
