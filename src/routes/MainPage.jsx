@@ -51,10 +51,32 @@ function MainPage() {
         });
     };
     
+    const handleSearch = () => {
+        const searchText = document.querySelector('input').value;
+        
+        let result = {};
+        axios.get('/projects', { searchText }).then(res => {
+            result = res.data;
+            
+            for (let i = 0; i < res.data.length; i++) {    
+                if (res.data[i].title.toLowerCase().includes(searchText.toLowerCase()) === false) {
+                    delete result[i];    
+                }
+            }
+            
+            setProjects(result);
+            setIsLoading(false);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    };
+
     return (
         <>
         <MainHeader />
         <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleFilterChange} />
+        
         <Content>
             { isLoading ? <div>Loading...</div> : 
                 <div id={styles.cardContainer}>
