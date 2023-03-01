@@ -503,13 +503,13 @@ async def query_user_projects(
                                          Tag.tagId.in_(tag_list)))), ))
 
             query = select(func.count(Project.id)).filter(
-                Project.email == current_user.email,
+                Project.user_id == current_user.id,
                 Project.title.like(f'%{keyword}%'))
             query = query.filter(and_(*conditions)) if conditions else query
             count = (await session.execute(query)).scalar_one_or_none()
 
             query = select(Project).group_by(Project.id).filter(
-                Project.email == current_user.email,
+                Project.user_id == current_user.id,
                 Project.title.like(f'%{keyword}%')).options(
                     selectinload(Project.user),
                     selectinload(Project.tags)).order_by(Project.id).offset(
@@ -530,13 +530,13 @@ async def query_user_projects(
                                 detail="Tags must be integers")
 
     query = select(func.count(
-        Project.id)).where(Project.email == current_user.email).filter(
+        Project.id)).where(Project.user_id == current_user.id).filter(
             Project.title.like(f'%{keyword}%'))
 
     r = await session.execute(query)
     count = r.scalar_one_or_none()
 
-    query = select(Project).where(Project.email == current_user.email).filter(
+    query = select(Project).where(Project.user_id == current_user.id).filter(
         Project.title.like(f'%{keyword}%')).options(selectinload(
             Project.user), selectinload(Project.tags)).order_by(Project.id)
 

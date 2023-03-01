@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
-    email: str = Field(primary_key=True, nullable=False, max_length=255)
+    email: str = Field(nullable=False, max_length=255)
     username: Optional[str] = None
 
 
@@ -16,11 +16,11 @@ class UserSignup(UserBase):
 # table = True => in database
 class User(UserBase, table=True):
     __tablename__ = 'users'
+    id: UUID = Field(primary_key=True, nullable=False)
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
     hashed_password: str = None
     password_version: int = Field(default=0)
-    id: UUID = Field(default=None)
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
     projects: List["Project"] = Relationship(back_populates="user")
@@ -82,23 +82,28 @@ class ProjectBase(SQLModel):
     tags: List[int]  # tagId
 
 
-class ProjectUpdate(ProjectBase):
-    is_live: bool
+class ProjectUpdate(SQLModel):
+    title: Optional[str]
+    link: Optional[str]
+    description: Optional[str]
+    content: Optional[str]
+    date: Optional[datetime]
+    tags: Optional[List[int]]
+    is_live: Optional[bool]
 
 
 class Project(ProjectBase, table=True):
     __tablename__ = 'projects'
     id: UUID = Field(primary_key=True, nullable=False)
-    email: str = Field(foreign_key="users.email")
     date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
+    user_id: UUID = Field(foreign_key="users.id")
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
 
 
 class ProjectWithUserAndTags(SQLModel):
     id: UUID
-    email: str
     title: str
     link: str
     description: str
