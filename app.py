@@ -14,7 +14,7 @@ app.add_middleware(
 )
 
 
-app.include_router(api.router, prefix="/api/v1")
+app.include_router(api.router)
 
 
 @app.get("/")

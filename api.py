@@ -22,6 +22,9 @@ from typing import List
 
 import re
 
+API_PREFIX = "/api/v1"
+router = APIRouter(prefix=API_PREFIX)
+
 # openssl rand -hex 32
 SECRET_KEY = "d8e632e42229356dbbcd5fdc366a05e9bfaca0193ba016e4fd6cf03307d90241"
 ALGORITHM = "HS256"
@@ -38,11 +41,9 @@ MAX_PAGE_SIZE = 50
 # 这里是 tokenUrl，而不是 token_url，是为了和 OAuth2 规范统一
 # tokenUrl 是为了指定 OpenAPI 前端登录时的接口地址
 # OAuthPasswordBearer 把 Authorization Header 的 Bearer 取出来，然后传给 tokenUrl
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/user/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-router = APIRouter()
 
 
 @router.on_event("startup")
@@ -92,7 +93,13 @@ async def get_all_users_db(session: AsyncSession = Depends(
     return [User(**user.__dict__) for user in users]
 
 
-async def get_user_db(
+async def get_user_with_id_db(
+    user_id: int, session: AsyncSession = Depends(get_session)) -> User:
+    result = await session.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
+
+
+async def get_user_with_email_db(
     email: str, session: AsyncSession = Depends(get_session)) -> User:
     result = await session.execute(select(User).where(User.email == email))
 
@@ -115,9 +122,13 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
     if expires < int(datetime.utcnow().timestamp()):
         raise unauthorized_error("Token expired")
 
-    user = await get_user_db(username, session)
+    user = await get_user_with_email_db(username, session)
     if user is None:
-        raise error
+        raise unauthorized_error(f"User {username} not found, probably email changed")
+
+    if user.password_version != payload.get("password_version"):
+        raise unauthorized_error("Password updated, please login again")
+
     return user
 
 
@@ -127,14 +138,14 @@ async def on_startup():
 
 
 @router.post("/user/signup")
-async def add_user(user: UserSignup,
-                   session: AsyncSession = Depends(get_session)):
+async def create_user(user: UserSignup,
+                      session: AsyncSession = Depends(get_session)):
     if not user.email or not re.match(
             r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", user.email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Email invalid")
 
-    existed_user = await get_user_db(user.email, session)
+    existed_user = await get_user_with_email_db(user.email, session)
     if existed_user is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Email registered already")
@@ -146,6 +157,9 @@ async def add_user(user: UserSignup,
 
     new_user = User(email=user.email,
                     hashed_password=get_password_hash(user.password + SALT),
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                    password_version=0,
                     id=str(uuid4()))
 
     session.add(new_user)
@@ -155,6 +169,7 @@ async def add_user(user: UserSignup,
     token = _create_token(
         data={
             "sub": user.username,
+            "password_version": 0,
             "role": 0
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -183,18 +198,19 @@ async def update_user(user: UserUpdate,
                             detail="non-admin user can only update self")
 
     data = user.dict(exclude_unset=True)
-    if not verify_password(data["password"], user_to_update.hashed_password):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Password invalid")
-    data.pop("password")
 
     for k, v in data.items():
         if v is not None:
-            if k == "new_password":
+            if k == "password":
                 if len(v) < 8:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Password invalid, should be at least 8 characters")
+                if get_password_hash(v + SALT) == user_to_update.hashed_password:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Password not changed")
+                user_to_update.password_version += 1
                 k, v = "hashed_password", get_password_hash(v + SALT)
             elif k == "email":
                 result = await session.execute(
@@ -206,6 +222,8 @@ async def update_user(user: UserUpdate,
                         detail=f"email {v} registered already")
 
             setattr(user_to_update, k, v)
+
+    user_to_update.updated_at = datetime.utcnow()
 
     session.add(user_to_update)
     await session.commit(
@@ -248,13 +266,14 @@ async def delete_user(id: str,
              response_model=Token)
 async def login(form: OAuth2PasswordRequestForm = Depends(),
                 session: AsyncSession = Depends(get_session)):
-    user = await get_user_db(form.username, session)
+    user = await get_user_with_email_db(form.username, session)
     if not user or not verify_password(form.password, user.hashed_password):
         raise unauthorized_error("Incorrect username or password")
 
     token = _create_token(
         data={
             "sub": form.username,
+            "password_version": user.password_version,
             "role": user.role
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -267,20 +286,18 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
 
 
 # Private Endpoints for test only
-@router.get("/user/private")
-async def get_private_endpoint(current_user: User = Depends(get_current_user)):
-    user_data = current_user.__dict__
-    user_data.pop("hashed_password")
-    return user_data
-
-
-@router.get("/user/private/admin")
-async def get_private_admin_endpoint(
-        current_user: User = Depends(get_current_user),
-        session: AsyncSession = Depends(get_session)):
-    if not current_user.role:
+@router.get("/user/info")
+async def get_private_endpoint(current_user: User = Depends(get_current_user),
+                               session: AsyncSession = Depends(get_session)):
+    if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
+
+    if not is_admin(current_user):
+        user_data = current_user.__dict__
+        user_data.pop("hashed_password")
+        return user_data
+
     all_users = await get_all_users_db(session)
     for user in all_users:
         user.__dict__.pop("hashed_password")
