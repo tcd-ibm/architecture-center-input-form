@@ -129,6 +129,9 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
     if user.password_version != payload.get("password_version"):
         raise unauthorized_error("Password updated, please login again")
 
+    if user.role != payload.get("role"):
+        raise unauthorized_error("Role updated, please login again")
+
     return user
 
 
@@ -205,8 +208,10 @@ async def update_user(user: UserUpdate,
                 if len(v) < 8:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Password invalid, should be at least 8 characters")
-                if get_password_hash(v + SALT) == user_to_update.hashed_password:
+                        detail=
+                        "Password invalid, should be at least 8 characters")
+                if get_password_hash(v +
+                                     SALT) == user_to_update.hashed_password:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Password not changed")
@@ -337,7 +342,7 @@ async def add_project(project: ProjectBase,
     return True
 
 
-@router.delete("/user/project")
+@router.delete("/user/project/{id}")
 async def delete_project(id: str,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
@@ -366,7 +371,7 @@ async def delete_project(id: str,
     return True
 
 
-@router.put("/user/project")
+@router.put("/user/project/{id}")
 async def modify_project(project: ProjectUpdate,
                          id: str,
                          session: AsyncSession = Depends(get_session),
@@ -425,7 +430,7 @@ async def modify_project(project: ProjectUpdate,
     return True
 
 
-@router.get("/user/project", response_model=ProjectFull)
+@router.get("/user/project/{id}", response_model=ProjectFull)
 async def get_project(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
