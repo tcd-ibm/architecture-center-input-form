@@ -108,7 +108,7 @@ class ProjectWithUserAndTags(SQLModel):
     description: str
     is_live: bool
     date: datetime
-    user: UserInfo | None = None
+    user: Optional[UserInfo] = None
     tags: List["Tag"] = []
 
 
