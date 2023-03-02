@@ -75,13 +75,8 @@ function AddProjectPage() {
         setInput('');
     };
 
-    const handleComplete = (id) => {
-        const list = tags.map((task) => {
-            if (task.id !== id) {
-                return { ...task };
-            } else return {};
-        });
-        setTags(list);
+    const handleComplete = id => {
+        setTags(tags.filter(item => item.id !== id));
     };
 
     return (
