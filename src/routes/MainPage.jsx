@@ -37,34 +37,15 @@ function MainPage() {
         });
     }, []);
 
-    const handleFilterChange = () => {
+
+    const handleSearchAndFilterChange = () => {
         const params = {
+            keyword: document.querySelector('input').value,
             tags: queryMenuRef.current.selectedTagList.join(',')
         };
 
-        axios.get('/projects', { params }).then(res => {
+        axios.get('./projects', { params }).then(res => {
             setProjects(res.data);
-            setIsLoading(false);
-        })
-        .catch(err => {
-            console.log(err);
-        });
-    };
-    
-    const handleSearch = () => {
-        const searchText = document.querySelector('input').value;
-        
-        let result = {};
-        axios.get('/projects', { searchText }).then(res => {
-            result = res.data;
-            
-            for (let i = 0; i < res.data.length; i++) {    
-                if (res.data[i].title.toLowerCase().includes(searchText.toLowerCase()) === false) {
-                    delete result[i];    
-                }
-            }
-            
-            setProjects(result);
             setIsLoading(false);
         })
         .catch(err => {
@@ -75,7 +56,7 @@ function MainPage() {
     return (
         <>
         <MainHeader />
-        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleFilterChange} />
+        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
         
         <Content>
             { isLoading ? <div>Loading...</div> : 
