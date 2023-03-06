@@ -27,45 +27,45 @@ function ManageProjectsPage() {
     const rows = [
         {
             id: '1',
-            project: 'ASCII Doc Editor',
-            sponsor: 'IBM',
+            project: 'SCADA Interface Modernisation',
+            sponsor: 'Kingspan',
             dateCreated: '2023-01-01',
-            technology: 'JavaScript'
+            technology: 'Redhat Enterprise Linux'
         },
         {
             id: '2',
-            project: 'ASCII Doc Editor',
-            sponsor: 'IBM',
+            project: 'Radio Access Networks',
+            sponsor: 'Telco',
             dateCreated: '2023-02-12',
-            technology: 'JavaScript'
+            technology: 'Orchestrator and Cloud Platform'
         },
         {
             id: '3',
-            project: 'ASCII Doc Editor',
-            sponsor: 'IBM',
+            project: 'API Management Platform',
+            sponsor: 'SAP',
             dateCreated: '2023-02-15',
-            technology: 'JavaScript'
+            technology: 'Red Hat Integration'
         },
         {
             id: '4',
-            project: 'ASCII Doc Editor',
-            sponsor: 'IBM',
+            project: 'Intelligent Automation Workflow',
+            sponsor: 'Axa',
             dateCreated: '2023-02-23',
-            technology: 'JavaScript'
+            technology: 'Red Hat Ansible Automation Platform'
         },
         {
             id: '5',
-            project: 'ASCII Doc Editor',
-            sponsor: 'IBM',
+            project: 'Red Hat OpenShift Service',
+            sponsor: 'Amazon',
             dateCreated: '2023-02-28',
-            technology: 'JavaScript'
+            technology: 'Amazon Web Services Cloud'
         },
         {
             id: '6',
-            project: 'ASCII Doc Editor',
-            sponsor: 'IBM',
+            project: 'Enabling Medical Imaging Diagnostics',
+            sponsor: 'Edge',
             dateCreated: '2023-03-01',
-            technology: 'JavaScript'
+            technology: 'Red Hat OpenShift GitOps'
         },
     ];
 
