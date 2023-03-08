@@ -124,7 +124,8 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
 
     user = await get_user_with_email_db(username, session)
     if user is None:
-        raise unauthorized_error(f"User {username} not found, probably email changed")
+        raise unauthorized_error(
+            f"User {username} not found, probably email changed")
 
     if user.password_version != payload.get("password_version"):
         raise unauthorized_error("Password updated, please login again")
@@ -313,8 +314,8 @@ async def get_private_endpoint(current_user: User = Depends(get_current_user),
 
 @router.post("/user/project")
 async def create_project(project: ProjectBase,
-                      session: AsyncSession = Depends(get_session),
-                      current_user: User = Depends(get_current_user)):
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -455,6 +456,10 @@ async def get_project(id: str,
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
+    project.visit_count += 1
+    session.add(project)
+    await session.commit()
+    await session.refresh(project)
     return project
 
 
@@ -570,25 +575,6 @@ async def get_project_by_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Project not found")
     return project
-
-
-@router.post("/project/visit/{id}")
-async def project_visit_count(id: str, session: AsyncSession = Depends(get_session)):
-    if not id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Project ID is required")
-
-    r = await session.execute(
-        select(Project).where(Project.id == id))
-    project = r.scalar_one_or_none()
-    if not project:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Project not found")
-
-    project.visit_count += 1
-    session.add(project)
-    await session.commit()
-    return {project.id: project.visit_count}
 
 
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
