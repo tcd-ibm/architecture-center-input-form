@@ -15,12 +15,12 @@ function ManageProjectsPage() {
             key: 'sponsor'
         },
         {
-            header: 'Date Created',
-            key: 'dateCreated'
+            header: 'Date Added',
+            key: 'dateAdded'
         },
         {
-            header: 'Technology',
-            key: 'technology'
+            header: 'Technologies',
+            key: 'technologies'
         }
     ];
 
@@ -29,43 +29,43 @@ function ManageProjectsPage() {
             id: '1',
             project: 'SCADA Interface Modernisation',
             sponsor: 'Kingspan',
-            dateCreated: '2023-01-01',
-            technology: 'Redhat Enterprise Linux'
+            dateAdded: '2023-01-01',
+            technologies: 'ACM, AMQ, Ansible, API, OpenShift'
         },
         {
             id: '2',
             project: 'Radio Access Networks',
             sponsor: 'Telco',
-            dateCreated: '2023-02-12',
-            technology: 'Orchestrator and Cloud Platform'
+            dateAdded: '2023-02-12',
+            technologies: 'ACM, AMQ, OpenShift, Quay, RHEL'
         },
         {
             id: '3',
             project: 'API Management Platform',
             sponsor: 'SAP',
-            dateCreated: '2023-02-15',
-            technology: 'Red Hat Integration'
+            dateAdded: '2023-02-15',
+            technologies: 'RHEL, OpenShift'
         },
         {
             id: '4',
             project: 'Intelligent Automation Workflow',
             sponsor: 'Axa',
-            dateCreated: '2023-02-23',
-            technology: 'Red Hat Ansible Automation Platform'
+            dateAdded: '2023-02-23',
+            technologies: 'OpenShift, Ansible'
         },
         {
             id: '5',
             project: 'Red Hat OpenShift Service',
             sponsor: 'Amazon',
-            dateCreated: '2023-02-28',
-            technology: 'Amazon Web Services Cloud'
+            dateAdded: '2023-02-28',
+            technologies: 'ROSA, OpenShift'
         },
         {
             id: '6',
             project: 'Enabling Medical Imaging Diagnostics',
             sponsor: 'Edge',
-            dateCreated: '2023-03-01',
-            technology: 'Red Hat OpenShift GitOps'
+            dateAdded: '2023-03-02',
+            technologies: 'OpenShift, AMQ, ACM, RHEL'
         },
     ];
 

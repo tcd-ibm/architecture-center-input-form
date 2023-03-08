@@ -1,4 +1,4 @@
-import { Form, Stack, Dropdown, Checkbox, Button } from '@carbon/react';
+import { Heading, Form, Stack, Dropdown, Checkbox, Button } from '@carbon/react';
 
 import styles from './ContentSettingsPage.module.scss';
 
@@ -20,6 +20,7 @@ function ContentSettingsPage() {
 
     return (
         <>
+        <Heading style={{marginBottom: '20px'}}>Content Settings</Heading>
         <Form>
             <Stack gap={5} className={styles.stackContainer}>
                 <Dropdown
