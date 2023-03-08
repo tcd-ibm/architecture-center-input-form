@@ -456,10 +456,6 @@ async def get_project(id: str,
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
-    project.visit_count += 1
-    session.add(project)
-    await session.commit()
-    await session.refresh(project)
     return project
 
 
@@ -574,6 +570,12 @@ async def get_project_by_id(
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Project not found")
+
+    project.visit_count += 1
+    session.add(project)
+    await session.commit()
+    await session.refresh(project)
+
     return project
 
 
