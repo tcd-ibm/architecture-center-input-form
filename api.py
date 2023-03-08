@@ -180,7 +180,7 @@ async def create_user(user: UserSignup,
     return response
 
 
-@router.put("/user/update", response_model=User)
+@router.put("/user/update/{id}", response_model=User)
 async def update_user(user: UserUpdate,
                       id: str,
                       session: AsyncSession = Depends(get_session),
@@ -239,7 +239,7 @@ async def update_user(user: UserUpdate,
     return user_data
 
 
-@router.delete('/user/delete')
+@router.delete('/user/delete/{id}')
 async def delete_user(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
@@ -570,6 +570,25 @@ async def get_project_by_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Project not found")
     return project
+
+
+@router.post("/project/visit/{id}")
+async def project_visit_count(id: str, session: AsyncSession = Depends(get_session)):
+    if not id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Project ID is required")
+
+    r = await session.execute(
+        select(Project).where(Project.id == id))
+    project = r.scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project not found")
+
+    project.visit_count += 1
+    session.add(project)
+    await session.commit()
+    return {project.id: project.visit_count}
 
 
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
