@@ -24,11 +24,11 @@
 
 .editor #codeArea {
   outline: none;
-  padding-left: 60px !important;
+  padding-left: clamp(25px, 5%, 50px) !important;
 }
 
 .editor pre {
-  padding-left: 60px !important;
+  padding-left: clamp(25px, 5%, 50px) !important;
 }
 
 .editor .lineNumber {
@@ -36,7 +36,9 @@
   left: 0px;
   color: #cccccc;
   text-align: right;
-  width: 40px;
+  width: 4%;
+  min-width: 18px;
+  max-width: 35px;
   font-weight: 100;
 }
 
@@ -46,7 +48,7 @@
   overflow: auto;
   padding-top: 20px;
   padding-bottom: 20px;
-  padding-left: 30px;
+  padding-left: clamp(10px, 5%, 30px);
   border: 1px solid #ced4da;
   background-color: #f8f9fa;
 }
