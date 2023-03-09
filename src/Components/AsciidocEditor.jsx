@@ -3,6 +3,7 @@ import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-asciidoc';
 import Asciidoctor from 'asciidoctor';
+import { Tabs, TabList, Tab, TabPanels, TabPanel} from '@carbon/react';
 
 // eslint-disable-next-line custom-rules/no-global-css
 import 'prismjs/themes/prism.css';
@@ -27,24 +28,37 @@ function DocEditor() {
 
   return (
     <>
-      <div className='container'>
-        <div className='editorContainer'>
-          <Editor
-            value={code}
-            onValueChange={code => setCode(code)}
-            highlight={code => hightlightWithLineNumbers(code, languages.asciidoc)}
-            className='editor'
-            textareaId='codeArea'
-            style={{
-              fontFamily: '"Fira code", "Fira Mono", monospace',
-              fontSize: 12,
-            }}
-          />
-        </div>
-        <div className='separator'></div>
-        <div className='previewContainer' dangerouslySetInnerHTML={{ __html: asciidoctor.convert(code) }}>
-        </div>
-      </div>
+      <Tabs>
+        <TabList >
+        <Tab>
+          Content Editor
+        </Tab>
+        <Tab>
+          Page Preview
+        </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel style={{paddingLeft: '0px'}}>
+            <div className='editorContainer'>
+              <Editor
+                value={code}
+                onValueChange={code => setCode(code)}
+                highlight={code => hightlightWithLineNumbers(code, languages.asciidoc)}
+                className='editor'
+                textareaId='codeArea'
+                style={{
+                  fontFamily: '"Fira code", "Fira Mono", monospace',
+                  fontSize: 12,
+                }}
+              />
+            </div>
+          </TabPanel>
+          <TabPanel style={{paddingLeft: '0px'}}>
+            <div className='previewContainer' dangerouslySetInnerHTML={{ __html: asciidoctor.convert(code) }}>
+            </div>
+          </TabPanel>
+        </TabPanels>
+        </Tabs>
     </>
   );
 }

@@ -79,18 +79,10 @@ function AddProjectPage() {
                     disabled={false}
                     placeholder='An omnichannel approach provides a unified customer experience across platforms, creating a single view for customers to interact with their own information.'
                 />
-                <Tile>
+                <Tile style={{paddingBottom: '0px'}}>
                     <h4 style={{marginBottom: '10px'}}>Main Content</h4>
                     <DocEditor />
                 </Tile>
-                <TextArea
-                    labelText='Main content'
-                    rows={8}
-                    id='mainContent'
-                    ref={contentInputRef}
-                    disabled={false}
-                    value='This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
-                />
                 <Button type='submit'>Save</Button>
             </Stack>
             </Form>
