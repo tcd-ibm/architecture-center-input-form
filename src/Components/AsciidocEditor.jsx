@@ -29,7 +29,7 @@ function DocEditor() {
   return (
     <>
       <Tabs>
-        <TabList >
+        <TabList>
         <Tab>
           Content Editor
         </Tab>

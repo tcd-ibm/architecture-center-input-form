@@ -79,8 +79,8 @@ function AddProjectPage() {
                     disabled={false}
                     placeholder='An omnichannel approach provides a unified customer experience across platforms, creating a single view for customers to interact with their own information.'
                 />
-                <Tile style={{paddingBottom: '0px'}}>
-                    <h4 style={{marginBottom: '10px'}}>Main Content</h4>
+                <Tile style={{paddingBottom: '0px', paddingTop: '5px', paddingRight: '0px'}}>
+                    {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
                     <DocEditor />
                 </Tile>
                 <Button type='submit'>Save</Button>
