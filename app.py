@@ -3,7 +3,6 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import api
 
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -12,7 +11,6 @@ app.add_middleware(
     allow_methods=["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
-
 
 app.include_router(api.router)
 

@@ -14,7 +14,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate
+from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo
 
 from datetime import timedelta, datetime
 
@@ -89,8 +89,7 @@ def _decode_token(token: str) -> dict:
 async def get_all_users_db(session: AsyncSession = Depends(
     get_session)) -> List[User]:
     result = await session.execute(select(User))
-    users = result.scalars().all()
-    return [User(**user.__dict__) for user in users]
+    return result.scalars().all()
 
 
 async def get_user_with_id_db(
@@ -293,23 +292,70 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
     return response
 
 
-# Private Endpoints for test only
-@router.get("/user/info")
-async def get_private_endpoint(current_user: User = Depends(get_current_user),
-                               session: AsyncSession = Depends(get_session)):
+@router.get("/user/info", response_model=UserInfo)
+async def get_current_user_info(current_user: User = Depends(get_current_user),
+                                session: AsyncSession = Depends(get_session)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    r = await session.execute(select(User).where(User.id == current_user.id))
+    return r.scalar_one_or_none()
+
+
+@router.get("/admin/users", response_model=List[UserInfo])
+async def admin_get_all_users(response: Response,
+                              per_page: int = DEFAULT_PAGE_SIZE,
+                              page: int = DEFAULT_PAGE,
+                              session: AsyncSession = Depends(get_session),
+                              current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
     if not is_admin(current_user):
-        user_data = current_user.__dict__
-        user_data.pop("hashed_password")
-        return user_data
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admin can access this endpoint")
 
-    all_users = await get_all_users_db(session)
-    for user in all_users:
-        user.__dict__.pop("hashed_password")
-    return all_users
+    count = (await session.execute(select(func.count(User.id))
+                                   )).scalar_one_or_none()
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
+
+    result = await session.execute(
+        select(User).offset(max((page - 1) * per_page,
+                                0)).limit(min(per_page, MAX_PAGE_SIZE)))
+    return result.scalars().all()
+
+
+@router.get("/admin/projects", response_model=List[ProjectWithUserAndTags])
+async def admin_get_all_projects(response: Response,
+                                 per_page: int = DEFAULT_PAGE_SIZE,
+                                 page: int = DEFAULT_PAGE,
+                                 session: AsyncSession = Depends(get_session),
+                                 current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admin can access this endpoint")
+
+    count = (await session.execute(select(func.count(Project.id))
+                                   )).scalar_one_or_none()
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
+
+    result = await session.execute(
+        select(Project).options(selectinload(Project.user),
+                                selectinload(Project.tags)).offset(
+                                    max((page - 1) * per_page,
+                                        0)).limit(min(per_page,
+                                                      MAX_PAGE_SIZE)))
+    return result.scalars().all()
 
 
 @router.post("/user/project")

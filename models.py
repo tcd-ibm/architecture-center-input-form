@@ -31,6 +31,7 @@ class UserInfo(UserBase):
     email: str
     username: Optional[str] = None
     is_active: bool
+    role: int
 
 
 class UserUpdate(UserBase):
@@ -110,7 +111,7 @@ class ProjectWithUserAndTags(SQLModel):
     is_live: bool
     visit_count: int
     date: datetime
-    user: UserInfo | None = None
+    user: Optional[UserInfo]
     tags: List["Tag"] = []
 
 
