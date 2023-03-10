@@ -111,7 +111,7 @@ class ProjectWithUserAndTags(SQLModel):
     is_live: bool
     visit_count: int
     date: datetime
-    user: Optional[UserInfo]
+    user: Optional[UserInfo] = None
     tags: List["Tag"] = []
 
 
