@@ -31,6 +31,7 @@ class UserInfo(UserBase):
     email: str
     username: Optional[str] = None
     is_active: bool
+    role: int
 
 
 class UserUpdate(UserBase):
@@ -96,6 +97,7 @@ class Project(ProjectBase, table=True):
     id: UUID = Field(primary_key=True, nullable=False)
     date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
+    visit_count: int = Field(default=0)
     user_id: UUID = Field(foreign_key="users.id")
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
@@ -107,6 +109,7 @@ class ProjectWithUserAndTags(SQLModel):
     link: str
     description: str
     is_live: bool
+    visit_count: int
     date: datetime
     user: Optional[UserInfo] = None
     tags: List["Tag"] = []
