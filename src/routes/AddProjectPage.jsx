@@ -95,32 +95,34 @@ function AddProjectPage() {
                         <Button onClick={() => handleClick()} size='md' kind='secondary' >Add</Button>
                     </div> */}
                     <div>
-                      {tags.filter(item => !item?.selected).map(item => {
-                        return (
-                          <Tag
-                            type='magenta'
-                            title='Clear Filter'
-                            key={item.tagId}
-                            onClick={() => handleTagAdd(item.tagId)}
-                          >
-                            {item.tagName}
-                          </Tag>
-                        );
-                      })}
+                        {tags.filter(item => !item?.selected).map(item => {
+                            return (
+                            <Tag
+                                type='magenta'
+                                title='Clear Filter'
+                                key={item.tagId}
+                                onClick={() => handleTagAdd(item.tagId)}
+                            >
+                                {item.tagName}
+                            </Tag>
+                            );
+                        })}
                     </div>
                     <h4 style={{marginBottom: '10px', marginTop: '10px'}}>Currently selected</h4>
-                    {tags.filter(item => item?.selected).map(item => {
-                        return (
-                          <Tag
-                            type='magenta'
-                            title='Clear Filter'
-                            key={item.tagId}
-                            onClick={() => handleTagRemove(item.tagId)}
-                          >
-                            {item.tagName}
-                          </Tag>
-                        );
-                    })}
+                    <div>
+                        {tags.filter(item => item?.selected).map(item => {
+                            return (
+                            <Tag
+                                type='magenta'
+                                title='Clear Filter'
+                                key={item.tagId}
+                                onClick={() => handleTagRemove(item.tagId)}
+                            >
+                                {item.tagName}
+                            </Tag>
+                            );
+                        })}
+                    </div>
                 </Tile>
                 <Tile style={{paddingBottom: '0px', paddingTop: '10px', paddingRight: '0px'}}>
                     {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
