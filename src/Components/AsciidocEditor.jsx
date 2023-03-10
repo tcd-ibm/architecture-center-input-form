@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useImperativeHandle, forwardRef } from 'react';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-asciidoc';
@@ -20,11 +20,17 @@ const hightlightWithLineNumbers = (input, language) =>
     .map((line, i) => `<span class='lineNumber'>${i + 1}</span>${line}`)
     .join('\n');
 
-function DocEditor() {
+function DocEditor(props, ref) {
 
   const [code, setCode] = useState(
     'This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
   );
+
+  useImperativeHandle(ref, () => ({
+    get value() {
+      return code;
+    }
+  }), [code]);
 
   return (
     <>
@@ -63,4 +69,4 @@ function DocEditor() {
   );
 }
 
-export default DocEditor;
+export default forwardRef(DocEditor);

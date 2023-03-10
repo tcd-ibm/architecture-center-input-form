@@ -126,7 +126,7 @@ function AddProjectPage() {
                 </Tile>
                 <Tile style={{paddingBottom: '0px', paddingTop: '10px', paddingRight: '0px'}}>
                     {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
-                    <DocEditor />
+                    <DocEditor ref={contentInputRef} />
                 </Tile>
                 <Button type='submit'>Save</Button>
             </Stack>
