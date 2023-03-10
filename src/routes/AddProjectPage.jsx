@@ -9,21 +9,13 @@ import styles from './AddProjectPage.module.scss';
 
 import AuthContext from '@/context/AuthContext';
 
-// ==============================================================
-//                              NOTE                             
-// ==============================================================
-// the following implementation is NOT complete
-// only basic request logic for submitting the form is implemented to test the API communication
-// layout, styling and form logic has NOT been implemented
-// ==============================================================
-
 function AddProjectPage() {
 
     const [user, setUser] = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [tags, setTags] = useState([]);
-    const [input, setInput] = useState('');
+    //const [input, setInput] = useState('');
 
     const titleInputRef = useRef();
     const linkInputRef = useRef();
@@ -37,7 +29,9 @@ function AddProjectPage() {
         }
 
         axios.get('/tags').then(res => {
-            setTags(res.data);
+            setTags( 
+                res.data.map(categoryItem => categoryItem.tags).flat()
+            );
         })
         .catch(error => {
             console.log(error);
@@ -52,10 +46,11 @@ function AddProjectPage() {
             description: previewDescriptionInputRef.current.value,
             content: contentInputRef.current.value,
             date: new Date(completionDateInputRef.current.value),
-            tags: [1,2]
+            tags: tags.filter(item => item?.selected).map(item => item.tagId)
         };
 
         try {
+            console.log(requestBody);
             await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
             navigate('/');
         } catch(error) {
@@ -63,21 +58,16 @@ function AddProjectPage() {
         }
     };
 
-    const handleClick = () => {
-        const id = tags.length + 1;
-        setTags((prev) => [
-          ...prev,
-          {
-            id: id,
-            task: input,
-            complete: false,
-          }
-        ]);
-        setInput('');
+    const handleTagAdd = tagId => {
+        setTags(tags.map(item => 
+            (item.tagId === tagId ? { ...item, selected: true } : item)
+        ));
     };
 
-    const handleComplete = id => {
-        setTags(tags.filter(item => item.id !== id));
+    const handleTagRemove = tagId => {
+        setTags(tags.map(item => 
+            (item.tagId === tagId ? { ...item, selected: false } : item)
+        ));
     };
 
     return (
@@ -100,24 +90,37 @@ function AddProjectPage() {
                 />
                 <Tile style={{padding: '20px'}}>
                     <h4 style={{marginBottom: '10px'}}>Add Tags</h4>
-                    <div style={{display: 'flex', alignItems: 'center', flexDirection: 'row', marginBottom: '10px'}}>
+                    {/* <div style={{display: 'flex', alignItems: 'center', flexDirection: 'row', marginBottom: '10px'}}>
                         <TextInput placeholder='Enter tag here' value={input} onInput={(e) =>setInput(e.target.value)} style={{marginRight: '10px'}} />
                         <Button onClick={() => handleClick()} size='md' kind='secondary' >Add</Button>
-                    </div>
+                    </div> */}
                     <div>
-                      {tags.map((todo) => {
+                      {tags.filter(item => !item?.selected).map(item => {
                         return (
                           <Tag
                             type='magenta'
                             title='Clear Filter'
-                            key={todo.id}
-                            onClick={() => handleComplete(todo.id)}
+                            key={item.tagId}
+                            onClick={() => handleTagAdd(item.tagId)}
                           >
-                            {todo.task}
+                            {item.tagName}
                           </Tag>
                         );
                       })}
                     </div>
+                    <h4 style={{marginBottom: '10px', marginTop: '10px'}}>Currently selected</h4>
+                    {tags.filter(item => item?.selected).map(item => {
+                        return (
+                          <Tag
+                            type='magenta'
+                            title='Clear Filter'
+                            key={item.tagId}
+                            onClick={() => handleTagRemove(item.tagId)}
+                          >
+                            {item.tagName}
+                          </Tag>
+                        );
+                    })}
                 </Tile>
                 <Tile style={{paddingBottom: '0px', paddingTop: '10px', paddingRight: '0px'}}>
                     {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
@@ -126,7 +129,6 @@ function AddProjectPage() {
                 <Button type='submit'>Save</Button>
             </Stack>
             </Form>
-            {/* <DocEditor /> */}
         </Content>
         </>
     );
