@@ -1,7 +1,11 @@
+import { useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
 import { TrashCan, UserRole } from '@carbon/icons-react';
+
+import AuthContext from '@/context/AuthContext';
 
 function ManageUsersPage() {
     const headers = [
@@ -23,54 +27,68 @@ function ManageUsersPage() {
         }
     ];
 
-    const rows = [
-        {
-            id: '1',
-            email: 'admin@admin.com',
-            username: 'admin',
-            signupDate: '2023-01-01',
-            role: 'Admin'
-        },
-        {
-            id: '2',
-            email: 'abc@abc.com',
-            username: 'abc',
-            signupDate: '2023-02-02',
-            role: 'Moderator'
-        },
-        {
-            id: '3',
-            email: 'abcd@abcd.com',
-            username: 'abcd',
-            signupDate: '2023-02-10',
-            role: 'User'
-        },
-        {
-            id: '4',
-            email: 'example@example.com',
-            username: 'example',
-            signupDate: '2023-02-11',
-            role: 'User'
-        },
-        {
-            id: '5',
-            email: 'qwerty@qwerty.com',
-            username: 'qwerty',
-            signupDate: '2023-02-22',
-            role: 'User'
-        },
-        {
-            id: '6',
-            email: 'zxcvb@zxcvb.com',
-            username: 'zxcvb',
-            signupDate: '2023-02-25',
-            role: 'User'
-        },
-    ];
+    // const rows = [
+    //     {
+    //         id: '1',
+    //         email: 'admin@admin.com',
+    //         username: 'admin',
+    //         signupDate: '2023-01-01',
+    //         role: 'Admin'
+    //     },
+    //     {
+    //         id: '2',
+    //         email: 'abc@abc.com',
+    //         username: 'abc',
+    //         signupDate: '2023-02-02',
+    //         role: 'Moderator'
+    //     },
+    //     {
+    //         id: '3',
+    //         email: 'abcd@abcd.com',
+    //         username: 'abcd',
+    //         signupDate: '2023-02-10',
+    //         role: 'User'
+    //     },
+    //     {
+    //         id: '4',
+    //         email: 'example@example.com',
+    //         username: 'example',
+    //         signupDate: '2023-02-11',
+    //         role: 'User'
+    //     },
+    //     {
+    //         id: '5',
+    //         email: 'qwerty@qwerty.com',
+    //         username: 'qwerty',
+    //         signupDate: '2023-02-22',
+    //         role: 'User'
+    //     },
+    //     {
+    //         id: '6',
+    //         email: 'zxcvb@zxcvb.com',
+    //         username: 'zxcvb',
+    //         signupDate: '2023-02-25',
+    //         role: 'User'
+    //     },
+    // ];
+
+    const [user, setUser] = useContext(AuthContext);
+
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        axios.get('/admin/users', { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } }).then(res => {
+            console.log(res.data);
+            setData(res.data);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, [user]);
 
     return (
         <>
-        <DataTable headers={headers} rows={rows} >
+        <DataTable headers={headers} rows={data} >
             {({
                 rows,
                 headers,
