@@ -1,9 +1,11 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
 import { TrashCan, UserRole } from '@carbon/icons-react';
+
+import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
 import AuthContext from '@/context/AuthContext';
 
@@ -26,6 +28,8 @@ function ManageUsersPage() {
             key: 'role'
         }
     ];
+
+    const deletionModalRef = useRef();
 
     const [user, setUser] = useContext(AuthContext);
 
@@ -88,6 +92,9 @@ function ManageUsersPage() {
                         <TableBatchActions {...batchActionProps}>
                             <TableBatchAction
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
+                                onClick={() => {
+                                    deletionModalRef.current.open(selectedRows.map(row => row.id));
+                                }}
                                 renderIcon={TrashCan}
                                 >
                                 Delete
@@ -157,6 +164,7 @@ function ManageUsersPage() {
             );
             }}
         </DataTable>
+        <ModalBulkUserDeletion users={data} onConfirm={selectedIds => console.log(selectedIds)} ref={deletionModalRef} />
         </>
     );
 }
