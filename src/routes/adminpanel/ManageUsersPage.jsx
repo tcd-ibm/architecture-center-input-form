@@ -27,64 +27,38 @@ function ManageUsersPage() {
         }
     ];
 
-    // const rows = [
-    //     {
-    //         id: '1',
-    //         email: 'admin@admin.com',
-    //         username: 'admin',
-    //         signupDate: '2023-01-01',
-    //         role: 'Admin'
-    //     },
-    //     {
-    //         id: '2',
-    //         email: 'abc@abc.com',
-    //         username: 'abc',
-    //         signupDate: '2023-02-02',
-    //         role: 'Moderator'
-    //     },
-    //     {
-    //         id: '3',
-    //         email: 'abcd@abcd.com',
-    //         username: 'abcd',
-    //         signupDate: '2023-02-10',
-    //         role: 'User'
-    //     },
-    //     {
-    //         id: '4',
-    //         email: 'example@example.com',
-    //         username: 'example',
-    //         signupDate: '2023-02-11',
-    //         role: 'User'
-    //     },
-    //     {
-    //         id: '5',
-    //         email: 'qwerty@qwerty.com',
-    //         username: 'qwerty',
-    //         signupDate: '2023-02-22',
-    //         role: 'User'
-    //     },
-    //     {
-    //         id: '6',
-    //         email: 'zxcvb@zxcvb.com',
-    //         username: 'zxcvb',
-    //         signupDate: '2023-02-25',
-    //         role: 'User'
-    //     },
-    // ];
-
     const [user, setUser] = useContext(AuthContext);
 
     const [data, setData] = useState([]);
+    const [numberOfEntries, setNumberOfEntries] = useState();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
-        axios.get('/admin/users', { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } }).then(res => {
-            console.log(res.data);
+        const requestConfig = { 
+            params: {
+                page: page,
+                per_page: pageSize
+            },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${user.accessToken}` 
+            } 
+        };
+        axios.get('/admin/users', requestConfig).then(res => {
             setData(res.data);
+            setNumberOfEntries(parseInt(res.headers['x-total-count']));
         })
         .catch(err => {
             console.log(err);
         });
-    }, [user]);
+    }, [user, page, pageSize]);
+
+    const handlePaginationChange = event => {
+        setPage(event.page);
+        setPageSize(event.pageSize);
+    };
 
     return (
         <>
@@ -172,17 +146,12 @@ function ManageUsersPage() {
                         backwardText='Previous page'
                         forwardText='Next page'
                         itemsPerPageText='Items per page:'
-                        onChange={function noRefCheck(){}}
-                        page={1}
-                        pageSize={10}
-                        pageSizes={[
-                          10,
-                          15,
-                          25,
-                          50
-                        ]}
+                        onChange={handlePaginationChange}
+                        page={page}
+                        pageSize={pageSize}
+                        pageSizes={[10, 15, 25, 50 ]}
                         size='lg'
-                        totalItems={103}
+                        totalItems={numberOfEntries}
                     />
                 </TableContainer>
             );
