@@ -10,6 +10,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["X-Total-Count", "X-Total-Pages"]
 )
 
 app.include_router(api.router)
