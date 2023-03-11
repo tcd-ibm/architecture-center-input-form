@@ -3,18 +3,17 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import api
 
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["POST", "GET"],
+    allow_methods=["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["X-Total-Count", "X-Total-Pages"]
 )
 
-
-app.include_router(api.router, prefix="/api/v1")
+app.include_router(api.router)
 
 
 @app.get("/")
