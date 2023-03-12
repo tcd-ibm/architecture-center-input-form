@@ -60,8 +60,9 @@ function AuthContextProvider(props) {
 
     useEffect(() => {
         if(!user) {
-            const storedUser = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
-            if(storedUser) {
+            const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
+            if(storedUserData) {
+                const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
                 setUser(storedUser);
             }
         }
