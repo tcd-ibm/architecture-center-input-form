@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useContext, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag } from '@carbon/react';
 
@@ -7,11 +7,11 @@ import MainHeader from '@/Components/MainHeader';
 import DocEditor from '@/Components/AsciidocEditor';
 import styles from './AddProjectPage.module.scss';
 
-import AuthContext from '@/context/AuthContext';
+import useAuth from '@/hooks/useAuth';
 
 function AddProjectPage() {
 
-    const [user, setUser] = useContext(AuthContext);
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     const [tags, setTags] = useState([]);

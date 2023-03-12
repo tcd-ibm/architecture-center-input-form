@@ -28,6 +28,12 @@ function ProjectQuerySidePanel(props, ref) {
         onChange();
     };
 
+    const handleSearch = (event) => {
+        if (event.key === 'Enter' || document.querySelector('input').value === '') {
+            onChange();
+        }
+    };
+
     return (
         <SideNav
             isFixedNav
@@ -39,6 +45,7 @@ function ProjectQuerySidePanel(props, ref) {
                 <Search
                     labelText='Search'
                     placeholder='Search'
+                    onKeyUp={handleSearch}
                 />
                 {menuContent && <Accordion>
                     {menuContent.map((item, index) => <AccordionItem title={item.title} key={index}>

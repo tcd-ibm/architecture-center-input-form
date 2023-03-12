@@ -43,6 +43,7 @@ class UserUpdate(UserBase):
 class Token(SQLModel):
     access_token: str
     token_type: str
+    role: int
 
 
 class CategoryBase(SQLModel):

@@ -37,12 +37,14 @@ function MainPage() {
         });
     }, []);
 
-    const handleFilterChange = () => {
+
+    const handleSearchAndFilterChange = () => {
         const params = {
+            keyword: document.querySelector('input').value,
             tags: queryMenuRef.current.selectedTagList.join(',')
         };
 
-        axios.get('/projects', { params }).then(res => {
+        axios.get('./projects', { params }).then(res => {
             setProjects(res.data);
             setIsLoading(false);
         })
@@ -50,11 +52,12 @@ function MainPage() {
             console.log(err);
         });
     };
-    
+
     return (
         <>
         <MainHeader />
-        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleFilterChange} />
+        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
+        
         <Content>
             { isLoading ? <div>Loading...</div> : 
                 <div id={styles.cardContainer}>

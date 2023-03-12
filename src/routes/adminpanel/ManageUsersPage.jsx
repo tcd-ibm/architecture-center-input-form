@@ -1,5 +1,6 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
@@ -7,7 +8,7 @@ import { TrashCan, UserRole } from '@carbon/icons-react';
 
 import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
-import AuthContext from '@/context/AuthContext';
+import useAuth from '@/hooks/useAuth';
 
 function ManageUsersPage() {
     const headers = [
@@ -29,9 +30,11 @@ function ManageUsersPage() {
         }
     ];
 
+    const navigate = useNavigate();
+
     const deletionModalRef = useRef();
 
-    const [user, setUser] = useContext(AuthContext);
+    const { user } = useAuth();
 
     const [data, setData] = useState([]);
     const [numberOfEntries, setNumberOfEntries] = useState();
@@ -39,6 +42,10 @@ function ManageUsersPage() {
     const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
+        if(!user) {
+            navigate('/login', { replace: true });
+            return;
+        }
         const requestConfig = { 
             params: {
                 page: page,
@@ -61,7 +68,7 @@ function ManageUsersPage() {
         .catch(err => {
             console.log(err);
         });
-    }, [user, page, pageSize]);
+    }, [navigate, user, page, pageSize]);
 
     const handlePaginationChange = event => {
         setPage(event.page);
