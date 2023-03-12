@@ -13,12 +13,14 @@ function LoginPage() {
 
     const { user, login } = useAuth();
     const [email, setEmail] = useState(null);
+    const [rememberId, setRememberId] = useState(null);
     const [errorText, setErrorText] = useState(null);
     const inputRef = useRef();
     const navigate = useNavigate();
 
-    const getEmail = () => {
+    const handleEmailSubmit = () => {
         if(inputRef.current.validate()) {
+            setRememberId(inputRef.current.rememberIdChecked);
             setEmail(inputRef.current.value);
         } else {
             setEmail(null);
@@ -29,7 +31,7 @@ function LoginPage() {
         if(inputRef.current.validate()) {
 
             try {
-                await login({ email: email, password: inputRef.current.value }, { persist: false });
+                await login({ email: email, password: inputRef.current.value }, { persist: rememberId });
                 navigate('/', {replace: true});
             } catch(error) {
                 console.log(error);
@@ -54,7 +56,7 @@ function LoginPage() {
             <div className={styles.loginFormContainer}>
                 { email ?
                     <LoginFormPasswordStep email={email} onSubmit={getPassword} errorText={errorText} setErrorText={setErrorText} ref={inputRef} /> :
-                    <LoginFormEmailStep onSubmit={getEmail} ref={inputRef} />
+                    <LoginFormEmailStep onSubmit={handleEmailSubmit} ref={inputRef} />
                 }
             </div>
         </Content>
