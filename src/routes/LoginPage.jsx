@@ -29,7 +29,7 @@ function LoginPage() {
         if(inputRef.current.validate()) {
 
             try {
-                await login({ email: email, password: inputRef.current.value });
+                await login({ email: email, password: inputRef.current.value }, { persist: false });
                 navigate('/', {replace: true});
             } catch(error) {
                 console.log(error);

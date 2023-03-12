@@ -1,10 +1,12 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import qs from 'qs';
 
 import User from '@/utils/User';
 
-const AuthContext = createContext();
+const LOCAL_STORAGE_USER_OBJECT_KEY = 'authUserObject';
+
+const AuthContext = createContext([null, () => {}]);
 
 function useAuth() {
     const [user, setUser] = useContext(AuthContext);
@@ -16,7 +18,17 @@ function useAuth() {
         };
 
         const response = await axios.post('/user/token', qs.stringify(requestData));
-        setUser(new User(response.data.access_token));
+
+        if(persist) {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_USER_OBJECT_KEY, JSON.stringify(
+                    new User(response.data.access_token, response.data.role)
+                ));
+            } catch(error) {
+                // write to localStorage failed, saving just in local state
+            }
+        }
+        setUser(new User(response.data.access_token, response.data.role));
     };
 
     const signup = async ({ email, username, password }) => {
@@ -27,10 +39,11 @@ function useAuth() {
         };
 
         const response = await axios.post('/user/signup', requestData, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
-        setUser(new User(response.data.access_token));
+        setUser(new User(response.data.access_token, response.data.role));
     };
 
     const logout = () => {
+        localStorage.removeItem(LOCAL_STORAGE_USER_OBJECT_KEY);
         setUser(null);
     };
 
@@ -44,6 +57,15 @@ function useAuth() {
 
 function AuthContextProvider(props) {
     const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        if(!user) {
+            const storedUser = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
+            if(storedUser) {
+                setUser(storedUser);
+            }
+        }
+    }, [user, setUser]);
 
     return (
         <AuthContext.Provider value={[user, setUser]}>
