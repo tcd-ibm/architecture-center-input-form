@@ -28,6 +28,7 @@ class User(UserBase, table=True):
 
 class UserInfo(UserBase):
     id: UUID
+    created_at: datetime
     email: str
     username: Optional[str] = None
     is_active: bool
