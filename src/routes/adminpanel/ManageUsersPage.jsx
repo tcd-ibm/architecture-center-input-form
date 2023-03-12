@@ -51,7 +51,11 @@ function ManageUsersPage() {
             } 
         };
         axios.get('/admin/users', requestConfig).then(res => {
-            setData(res.data);
+            const data = res.data.map(user => ({ 
+                ...user, 
+                signupDate: new Date(user.created_at).toISOString().substring(0, 10) 
+            }));
+            setData(data);
             setNumberOfEntries(parseInt(res.headers['x-total-count']));
         })
         .catch(err => {
