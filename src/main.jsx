@@ -13,7 +13,7 @@ import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
 import ProjectDetails from './routes/ProjectDetails';
 
-import AuthContextProvider from './context/AuthContextProvider';
+import { AuthContextProvider } from '@/hooks/useAuth';
 
 axios.defaults.baseURL = 'http://localhost:5297/api/v1/';
 

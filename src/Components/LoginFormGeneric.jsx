@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { useRef, useImperativeHandle, forwardRef } from 'react';
 import { Tile, FluidForm, InlineNotification, Checkbox, Button } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import styles from './LoginFormGeneric.module.scss';
@@ -8,6 +8,20 @@ import PasswordInput from './PasswordInput';
 
 function LoginFormGeneric(props, ref) {
     const {subheadingContentNode, errorText, setErrorText, inputType, rememberIdCheckbox, buttonText, onSubmit} = props;
+
+    const inputRef = useRef();
+    const rememberIdCheckboxRef = useRef();
+    useImperativeHandle(ref, () => ({
+        validate: () => {
+            return inputRef.current.validate();
+        },
+        get value() {
+            return inputRef.current.value;
+        },
+        get rememberIdChecked() {
+            return rememberIdCheckboxRef.current.checked;
+        }
+    }), []);
 
     const onSubmitWrapper = event => {
         event.preventDefault();
@@ -34,14 +48,14 @@ function LoginFormGeneric(props, ref) {
                     }
                     
                     { inputType === 'email' &&
-                        <EmailInput autoFocus className={styles.input} id='email' ref={ref} />
+                        <EmailInput autoFocus className={styles.input} id='email' ref={inputRef} />
                     }
                     { inputType === 'password' &&
-                        <PasswordInput autoFocus className={styles.input} id='password' ref={ref} />
+                        <PasswordInput autoFocus className={styles.input} id='password' ref={inputRef} />
                     }
 
                     { rememberIdCheckbox ?
-                        <div><Checkbox labelText='Remember ID' id='remember-id-checkbox' className={styles.checkbox} /></div> :
+                        <div><Checkbox labelText='Remember ID' id='remember-id-checkbox' defaultChecked={true} className={styles.checkbox} ref={rememberIdCheckboxRef} /></div> :
                         <div style={{visibility: 'hidden'}}><Checkbox labelText='Remember ID' id='remember-id-checkbox' className={styles.checkbox} /></div>
                     }
                     
