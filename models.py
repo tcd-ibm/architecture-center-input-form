@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
-    email: str = Field(primary_key=True, nullable=False, max_length=255)
+    email: str = Field(nullable=False, max_length=255)
     username: Optional[str] = None
 
 
@@ -16,17 +16,23 @@ class UserSignup(UserBase):
 # table = True => in database
 class User(UserBase, table=True):
     __tablename__ = 'users'
+    id: UUID = Field(primary_key=True, nullable=False)
+    created_at: datetime = Field(default=datetime.now())
+    updated_at: datetime = Field(default=datetime.now())
     hashed_password: str = None
-    id: UUID = Field(default=None)
+    password_version: int = Field(default=0)
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
     projects: List["Project"] = Relationship(back_populates="user")
 
 
 class UserInfo(UserBase):
+    id: UUID
+    created_at: datetime
     email: str
     username: Optional[str] = None
     is_active: bool
+    role: int
 
 
 class UserUpdate(UserBase):
@@ -37,66 +43,7 @@ class UserUpdate(UserBase):
 class Token(SQLModel):
     access_token: str
     token_type: str
-
-
-class Announcement(SQLModel, table=True):
-    __tablename__ = 'AnnouncementList'
-    aid: int = Field(primary_key=True, nullable=False)
-    title: str = Field(max_length=255)
-    titleLink: str = Field(max_length=255)
-    date: str = Field(max_length=255)
-    announcementType: str = Field(max_length=255)
-    desc: str = Field(max_length=255)
-
-
-class Detail(SQLModel, table=True):
-    __tablename__ = 'DetailLink'
-    ppid: int = Field(nullable=False)
-    description: str = Field(max_length=255)
-    url: str = Field(primary_key=True, max_length=255)
-    type: str = Field(max_length=255)
-
-
-class PA(SQLModel, table=True):
-    __tablename__ = 'PAList'
-    ppid: int = Field(primary_key=True)
-    Heading: str = Field(max_length=255)
-    Summary: str = Field(default=None)
-    Product: str = Field(default=None)
-    Solutions: str = Field(default=None)
-    Vertical: str = Field(default=None)
-    Image1Url: str = Field(default=None)
-    ProductType: str = Field(default=None)
-    DetailPage: str = Field(default=None)
-    islive: bool = Field(default=False)
-    isnew: bool = Field(default=True)
-    metaDesc: str = Field(default=None)
-    metaKeyword: str = Field(default=None)
-
-
-class Product(SQLModel, table=True):
-    __tablename__ = 'ProductList'
-    pid: str = Field(primary_key=True)
-    pname: str = Field(max_length=255)
-    plink: str
-
-
-class Solution(SQLModel, table=True):
-    __tablename__ = 'SolutionList'
-    sid: str = Field(primary_key=True)
-    sname: str = Field(max_length=255)
-
-
-class Type(SQLModel, table=True):
-    __tablename__ = 'TypeList'
-    tid: str = Field(primary_key=True)
-    typename: str = Field(max_length=255)
-
-
-class Vertical(SQLModel, table=True):
-    __tablename__ = 'VerticalList'
-    vid: str = Field(primary_key=True)
-    vname: str = Field(max_length=255)
+    role: int
 
 
 class CategoryBase(SQLModel):
@@ -134,29 +81,39 @@ class ProjectBase(SQLModel):
     link: str
     description: str
     content: str
-    date: datetime
     tags: List[int]  # tagId
+
+
+class ProjectUpdate(SQLModel):
+    title: Optional[str]
+    link: Optional[str]
+    description: Optional[str]
+    content: Optional[str]
+    date: Optional[datetime]
+    tags: Optional[List[int]]
+    is_live: Optional[bool]
 
 
 class Project(ProjectBase, table=True):
     __tablename__ = 'projects'
     id: UUID = Field(primary_key=True, nullable=False)
-    email: str = Field(foreign_key="users.email")
     date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
+    visit_count: int = Field(default=0)
+    user_id: UUID = Field(foreign_key="users.id")
     user: User = Relationship(back_populates="projects")
     tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
 
 
 class ProjectWithUserAndTags(SQLModel):
     id: UUID
-    email: str
     title: str
     link: str
     description: str
     is_live: bool
+    visit_count: int
     date: datetime
-    user: UserInfo | None = None
+    user: Optional[UserInfo] = None
     tags: List["Tag"] = []
 
 

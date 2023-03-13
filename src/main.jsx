@@ -19,7 +19,7 @@ import ManageUsersPage from './routes/adminpanel/ManageUsersPage';
 import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
 import StatisticsPage from './routes/adminpanel/StatisticsPage';
 
-import AuthContextProvider from './context/AuthContextProvider';
+import { AuthContextProvider } from '@/hooks/useAuth';
 
 axios.defaults.baseURL = 'http://localhost:5297/api/v1/';
 

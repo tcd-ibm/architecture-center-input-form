@@ -1,7 +1,14 @@
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
 import { TrashCan, UserRole } from '@carbon/icons-react';
+
+import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
+
+import useAuth from '@/hooks/useAuth';
 
 function ManageUsersPage() {
     const headers = [
@@ -23,54 +30,54 @@ function ManageUsersPage() {
         }
     ];
 
-    const rows = [
-        {
-            id: '1',
-            email: 'admin@admin.com',
-            username: 'admin',
-            signupDate: '2023-01-01',
-            role: 'Admin'
-        },
-        {
-            id: '2',
-            email: 'abc@abc.com',
-            username: 'abc',
-            signupDate: '2023-02-02',
-            role: 'Moderator'
-        },
-        {
-            id: '3',
-            email: 'abcd@abcd.com',
-            username: 'abcd',
-            signupDate: '2023-02-10',
-            role: 'User'
-        },
-        {
-            id: '4',
-            email: 'example@example.com',
-            username: 'example',
-            signupDate: '2023-02-11',
-            role: 'User'
-        },
-        {
-            id: '5',
-            email: 'qwerty@qwerty.com',
-            username: 'qwerty',
-            signupDate: '2023-02-22',
-            role: 'User'
-        },
-        {
-            id: '6',
-            email: 'zxcvb@zxcvb.com',
-            username: 'zxcvb',
-            signupDate: '2023-02-25',
-            role: 'User'
-        },
-    ];
+    const navigate = useNavigate();
+
+    const deletionModalRef = useRef();
+
+    const { user } = useAuth();
+
+    const [data, setData] = useState([]);
+    const [numberOfEntries, setNumberOfEntries] = useState();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    useEffect(() => {
+        if(!user) {
+            navigate('/login', { replace: true });
+            return;
+        }
+        const requestConfig = { 
+            params: {
+                page: page,
+                per_page: pageSize
+            },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${user.accessToken}` 
+            } 
+        };
+        axios.get('/admin/users', requestConfig).then(res => {
+            const data = res.data.map(user => ({ 
+                ...user, 
+                signupDate: new Date(user.created_at).toISOString().substring(0, 10) 
+            }));
+            setData(data);
+            setNumberOfEntries(parseInt(res.headers['x-total-count']));
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, [navigate, user, page, pageSize]);
+
+    const handlePaginationChange = event => {
+        setPage(event.page);
+        setPageSize(event.pageSize);
+    };
 
     return (
         <>
-        <DataTable headers={headers} rows={rows} >
+        <DataTable headers={headers} rows={data} >
             {({
                 rows,
                 headers,
@@ -96,6 +103,9 @@ function ManageUsersPage() {
                         <TableBatchActions {...batchActionProps}>
                             <TableBatchAction
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
+                                onClick={() => {
+                                    deletionModalRef.current.open(selectedRows.map(row => row.id));
+                                }}
                                 renderIcon={TrashCan}
                                 >
                                 Delete
@@ -154,22 +164,18 @@ function ManageUsersPage() {
                         backwardText='Previous page'
                         forwardText='Next page'
                         itemsPerPageText='Items per page:'
-                        onChange={function noRefCheck(){}}
-                        page={1}
-                        pageSize={10}
-                        pageSizes={[
-                          10,
-                          15,
-                          25,
-                          50
-                        ]}
+                        onChange={handlePaginationChange}
+                        page={page}
+                        pageSize={pageSize}
+                        pageSizes={[10, 15, 25, 50 ]}
                         size='lg'
-                        totalItems={103}
+                        totalItems={numberOfEntries}
                     />
                 </TableContainer>
             );
             }}
         </DataTable>
+        <ModalBulkUserDeletion users={data} onConfirm={selectedIds => console.log(selectedIds)} ref={deletionModalRef} />
         </>
     );
 }

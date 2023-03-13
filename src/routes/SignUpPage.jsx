@@ -1,6 +1,5 @@
-import { useState, useRef, useContext } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 import MainHeader from '@/Components/MainHeader';
 import EmailInput from '@/Components/EmailInput';
@@ -10,14 +9,13 @@ import ValidatedPasswordConfirmationInput from '../Components/ValidatedPasswordC
 import { ArrowRight } from '@carbon/icons-react';
 import { Content, Tile, Button, InlineNotification, Link, FluidForm } from '@carbon/react';
 
-import AuthContext from '@/context/AuthContext';
-import User from '@/utils/User';
+import useAuth from '@/hooks/useAuth';
 
 import styles from './SignUpPage.module.scss';
 
 function SignUpPage() {
 
-    const [user, setUser] = useContext(AuthContext);
+    const { user, signup } = useAuth();
 
     const [errorText, setErrorText] = useState(null);
 
@@ -35,19 +33,10 @@ function SignUpPage() {
         if(!passwordRef.current.validate()) return;
         if(!confirmPasswordRef.current.validate()) return;
 
-        const requestData = {
-            email: emailRef.current.value,
-            username: '',
-            password: passwordRef.current.value
-        };
-
         try {
-            const response = await axios.post('/user/signup', requestData, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
-            setUser(new User(response.data.access_token));
-
+            await signup({ email: emailRef.current.value, username: '', password: passwordRef.current.value });
             navigate('/', { replace: true });
         } catch (error) {
-            console.error(error);
             if (error?.response?.status === 400) {
                 const detail = error.response.data.detail;
                 if (detail === 'Email registered already')

@@ -1,7 +1,5 @@
-import { useState, useRef, useContext } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import qs from 'qs';
 import { Content } from '@carbon/react';
 import styles from './LoginPage.module.scss';
 
@@ -9,19 +7,20 @@ import MainHeader from '@/Components/MainHeader';
 import LoginFormEmailStep from '@/Components/LoginFormEmailStep';
 import LoginFormPasswordStep from '@/Components/LoginFormPasswordStep';
 
-import AuthContext from '@/context/AuthContext';
-import User from '@/utils/User';
+import useAuth from '@/hooks/useAuth';
 
 function LoginPage() {
 
-    const [user, setUser] = useContext(AuthContext);
+    const { user, login } = useAuth();
     const [email, setEmail] = useState(null);
+    const [rememberId, setRememberId] = useState(null);
     const [errorText, setErrorText] = useState(null);
     const inputRef = useRef();
     const navigate = useNavigate();
 
-    const getEmail = () => {
+    const handleEmailSubmit = () => {
         if(inputRef.current.validate()) {
+            setRememberId(inputRef.current.rememberIdChecked);
             setEmail(inputRef.current.value);
         } else {
             setEmail(null);
@@ -30,17 +29,12 @@ function LoginPage() {
 
     const getPassword = async () => {
         if(inputRef.current.validate()) {
-            
-            const requestData = {
-                username: email,
-                password: inputRef.current.value
-            };
 
             try {
-                const response = await axios.post('/user/token', qs.stringify(requestData));
-                setUser(new User(response.data.access_token));
+                await login({ email: email, password: inputRef.current.value }, { persist: rememberId });
                 navigate('/', {replace: true});
             } catch(error) {
+                console.log(error);
                 if(error?.response?.status === 401) {
                     setErrorText('Incorrect email or password. Try again.');
                 } else {
@@ -62,7 +56,7 @@ function LoginPage() {
             <div className={styles.loginFormContainer}>
                 { email ?
                     <LoginFormPasswordStep email={email} onSubmit={getPassword} errorText={errorText} setErrorText={setErrorText} ref={inputRef} /> :
-                    <LoginFormEmailStep onSubmit={getEmail} ref={inputRef} />
+                    <LoginFormEmailStep onSubmit={handleEmailSubmit} ref={inputRef} />
                 }
             </div>
         </Content>

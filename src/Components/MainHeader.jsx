@@ -1,14 +1,13 @@
-import { useContext } from 'react';
 import { Header, HeaderName, HeaderNavigation, HeaderGlobalBar } from '@carbon/react';
 
-import AuthContext from '../context/AuthContext';
+import useAuth from '@/hooks/useAuth';
 import CustomHeaderMenuItem from './CustomHeaderMenuItem';
 
 //TODO replace HeaderName react-router Link component or equivalent
 //TODO replace the login and signup links when proper design ready
 
 function MainHeader() {
-    const [user, setUser] = useContext(AuthContext);
+    const { user, logout } = useAuth();
 
     return (
         <Header aria-label='Amazing SwEng Project'>
@@ -28,7 +27,7 @@ function MainHeader() {
             <HeaderGlobalBar>
                 { user &&
                     <HeaderNavigation aria-label='Account options'>
-                        <CustomHeaderMenuItem onClick={() => setUser(null)}>
+                        <CustomHeaderMenuItem onClick={logout}>
                             Log out
                         </CustomHeaderMenuItem>
                     </HeaderNavigation>

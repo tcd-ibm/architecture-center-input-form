@@ -1,10 +1,11 @@
 class User {
-    constructor(accessToken) {
+    constructor(accessToken, role) {
         this.accessToken = accessToken;
+        this.role = role;
     }
 
     isAdmin() {
-        return true;
+        return this.role !== 0;
     }
 }
 
