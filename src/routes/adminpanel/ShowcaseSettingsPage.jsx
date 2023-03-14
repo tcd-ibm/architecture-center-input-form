@@ -1,23 +1,41 @@
 import { Heading, FileUploader, Form, Stack, ComboBox, Checkbox, Button, Tile } from '@carbon/react';
+import { useState } from 'react';
+import { storage } from './../../firebase';
+import { ref, uploadBytes } from 'firebase/storage';
 
 function ShowcaseSettingsPage() {
+
+    const [headerImage, setHeaderImage] = useState(null);
+    const url = 'https://firebasestorage.googleapis.com/v0/b/arch-center.appspot.com/o/logo.png?alt=media&token=9f7ab576-c49a-40ec-879a-152942825667';
+    const uploadImage = () => {
+        if (headerImage == null) return;
+        const imageRef = ref(storage, 'logo.png');
+        uploadBytes(imageRef, headerImage).then((snapshot) => {
+            window.location.reload(true);
+        });
+    };
+
     return (
         <>
         <Heading style={{marginBottom: '20px'}}>Showcase Settings</Heading>
         <Form>
             <Stack gap={5}>
-                <Tile style = {{maxWidth: '500px', paddingBottom: '2px', marginBottom: '5px '}}>
+                <Tile style = {{maxWidth: '500px', paddingBottom: '10px', marginBottom: '5px '}}>
+                    <img src={url} style={{maxWidth: '100%', marginBottom: '10px'}} onError={(event) => event.target.style.display = 'none'} />
                     <FileUploader
                         labelTitle='Upload header image'
                         labelDescription='Max file size is 10mb. Only .png files are supported.'
                         buttonLabel='Add file'
                         buttonKind='secondary'
                         filenameStatus='edit'
-                        accept={['.jpg', '.png']}
+                        accept={['.png']}
                         multiple={false}
                         disabled={false}
                         iconDescription='Delete file'
                         name=''
+                        onChange={(event) => {
+                            setHeaderImage(event.target.files[0]);
+                        }}
                     />
                 </Tile>
                 <Checkbox 
@@ -40,7 +58,7 @@ function ShowcaseSettingsPage() {
                     size = 'lg'
                 />
                 </div>
-                <Button>Save</Button>
+                <Button onClick={uploadImage}>Save</Button>
             </Stack>
         </Form>
         </>
