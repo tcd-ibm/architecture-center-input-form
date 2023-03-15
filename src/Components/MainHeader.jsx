@@ -1,30 +1,34 @@
-import { Header, HeaderName, HeaderNavigation, HeaderGlobalBar } from '@carbon/react';
+import { Header, HeaderName, HeaderNavigation, HeaderGlobalBar, HeaderGlobalAction, HeaderPanel,
+    Switcher, SwitcherDivider, SwitcherItem } from '@carbon/react';
+import { User, DocumentAdd } from '@carbon/icons-react';
 
 import useAuth from '@/hooks/useAuth';
 import CustomHeaderMenuItem from './CustomHeaderMenuItem';
+import { useState } from 'react';
 
 //TODO replace HeaderName react-router Link component or equivalent
 //TODO replace the login and signup links when proper design ready
-
 function MainHeader() {
     const { user, logout } = useAuth();
+    const [open, setOpen] = useState(false);
 
     return (
         <Header aria-label='Amazing SwEng Project'>
             <HeaderName href='/' prefix=''>
                 Amazing SwEng Project
             </HeaderName>
-            <HeaderNavigation aria-label='Amazing SwEng Project'>
-                <CustomHeaderMenuItem href='/add'>
-                    Add new project
-                </CustomHeaderMenuItem>
-            </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
                     <HeaderNavigation aria-label='Account options'>
-                        <CustomHeaderMenuItem onClick={logout}>
-                            Log out
-                        </CustomHeaderMenuItem>
+                        <HeaderGlobalAction href='/add' aria-label='Add new project'>
+                            <DocumentAdd />
+                        </HeaderGlobalAction>
+                        <HeaderGlobalAction isActive={open}
+                                            aria-label='Account'
+                                            tooltipAlignment='end'
+                                            onClick={() => setOpen(!open)}>
+                            <User />
+                        </HeaderGlobalAction>
                     </HeaderNavigation>
                 }
                 { !user &&
@@ -38,6 +42,21 @@ function MainHeader() {
                     </HeaderNavigation>
                 }
             </HeaderGlobalBar>
+            {
+            <HeaderPanel expanded={open}>
+                <Switcher>
+                    <SwitcherItem>
+                        Account
+                    </SwitcherItem>
+                    <SwitcherDivider />
+                    <SwitcherItem onClick={() => {
+                        setOpen(false);
+                        logout();
+                        }}>
+                        Log out
+                    </SwitcherItem>
+                </Switcher>
+            </HeaderPanel>}
         </Header>
     );
 }
