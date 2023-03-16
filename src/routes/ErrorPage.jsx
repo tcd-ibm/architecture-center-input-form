@@ -1,14 +1,17 @@
-import { Content, Heading, Section} from '@carbon/react';
+import { Content, Heading } from '@carbon/react';
 import MainHeader from '@/Components/MainHeader';
 import styles from './ErrorPage.module.scss';
+import { useRouteError } from 'react-router-dom';
 
 function ErrorPage() {
+    const error = useRouteError();
+    // console.log(error);
     return (
         <>
-        <MainHeader />
+         <MainHeader />
             <Content className={styles.mainContainer}>
-                    <Heading className={styles.notFound}>404 Page not found!</Heading>
-                    <p class='text' >Unfortunately, the page you are looking for does not exist.</p>
+                    <Heading className={styles.notFound}>{error.status} {error.statusText}!</Heading>
+                    <p class='text' >{error.error.message}</p>
                     <p class='text' >Please click <a href='/'>here</a> to return to the Home Page.</p>
             </Content>
         </>
