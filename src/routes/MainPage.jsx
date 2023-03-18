@@ -16,6 +16,7 @@ function MainPage() {
     const [filteredProjects, setFilteredProjects] = useState([]);
     
     const [filterTagList, setFilterTagList] = useState([]);
+    const [pageNum, setPageNum] = useState(0);
 
     useEffect(() => {
         axios.get('pa/0').then(res => {
@@ -84,10 +85,39 @@ function MainPage() {
         <Content>
             { isLoading ? <div>Loading...</div> : 
                 <div id="cardContainer">
-                    {filteredProjects.map((projectData, index) => (
+                    {filteredProjects.slice(pageNum*10,(pageNum*10)+10).map((projectData, index) => (
                         <Card projectData={projectData} key={index} />
                     ))}
                 </div>
+
+            }
+
+            { isLoading ? null: 
+                <div id="pagination">
+                       <button className={pageNum == 0? "btnInvisible": " "} onClick={()=>{ 
+                        if (pageNum > 0) {
+                        setPageNum(pageNum -1);
+                        console.log(filteredProjects.length);
+                        }
+                    }}>
+                        Back
+                    </button>
+               
+                    <p>
+                        { "page " + (pageNum+1) + " of " + Math.ceil(filteredProjects.length/10)}
+                    </p>
+
+                    <button className={pageNum +1 == Math.ceil(filteredProjects.length/10)? "btnInvisible": " "} onClick={()=>{
+                        if (pageNum+1 < Math.ceil(filteredProjects.length/10)) {
+                            setPageNum(pageNum+1);
+                        }
+
+                    }}>
+                        Next
+                    </button>
+                </div>
+
+
             }
         </Content>
         </>
