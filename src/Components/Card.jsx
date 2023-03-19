@@ -11,7 +11,7 @@ export default function Card({projectData}) {
     <ClickableTile className={styles.tile} onClick={() => navigate(`./details/${projectData.id}`)} >
       {/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
       <Link size='lg' className={styles.titleLink}>{projectData.title}</Link>
-      <p>{projectData.description}</p>
+      <p className={styles.description} >{projectData.description}</p>
       <div className={styles.tags}>
         {projectData.tags.map(tagItem => 
           <Tag type='magenta' title='Clear Filter' key={tagItem.tagId}>{tagItem.tagName}</Tag>
