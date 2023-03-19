@@ -1,77 +1,98 @@
 //import { Heading } from '@carbon/react';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
-import { TrashCan, UserRole } from '@carbon/icons-react';
+    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal } from '@carbon/react';
+import { TrashCan, Edit } from '@carbon/icons-react';
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+
+import { useNavigate } from 'react-router';
+import useAuth from '@/hooks/useAuth';
 
 function ManageProjectsPage() {
+
+    const [projects, setProjects] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const { user } = useAuth();
+
+    useEffect(() => {
+        axios.get('/projects').then(res => {
+            setProjects(res.data);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, []);
+    
+
     const headers = [
         {
             header: 'Project',
-            key: 'project'
+            key: 'title'
         },
         {
-            header: 'Sponsor',
-            key: 'sponsor'
+            header: 'ID',
+            key: 'id'
         },
         {
             header: 'Date Added',
-            key: 'dateAdded'
+            key: 'date'
         },
         {
-            header: 'Technologies',
-            key: 'technologies'
+            header: 'Description',
+            key: 'description'
+        },
+        {
+            header: 'Tags',
+            key: 'tags'
+        },
+        {
+            header: 'Visit Count',
+            key: 'visit_count'
         }
     ];
 
-    const rows = [
-        {
-            id: '1',
-            project: 'SCADA Interface Modernisation',
-            sponsor: 'Kingspan',
-            dateAdded: '2023-01-01',
-            technologies: 'ACM, AMQ, Ansible, API, OpenShift'
-        },
-        {
-            id: '2',
-            project: 'Radio Access Networks',
-            sponsor: 'Telco',
-            dateAdded: '2023-02-12',
-            technologies: 'ACM, AMQ, OpenShift, Quay, RHEL'
-        },
-        {
-            id: '3',
-            project: 'API Management Platform',
-            sponsor: 'SAP',
-            dateAdded: '2023-02-15',
-            technologies: 'RHEL, OpenShift'
-        },
-        {
-            id: '4',
-            project: 'Intelligent Automation Workflow',
-            sponsor: 'Axa',
-            dateAdded: '2023-02-23',
-            technologies: 'OpenShift, Ansible'
-        },
-        {
-            id: '5',
-            project: 'Red Hat OpenShift Service',
-            sponsor: 'Amazon',
-            dateAdded: '2023-02-28',
-            technologies: 'ROSA, OpenShift'
-        },
-        {
-            id: '6',
-            project: 'Enabling Medical Imaging Diagnostics',
-            sponsor: 'Edge',
-            dateAdded: '2023-03-02',
-            technologies: 'OpenShift, AMQ, ACM, RHEL'
-        },
-    ];
+
+    function handleCell(cell) {
+        if (cell.info.header ==='date') {
+            return cell.value.slice(0,10);
+        } 
+        if (cell.info.header ==='tags') {
+            let first = true;
+            let currentTag ='';
+            return cell.value.map(tag => {
+                currentTag = first ? tag.tagName : ', ' + tag.tagName;
+                first = false;
+                return currentTag;
+            });
+        } else return cell.value;
+    }
+
+
+    function handleDelete(selectedProjects) {
+        selectedProjects.map(async(project) => {
+            const currentId = project.id;
+            try {
+                console.log(currentId);
+                await axios.delete(`/user/project/${currentId}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+                navigate('/');
+            } catch(error) {
+                console.log(error);
+            }
+        });
+    }
+
+
+    function handleModifyProject() {
+
+    }
+
 
     return (
+
         <>
-        <DataTable headers={headers} rows={rows} >
+        <DataTable headers={headers} rows={projects} >
             {({
                 rows,
                 headers,
@@ -93,19 +114,29 @@ function ManageProjectsPage() {
                 description='List of all current projects'
                 {...getTableContainerProps()}>
 
-                    <TableToolbar {...getToolbarProps()}>
+                <Modal open={modalOpen}
+                    danger
+                    size='sm'
+                    modalHeading='Are you sure you want to delete the currently selected project(s)? This action is irreversible.'
+                    modalLabel='Delete Projects'
+                    primaryButtonText='Delete'
+                    secondaryButtonText='Cancel'
+                    onRequestClose={() => setModalOpen(false)}
+                    onRequestSubmit={() => handleDelete(selectedRows)}
+                />
+                    <TableToolbar >
                         <TableBatchActions {...batchActionProps}>
-                            <TableBatchAction
+                            <TableBatchAction {...getToolbarProps({onClick: () => setModalOpen(modalOpen => !modalOpen)})}
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
                                 renderIcon={TrashCan}
                                 >
                                 Delete
                             </TableBatchAction>
-                            <TableBatchAction
+                            <TableBatchAction {...getToolbarProps({onClick: () => handleModifyProject()})}
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
-                                renderIcon={UserRole}
+                                renderIcon={Edit}
                                 >
-                                Change user role
+                                Modify Project
                             </TableBatchAction>
                         </TableBatchActions>
                         <TableToolbarContent aria-hidden={batchActionProps.shouldShowBatchActions}>
@@ -142,10 +173,12 @@ function ManageProjectsPage() {
                         </TableHead>
                         <TableBody>
                         {rows.map((row, i) => (
-                            <TableRow key={i} {...getRowProps({ row })}>
+                            <TableRow key={rows.id} {...getRowProps({ row })}>
                             <TableSelectRow {...getSelectionProps({ row })} />
                             {row.cells.map((cell) => (
-                                <TableCell key={cell.id}>{cell.value}</TableCell>
+                                <TableCell key={cell.id}>
+                                    {(cell.info.header==='date'||cell.info.header==='tags') ? handleCell(cell) : cell.value}
+                                </TableCell>
                             ))}
                             </TableRow>
                         ))}
