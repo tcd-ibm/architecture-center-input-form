@@ -15,6 +15,9 @@ function AdminPanel() {
             aria-label='Admin panel navigation'>
 
             <SideNavItems>
+            <CustomSideNavLink href='dashboard'>
+                    Dashboard
+                </CustomSideNavLink>
                 <CustomSideNavLink href='showcase'>
                     Showcase settings
                 </CustomSideNavLink>
