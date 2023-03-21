@@ -38,16 +38,6 @@ function ShowcaseSettingsPage() {
                         }}
                     />
                 </Tile>
-                <Checkbox 
-                    labelText='Show project preview images on the showcase page' 
-                    id='new-projects-approved-checkbox' 
-                    checked={true}
-                />
-                <Checkbox 
-                    labelText='Show featured project at top of page' 
-                    id='project-edits-approved-checkbox' 
-                    checked={true}
-                />
                 <div style = {{maxWidth: '500px'}}>
                 <ComboBox
                     id='featured-project-dropdown'
@@ -58,7 +48,15 @@ function ShowcaseSettingsPage() {
                     size = 'lg'
                 />
                 </div>
-                <Button onClick={uploadImage}>Save</Button>
+                <Checkbox 
+                    labelText='Show project preview images on the showcase page' 
+                    id='new-projects-approved-checkbox' 
+                />
+                <Checkbox 
+                    labelText='Show featured project at top of page' 
+                    id='project-edits-approved-checkbox' 
+                />
+                <Button onClick={uploadImage} style={{marginTop: '10px', marginBottom: '50px'}}>Save</Button>
             </Stack>
         </Form>
         </>

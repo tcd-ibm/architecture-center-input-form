@@ -76,7 +76,7 @@ function ManageProjectsPage() {
             try {
                 console.log(currentId);
                 await axios.delete(`/user/project/${currentId}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
-                navigate('/');
+                window.location.reload(true);
             } catch(error) {
                 console.log(error);
             }

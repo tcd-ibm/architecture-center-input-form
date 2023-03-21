@@ -42,7 +42,7 @@ function ContentSettingsPage() {
                     id='project-edits-approved-checkbox' 
                     checked={true}
                 />
-                <Button>Save</Button>
+                <Button style={{marginTop: '10px', marginBottom: '50px'}}>Save</Button>
             </Stack>
         </Form>
         </>

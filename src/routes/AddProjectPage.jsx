@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useImperativeHandle  } from 'react';
 import { useNavigate } from 'react-router';
-import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag } from '@carbon/react';
+import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag, DatePicker, DatePickerInput } from '@carbon/react';
 
 import MainHeader from '@/Components/MainHeader';
 import DocEditor from '@/Components/AsciidocEditor';
@@ -69,6 +69,21 @@ function AddProjectPage() {
             (item.tagId === tagId ? { ...item, selected: false } : item)
         ));
     };
+    
+    const [invalidText, setInvalidText] = useState(null);
+
+    const validateLink = () => {
+        if(!linkInputRef.current.value) {
+            setInvalidText('Link is required');
+            return false;
+        }
+        if(!/^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/.test(linkInputRef.current.value)) {
+            setInvalidText('Enter a valid link');
+            return false;
+        }
+        setInvalidText(null);
+        return true;
+    };
 
     return (
         <>
@@ -78,8 +93,19 @@ function AddProjectPage() {
             <Stack gap={6}>
                 <h1>Add New Project</h1>
                 <TextInput labelText='Project Title' id='title' ref={titleInputRef} required />
-                <TextInput labelText='Link to Project' id='link' ref={linkInputRef} placeholder='https://example.com'/>
+                <TextInput labelText='Link to Project' placeholder='https://example.com' id='link' invalid={Boolean(invalidText)} invalidText={invalidText} ref={linkInputRef} onBlur={validateLink}/>
                 <TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />
+                {/*
+                <DatePicker datePickerType='single'>
+                    <DatePickerInput
+                      placeholder='dd/mm/yyyy'
+                      labelText='Completion Date'
+                      id='date'
+                      ref={completionDateInputRef}
+                      style={{margin: '0px'}}
+                    />
+                </DatePicker>
+                */}
                 <TextArea
                     labelText='Preview description'
                     rows={4}
