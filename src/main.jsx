@@ -18,6 +18,7 @@ import ContentSettingsPage from './routes/adminpanel/ContentSettingsPage';
 import ManageUsersPage from './routes/adminpanel/ManageUsersPage';
 import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
 import StatisticsPage from './routes/adminpanel/StatisticsPage';
+import DashboardPage from './routes/adminpanel/DashboardPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
 
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
       {
         path: 'statistics',
         element: <StatisticsPage />
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardPage />
       }
     ]
   }
