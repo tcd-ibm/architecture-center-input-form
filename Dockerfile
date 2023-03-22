@@ -12,7 +12,6 @@ RUN yum install -y python3 python3-pip vim npm sqlite
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 RUN npm install -global yarn
-RUN npm install -g --unsafe-perm=true --allow-root
 RUN yarn install
 
 RUN chmod +x start.sh
