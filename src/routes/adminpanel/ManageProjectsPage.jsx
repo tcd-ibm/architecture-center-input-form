@@ -13,18 +13,48 @@ function ManageProjectsPage() {
 
     const [projects, setProjects] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [numberOfEntries, setNumberOfEntries] = useState();
     const navigate = useNavigate();
+
     const { user } = useAuth();
 
-    useEffect(() => {
+    /*useEffect(() => {
         axios.get('/projects').then(res => {
             setProjects(res.data);
         })
         .catch(err => {
             console.log(err);
         });
-    }, []);
-    
+    }, []);*/
+
+    useEffect(() => {
+        if(!user) {
+            navigate('/login', { replace: true });
+            return;
+        }
+        const requestConfig = { 
+            params: {
+                page: page,
+                per_page: pageSize
+            },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${user.accessToken}` 
+            } 
+        };
+        axios.get('/admin/projects', requestConfig).then(res => {
+            const projects = res.data;
+            setProjects(projects);
+            setNumberOfEntries(parseInt(res.headers['x-total-count']));
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, [navigate, user, page, pageSize]);
+
 
     const headers = [
         {
@@ -60,7 +90,7 @@ function ManageProjectsPage() {
         } 
         if (cell.info.header ==='tags') {
             let first = true;
-            let currentTag ='';
+            let currentTag =''; 
             return cell.value.map(tag => {
                 currentTag = first ? tag.tagName : ', ' + tag.tagName;
                 first = false;
@@ -83,11 +113,14 @@ function ManageProjectsPage() {
         });
     }
 
+    const handlePaginationChange = event => {
+        setPage(event.page);
+        setPageSize(event.pageSize);
+    };
+
 
     function handleModifyProject() {
-
     }
-
 
     return (
 
@@ -176,17 +209,12 @@ function ManageProjectsPage() {
                         backwardText='Previous page'
                         forwardText='Next page'
                         itemsPerPageText='Items per page:'
-                        onChange={function noRefCheck(){}}
-                        page={1}
-                        pageSize={10}
-                        pageSizes={[
-                          10,
-                          15,
-                          25,
-                          50
-                        ]}
+                        onChange={handlePaginationChange}
+                        page={page}
+                        pageSize={pageSize}
+                        pageSizes={[10, 15, 25, 50 ]}
                         size='lg'
-                        totalItems={103}
+                        totalItems={numberOfEntries}
                     />
                 </TableContainer>
             );
