@@ -30,9 +30,6 @@ function AdminPanel() {
                 <CustomSideNavLink href='projects'>
                     Manage projects
                 </CustomSideNavLink>
-                <CustomSideNavLink href='statistics'>
-                    Statistics
-                </CustomSideNavLink>
             </SideNavItems>
             
         </SideNav>
