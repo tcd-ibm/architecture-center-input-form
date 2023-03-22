@@ -1,12 +1,14 @@
+import { useNavigate } from 'react-router';
 import { ClickableTile, Link, Tag } from '@carbon/react';
 import styles from './Card.module.scss';
 
 //const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
 
 export default function Card({projectData}) {
+  const navigate = useNavigate();
 
   return (
-    <ClickableTile className={styles.tile} href={`./details/${projectData.id}`}>
+    <ClickableTile className={styles.tile} onClick={() => navigate(`./details/${projectData.id}`)} >
       {/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
       <Link size='lg' className={styles.titleLink}>{projectData.title}</Link>
       <p>{projectData.description}</p>
