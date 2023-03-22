@@ -330,11 +330,12 @@ async def admin_get_all_users(response: Response,
 
 
 @router.get("/admin/projects", response_model=List[ProjectWithUserAndTags])
-async def admin_get_all_projects(response: Response,
-                                 per_page: int = DEFAULT_PAGE_SIZE,
-                                 page: int = DEFAULT_PAGE,
-                                 session: AsyncSession = Depends(get_session),
-                                 current_user: User = Depends(get_current_user)):
+async def admin_get_all_projects(
+    response: Response,
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -598,6 +599,63 @@ async def query_user_projects(
     response.headers['X-Total-Pages'] = str((count // per_page) +
                                             (1 if count % per_page else 0))
     return r.scalars().all()
+
+
+@router.get("/project/featured")
+async def get_featured_project(session: AsyncSession = Depends(get_session)):
+    if not id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Project ID is required")
+
+    r = await session.execute(select(Project).where(Project.is_featured))
+    project = r.scalar_one_or_none()
+
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project not found")
+
+    return project
+
+
+@router.put("/project/featured/{id}")
+async def set_featured_project(id: str,
+                               session: AsyncSession = Depends(get_session),
+                               current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admins can set feature projects")
+
+    if not id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Project ID is required")
+
+    project = (await session.execute(select(Project).where(Project.id == id)
+                                     )).scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project not found")
+
+    if project.is_featured:
+        return project
+    # set project to featured and unset all other projects
+    r = await session.execute(
+        select(Project).where(Project.is_featured is True))
+    featured_projects = r.scalars().all()
+    for p in featured_projects:
+        p.is_featured = False
+        session.add(p)
+
+    r = await session.execute(select(Project).where(Project.id == id))
+    project = r.scalar_one_or_none()
+    project.is_featured = True
+    session.add(project)
+    await session.commit()
+    await session.refresh(project)
+    return project
 
 
 @router.get("/project/{id}", response_model=ProjectFull)
