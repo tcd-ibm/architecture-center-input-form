@@ -15,7 +15,7 @@ function AddProjectPage() {
     const navigate = useNavigate();
 
     const [tags, setTags] = useState([]);
-    //const [input, setInput] = useState('');
+    const [date, setDate] = useState(new Date());
 
     const titleInputRef = useRef();
     const linkInputRef = useRef();
@@ -27,7 +27,6 @@ function AddProjectPage() {
         if(!user) {
             navigate('/login', { replace: true });
         }
-
         axios.get('/tags').then(res => {
             setTags( 
                 res.data.map(categoryItem => categoryItem.tags).flat()
@@ -45,7 +44,7 @@ function AddProjectPage() {
             link: linkInputRef.current.value,
             description: previewDescriptionInputRef.current.value,
             content: contentInputRef.current.value,
-            date: new Date(completionDateInputRef.current.value),
+            date: date,
             tags: tags.filter(item => item?.selected).map(item => item.tagId)
         };
 
@@ -94,9 +93,8 @@ function AddProjectPage() {
                 <h1>Add New Project</h1>
                 <TextInput labelText='Project Title' id='title' ref={titleInputRef} required />
                 <TextInput labelText='Link to Project' placeholder='https://example.com' id='link' invalid={Boolean(invalidText)} invalidText={invalidText} ref={linkInputRef} onBlur={validateLink}/>
-                <TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />
-                {/*
-                <DatePicker datePickerType='single'>
+                {/*<TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />*/}
+                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(date)}>
                     <DatePickerInput
                       placeholder='dd/mm/yyyy'
                       labelText='Completion Date'
@@ -105,7 +103,7 @@ function AddProjectPage() {
                       style={{margin: '0px'}}
                     />
                 </DatePicker>
-                */}
+
                 <TextArea
                     labelText='Preview description'
                     rows={4}
@@ -114,12 +112,9 @@ function AddProjectPage() {
                     disabled={false}
                     placeholder='An omnichannel approach provides a unified customer experience across platforms, creating a single view for customers to interact with their own information.'
                 />
+
                 <Tile style={{padding: '20px'}}>
                     <h4 style={{marginBottom: '10px'}}>Add Tags</h4>
-                    {/* <div style={{display: 'flex', alignItems: 'center', flexDirection: 'row', marginBottom: '10px'}}>
-                        <TextInput placeholder='Enter tag here' value={input} onInput={(e) =>setInput(e.target.value)} style={{marginRight: '10px'}} />
-                        <Button onClick={() => handleClick()} size='md' kind='secondary' >Add</Button>
-                    </div> */}
                     <div>
                         {tags.filter(item => !item?.selected).map(item => {
                             return (

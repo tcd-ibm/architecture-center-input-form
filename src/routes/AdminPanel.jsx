@@ -31,9 +31,6 @@ function AdminPanel() {
                 <CustomSideNavLink href='projects' renderIcon={Cube}>
                     Manage projects
                 </CustomSideNavLink>
-                <CustomSideNavLink href='statistics'>
-                    Statistics
-                </CustomSideNavLink>
             </SideNavItems>
             
         </SideNav>

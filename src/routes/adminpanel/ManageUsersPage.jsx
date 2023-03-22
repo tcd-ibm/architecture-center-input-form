@@ -123,18 +123,6 @@ function ManageUsersPage() {
                                 onChange={onInputChange}
                                 persistent
                             />
-                            <TableToolbarMenu
-                                tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}>
-                                <TableToolbarAction onClick={() => alert('Alert 1')}>
-                                Action 1
-                                </TableToolbarAction>
-                                <TableToolbarAction onClick={() => alert('Alert 2')}>
-                                Action 2
-                                </TableToolbarAction>
-                                <TableToolbarAction onClick={() => alert('Alert 3')}>
-                                Action 3
-                                </TableToolbarAction>
-                            </TableToolbarMenu>
                         </TableToolbarContent>
                     </TableToolbar>
                     

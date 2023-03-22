@@ -22,7 +22,7 @@ function MainHeader() {
                     Add new project
                 </CustomHeaderMenuItem>
                 { user?.isAdmin() &&
-                    <CustomHeaderMenuItem href='/adminpanel/showcase'>
+                    <CustomHeaderMenuItem href='/adminpanel/dashboard'>
                         Admin panel
                     </CustomHeaderMenuItem>
                 }
