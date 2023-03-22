@@ -45,8 +45,8 @@ function MainHeader() {
             {
             <HeaderPanel expanded={open}>
                 <Switcher>
-                    <SwitcherItem>
-                        Account
+                    <SwitcherItem href='/account'>
+                        My Account
                     </SwitcherItem>
                     <SwitcherDivider />
                     <SwitcherItem onClick={() => {
