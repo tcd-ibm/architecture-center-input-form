@@ -10,6 +10,7 @@ function LoginFormEmailStep(props, ref) {
         subheadingContentNode: <>Don't have an account? <Link href='/signup'>Sign up</Link></>,
         inputType: 'email',
         rememberIdCheckbox: true,
+        backLink: '/',
         buttonText: 'Continue',
         onSubmit: onSubmit
     };
