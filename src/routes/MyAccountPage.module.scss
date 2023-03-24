@@ -1,5 +1,23 @@
 .mainContainer {
     text-align: center;
-    padding-left: 100px;
-    padding-right: 100px;
+    // background-color: rgb(244, 244, 244);
+    margin-left: 400px;
+    margin-right: 150px;
+}
+
+.sideNav {
+    background-color: rgb(244, 244, 244);
+}
+
+.sideNavHeading {
+    padding-left: 15px;
+    font-size: 24px;
+    font-weight: 500;
+    color: black;
+}
+
+.mainText {
+    padding-top: 50px;
+    text-align: left;
+    font-size: 20px;
 }
