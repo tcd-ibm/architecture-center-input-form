@@ -1,6 +1,7 @@
-import { Content, Heading, Section, SideNav, SideNavItems, SideNavDivider, SideNavLink, TextInput } from '@carbon/react';
+import { Content, Heading, Section, SideNav, SideNavItems, SideNavDivider, SideNavLink, TextInput, IconButton } from '@carbon/react';
 import MainHeader from '@/Components/MainHeader';
 import styles from './MyAccountPage.module.scss';
+import { Edit } from '@carbon/icons-react';
 
 
 function MyAccountPage() {
@@ -22,22 +23,28 @@ function MyAccountPage() {
                 <div className={styles.mainText}>
                     <p1>Email</p1>
                     <TextInput
-                    className={styles.textBox} 
-                    defaultValue='example@example.com'
-                    readOnly={true}
-                    size='lg'
+                        className={styles.textBox} 
+                        defaultValue='example@example.com'
+                        readOnly={true}
+                        size='lg'
                     />
+                    <IconButton className={styles.icon} label='Edit' kind='ghost' >
+                        <Edit/>
+                    </IconButton>
                 </div>
 
                 <div className={styles.mainText}>
                     <p1>Password</p1>
                     <TextInput
-                    className={styles.textBox} 
-                    defaultValue='password'
-                    readOnly={true}
-                    type='password'
-                    size='lg'
+                        className={styles.textBox} 
+                        defaultValue='password'
+                        readOnly={true}
+                        type='password'
+                        size='lg'
                     />
+                    <IconButton className={styles.icon} label='Edit' kind='ghost' >
+                        <Edit/>
+                    </IconButton>
                 </div>
                 
             </div>
