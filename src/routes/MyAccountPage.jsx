@@ -3,18 +3,32 @@ import MainHeader from '@/Components/MainHeader';
 import styles from './MyAccountPage.module.scss';
 import { Edit } from '@carbon/icons-react';
 import axios from 'axios';
+import useAuth from '@/hooks/useAuth';
+import { useNavigate } from 'react-router';
+import { useEffect, useState, useRef } from 'react';
 
 
 function MyAccountPage() {
+    
 
+    const { user } = useAuth();
+    const navigate = useNavigate();
     let userInfo;
-    axios.get('/user/info').then(res => {
+
+    // useEffect(() => {
+    //     if(!user) {
+    //         navigate('/login', { replace: true });
+    //     }
+    // }, [navigate, user]);
+    
+    axios.get('/user/info', {Authorization: `Bearer ${user.accessToken}`}).then(res => {
         userInfo = res.data;
         console.log(userInfo);
     })
     .catch(err => {
         console.log(err);
     });
+
 
     return (
         <>
@@ -23,7 +37,7 @@ function MyAccountPage() {
                 
             <SideNav className={styles.sideNav}>
                 <SideNavItems >
-                    <p1 className={styles.sideNavHeading} >My Account</p1>
+                    <p1 className={styles.sideNavHeading}>My Account</p1>
                     <SideNavDivider />
                     <SideNavLink href='/account' >User Info</SideNavLink>
                 </SideNavItems>
