@@ -13,22 +13,23 @@ function MyAccountPage() {
 
     const { user } = useAuth();
     const navigate = useNavigate();
-    let userInfo;
+    let userInfo = [];
+    userInfo.email = '';
 
-    // useEffect(() => {
-    //     if(!user) {
-    //         navigate('/login', { replace: true });
-    //     }
-    // }, [navigate, user]);
-    
-    axios.get('/user/info', {Authorization: `Bearer ${user.accessToken}`}).then(res => {
-        userInfo = res.data;
-        console.log(userInfo);
-    })
-    .catch(err => {
-        console.log(err);
-    });
+    useEffect(() => {
+        if(!user) {
+            navigate('/login', { replace: true });
+        }
 
+        axios.get('/user/info', { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } }).then(res => {
+            userInfo = res.data;
+            console.log(userInfo);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+
+    }, [navigate, user]);
 
     return (
         <>
@@ -49,7 +50,7 @@ function MyAccountPage() {
                     <p1>Email</p1>
                     <TextInput
                         className={styles.textBox} 
-                        defaultValue='example@example.com'
+                        defaultValue={userInfo.email}
                         readOnly={true}
                         size='lg'
                     />
