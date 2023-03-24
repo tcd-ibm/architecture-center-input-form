@@ -1,10 +1,21 @@
-import { Content, Heading, Section, SideNav, SideNavItems, SideNavDivider, SideNavLink, TextInput, IconButton } from '@carbon/react';
+import { Content, Heading, SideNav, SideNavItems, SideNavDivider, SideNavLink, TextInput, IconButton } from '@carbon/react';
 import MainHeader from '@/Components/MainHeader';
 import styles from './MyAccountPage.module.scss';
 import { Edit } from '@carbon/icons-react';
+import axios from 'axios';
 
 
 function MyAccountPage() {
+
+    let userInfo;
+    axios.get('/user/info').then(res => {
+        userInfo = res.data;
+        console.log(userInfo);
+    })
+    .catch(err => {
+        console.log(err);
+    });
+
     return (
         <>
          <MainHeader />
