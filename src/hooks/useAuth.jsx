@@ -48,7 +48,13 @@ function useAuth() {
     };
 
     return {
-        user,
+        get user() {
+            if(user) return user;
+            const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
+            if(!storedUserData) return null;
+            const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
+            return storedUser;
+        },
         login,
         signup,
         logout
