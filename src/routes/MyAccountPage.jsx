@@ -5,7 +5,7 @@ import { Edit } from '@carbon/icons-react';
 import axios from 'axios';
 import useAuth from '@/hooks/useAuth';
 import { useNavigate } from 'react-router';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 
 function MyAccountPage() {
@@ -13,8 +13,7 @@ function MyAccountPage() {
 
     const { user } = useAuth();
     const navigate = useNavigate();
-    let userInfo = [];
-    userInfo.email = '';
+    let { userInfo } = useRef();
 
     useEffect(() => {
         if(!user) {
@@ -36,9 +35,15 @@ function MyAccountPage() {
          <MainHeader />
             <Content>
                 
-            <SideNav className={styles.sideNav}>
+            <SideNav
+                isFixedNav
+                expanded={true}
+                isChildOfHeader={false}
+                aria-label='Side navigation'
+                className={styles.sideNav}
+            >
                 <SideNavItems >
-                    <p1 className={styles.sideNavHeading}>My Account</p1>
+                    <p className={styles.sideNavHeading}>My Account</p>
                     <SideNavDivider />
                     <SideNavLink href='/account' >User Info</SideNavLink>
                 </SideNavItems>
@@ -47,10 +52,12 @@ function MyAccountPage() {
             <div className={styles.mainContainer}>
                 <Heading className={styles.mainHeading} >User Info</Heading>    
                 <div className={styles.mainText}>
-                    <p1>Email</p1>
+                    <p>Email</p>
                     <TextInput
+                        labelText=''
+                        id='email'
                         className={styles.textBox} 
-                        defaultValue={userInfo.email}
+                        defaultValue='example@example.com'
                         readOnly={true}
                         size='lg'
                     />
@@ -60,8 +67,10 @@ function MyAccountPage() {
                 </div>
 
                 <div className={styles.mainText}>
-                    <p1>Password</p1>
+                    <p>Password</p>
                     <TextInput
+                        labelText=''
+                        id='password'
                         className={styles.textBox} 
                         defaultValue='password'
                         readOnly={true}
