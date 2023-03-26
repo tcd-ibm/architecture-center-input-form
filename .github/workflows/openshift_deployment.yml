@@ -1,5 +1,7 @@
 name: OpenShift
 
+# test comment
+
 env:
   APP_NAME: "architecture-center-input-form"
   APP_PORT: 4621
