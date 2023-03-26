@@ -16,7 +16,7 @@ RUN yarn install
 
 RUN chmod +x start.sh
 
-#EXPOSE 5297
+EXPOSE 5297
 EXPOSE 4621
 
 CMD start.sh
