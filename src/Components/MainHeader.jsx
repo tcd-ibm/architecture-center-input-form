@@ -43,13 +43,13 @@ function MainHeader() {
                 }
             </HeaderGlobalBar>
             {
-            <HeaderPanel expanded={open}>
-                <Switcher>
-                    <SwitcherItem href='/account'>
+            <HeaderPanel aria-label='' expanded={open}>
+                <Switcher aria-label='' >
+                    <SwitcherItem aria-label='' href='/account'>
                         My Account
                     </SwitcherItem>
                     <SwitcherDivider />
-                    <SwitcherItem onClick={() => {
+                    <SwitcherItem aria-label='' onClick={() => {
                         setOpen(false);
                         logout();
                         }}>
