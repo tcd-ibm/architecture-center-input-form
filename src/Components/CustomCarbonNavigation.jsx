@@ -1,20 +1,20 @@
 import { useNavigate } from 'react-router';
 import { HeaderMenuItem } from '@carbon/react';
 
-function CustomHeaderMenuItem(props) {
-    const { href, children, ...remainingProps } = props;
+function ComponentWrapper(props) {
+    const { href, Component, children, ...remainingProps } = props;
 
     const navigate = useNavigate();
 
     return (
-        <HeaderMenuItem 
+        <Component 
             onClick={() => navigate(href)}
             style={{cursor: 'pointer'}}
             {...remainingProps}
         >
             {children}
-        </HeaderMenuItem>
+        </Component>
     );
 }
 
-export default CustomHeaderMenuItem;
+export const CustomHeaderMenuItem = props => <ComponentWrapper Component={HeaderMenuItem} {...props} />;

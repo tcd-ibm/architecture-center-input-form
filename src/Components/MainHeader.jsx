@@ -3,7 +3,7 @@ import { Header, HeaderName, HeaderNavigation, HeaderGlobalBar, HeaderGlobalActi
 import { User, DocumentAdd } from '@carbon/icons-react';
 
 import useAuth from '@/hooks/useAuth';
-import CustomHeaderMenuItem from './CustomHeaderMenuItem';
+import { CustomHeaderMenuItem } from './CustomCarbonNavigation';
 import { useState } from 'react';
 
 //TODO replace HeaderName react-router Link component or equivalent
