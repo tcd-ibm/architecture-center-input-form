@@ -1,13 +1,13 @@
 import { forwardRef } from 'react';
-import { Link } from '@carbon/react';
 
 import LoginFormGeneric from './LoginFormGeneric';
+import { CustomLink } from './CustomCarbonNavigation';
 
 function LoginFormEmailStep(props, ref) {
     const { onSubmit } = props;
 
     const componentProps = {
-        subheadingContentNode: <>Don't have an account? <Link href='/signup'>Sign up</Link></>,
+        subheadingContentNode: <>Don't have an account? <CustomLink href='/signup'>Sign up</CustomLink></>,
         inputType: 'email',
         rememberIdCheckbox: true,
         backLink: '/',

@@ -1,28 +1,26 @@
-import { Header, HeaderName, HeaderNavigation, HeaderGlobalBar, HeaderGlobalAction, HeaderPanel,
+import { Header, HeaderNavigation, HeaderGlobalBar, HeaderGlobalAction, HeaderPanel,
     Switcher, SwitcherDivider, SwitcherItem } from '@carbon/react';
 import { User, DocumentAdd } from '@carbon/icons-react';
 
 import useAuth from '@/hooks/useAuth';
-import { CustomHeaderMenuItem } from './CustomCarbonNavigation';
+import { CustomHeaderGlobalAction, CustomHeaderMenuItem, CustomHeaderName, CustomSwitcherItem } from './CustomCarbonNavigation';
 import { useState } from 'react';
 
-//TODO replace HeaderName react-router Link component or equivalent
-//TODO replace the login and signup links when proper design ready
 function MainHeader() {
     const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
 
     return (
         <Header aria-label='Amazing SwEng Project'>
-            <HeaderName href='/' prefix=''>
+            <CustomHeaderName href='/' prefix=''>
                 Amazing SwEng Project
-            </HeaderName>
+            </CustomHeaderName>
             <HeaderGlobalBar>
                 { user &&
                     <HeaderNavigation aria-label='Account options'>
-                        <HeaderGlobalAction href='/add' aria-label='Add new project'>
+                        <CustomHeaderGlobalAction href='/add' aria-label='Add new project'>
                             <DocumentAdd />
-                        </HeaderGlobalAction>
+                        </CustomHeaderGlobalAction>
                         <HeaderGlobalAction isActive={open}
                                             aria-label='Account'
                                             tooltipAlignment='end'
@@ -45,13 +43,13 @@ function MainHeader() {
             {
             <HeaderPanel aria-label='' expanded={open}>
                 <Switcher aria-label='' >
-                    <SwitcherItem aria-label='' href='/account'>
+                    <CustomSwitcherItem aria-label='' href='/account'>
                         My Account
-                    </SwitcherItem>
+                    </CustomSwitcherItem>
                     <SwitcherDivider />
                     <SwitcherItem aria-label='' onClick={() => {
-                        setOpen(false);
-                        logout();
+                            setOpen(false);
+                            logout();
                         }}>
                         Log out
                     </SwitcherItem>
