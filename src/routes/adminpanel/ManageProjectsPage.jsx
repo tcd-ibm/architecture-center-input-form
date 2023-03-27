@@ -1,7 +1,7 @@
 //import { Heading } from '@carbon/react';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal } from '@carbon/react';
+    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, ModalWrapper } from '@carbon/react';
 import { TrashCan, Edit } from '@carbon/icons-react';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
@@ -12,22 +12,16 @@ import useAuth from '@/hooks/useAuth';
 function ManageProjectsPage() {
 
     const [projects, setProjects] = useState([]);
-    const [modalOpen, setModalOpen] = useState(false);
+    const [dangerModalOpen, setDangerModalOpen] = useState(false);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [numberOfEntries, setNumberOfEntries] = useState();
     const navigate = useNavigate();
 
+    const [passiveModalOpen, setPassiveModalOpen] = useState(false);
+
     const { user } = useAuth();
 
-    /*useEffect(() => {
-        axios.get('/projects').then(res => {
-            setProjects(res.data);
-        })
-        .catch(err => {
-            console.log(err);
-        });
-    }, []);*/
 
     useEffect(() => {
         if(!user) {
@@ -119,7 +113,8 @@ function ManageProjectsPage() {
     };
 
 
-    function handleModifyProject() {
+    function handleModifyProject(selectedRows) {
+        
     }
 
     return (
@@ -147,25 +142,34 @@ function ManageProjectsPage() {
                 description='List of all current projects'
                 {...getTableContainerProps()}>
 
-                <Modal open={modalOpen}
+                <Modal open={dangerModalOpen}
                     danger
                     size='sm'
                     modalHeading='Are you sure you want to delete the currently selected project(s)? This action is irreversible.'
                     modalLabel='Delete Projects'
                     primaryButtonText='Delete'
                     secondaryButtonText='Cancel'
-                    onRequestClose={() => setModalOpen(false)}
+                    onRequestClose={() => setDangerModalOpen(false)}
                     onRequestSubmit={() => handleDelete(selectedRows)}
                 />
+                <Modal
+                    open = {passiveModalOpen}
+                    passiveModal
+                    size='sm'
+                    modalHeading='Unable to modify multiple projects at once'
+                    modalLabel='Error'
+                    onRequestClose={() => setPassiveModalOpen(false)}>
+                    <p>Please select only one project to modify at a time.</p>
+                </Modal>
                     <TableToolbar >
                         <TableBatchActions {...batchActionProps}>
-                            <TableBatchAction {...getToolbarProps({onClick: () => setModalOpen(modalOpen => !modalOpen)})}
+                            <TableBatchAction {...getToolbarProps({onClick: () => setDangerModalOpen(modalOpen => !modalOpen)})}
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
                                 renderIcon={TrashCan}
                                 >
                                 Delete
                             </TableBatchAction>
-                            <TableBatchAction {...getToolbarProps({onClick: () => handleModifyProject()})}
+                            <TableBatchAction {...getToolbarProps({onClick: () => (selectedRows.length) > 1 ? setPassiveModalOpen(true) : handleModifyProject(selectedRows)})}
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
                                 renderIcon={Edit}
                                 >
