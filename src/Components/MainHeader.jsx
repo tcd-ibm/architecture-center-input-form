@@ -1,10 +1,9 @@
-import { Header, HeaderNavigation, HeaderGlobalBar, HeaderGlobalAction, HeaderPanel,
-    Switcher, SwitcherDivider, SwitcherItem } from '@carbon/react';
+import { useState } from 'react';
+import { Header, HeaderNavigation, HeaderGlobalBar, HeaderPanel, Switcher, SwitcherDivider } from '@carbon/react';
 import { User, DocumentAdd } from '@carbon/icons-react';
 
 import useAuth from '@/hooks/useAuth';
 import { CustomHeaderGlobalAction, CustomHeaderMenuItem, CustomHeaderName, CustomSwitcherItem } from './CustomCarbonNavigation';
-import { useState } from 'react';
 
 function MainHeader() {
     const { user, logout } = useAuth();
@@ -21,12 +20,12 @@ function MainHeader() {
                         <CustomHeaderGlobalAction href='/add' aria-label='Add new project'>
                             <DocumentAdd />
                         </CustomHeaderGlobalAction>
-                        <HeaderGlobalAction isActive={open}
-                                            aria-label='Account'
-                                            tooltipAlignment='end'
-                                            onClick={() => setOpen(!open)}>
+                        <CustomHeaderGlobalAction isActive={open}
+                            aria-label='Account'
+                            tooltipAlignment='end'
+                            onClick={() => setOpen(!open)}>
                             <User />
-                        </HeaderGlobalAction>
+                        </CustomHeaderGlobalAction>
                     </HeaderNavigation>
                 }
                 { !user &&
@@ -47,12 +46,13 @@ function MainHeader() {
                         My Account
                     </CustomSwitcherItem>
                     <SwitcherDivider />
-                    <SwitcherItem aria-label='' onClick={() => {
+                    <CustomSwitcherItem aria-label='' 
+                        onClick={() => {
                             setOpen(false);
                             logout();
                         }}>
                         Log out
-                    </SwitcherItem>
+                    </CustomSwitcherItem>
                 </Switcher>
             </HeaderPanel>}
         </Header>
