@@ -48,7 +48,7 @@ jobs:
       uses: redhat-actions/oc-new-app@v1
       with:
         app_name: ${{ env.APP_NAME }}
-        image: quay.io/${{secrets.QUAY_IO_ACCOUNT_NAME}}/architecture-center-input-form
+        image: quay.io/moeto88/architecture-center-input-form
         namespace: ${{ env.PROJECT_NAME }}
         port: ${{ env.APP_PORT }}
     
