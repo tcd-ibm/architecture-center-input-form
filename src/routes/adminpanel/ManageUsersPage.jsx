@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
+    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Button } from '@carbon/react';
 import { TrashCan, UserRole } from '@carbon/icons-react';
+
+import styles from './ManageUsersPage.module.scss';
 
 import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
@@ -27,7 +29,15 @@ function ManageUsersPage() {
         {
             header: 'Role',
             key: 'role'
-        }
+        },
+        {
+            header: 'Actions',
+            key: 'actionsChangeRole'
+        },
+        {
+            header: 'Actions',
+            key: 'actionsDelete'
+        },
     ];
 
     const navigate = useNavigate();
@@ -60,7 +70,9 @@ function ManageUsersPage() {
         axios.get('/admin/users', requestConfig).then(res => {
             const data = res.data.map(user => ({ 
                 ...user, 
-                signupDate: new Date(user.created_at).toISOString().substring(0, 10) 
+                signupDate: new Date(user.created_at).toISOString().substring(0, 10),
+                actionsChangeRole: <Button kind='ghost' renderIcon={UserRole}>Change role</Button>,
+                actionsDelete: <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
             }));
             setData(data);
             setNumberOfEntries(parseInt(res.headers['x-total-count']));
@@ -131,9 +143,14 @@ function ManageUsersPage() {
                         <TableRow>
                             <TableSelectAll {...getSelectionProps()} />
                             {headers.map((header, i) => (
-                            <TableHeader key={i} {...getHeaderProps({ header })}>
-                                {header.header}
-                            </TableHeader>
+                                header.key === 'actionsChangeRole' ?
+                                    <TableHeader key={i} {...getHeaderProps({ header })} colspan={2} className={styles.actionsHeaderCell}>
+                                        {header.header}
+                                    </TableHeader> :
+                                header.key !== 'actionsDelete' &&
+                                    <TableHeader key={i} {...getHeaderProps({ header })}>
+                                        {header.header}
+                                    </TableHeader>
                             ))}
                         </TableRow>
                         </TableHead>
@@ -142,6 +159,8 @@ function ManageUsersPage() {
                             <TableRow key={i} {...getRowProps({ row })}>
                             <TableSelectRow {...getSelectionProps({ row })} />
                             {row.cells.map((cell) => (
+                                (cell.info.header === 'actionsChangeRole' || cell.info.header === 'actionsDelete') ?
+                                <TableCell key={cell.id} className={styles.actionsCell}>{cell.value}</TableCell> :
                                 <TableCell key={cell.id}>{cell.value}</TableCell>
                             ))}
                             </TableRow>
