@@ -28,7 +28,7 @@ function useAuth() {
                 // write to localStorage failed, saving just in local state
             }
         }
-        setUser(new User(response.data.access_token, response.data.role));
+        setUser(new User(response.data.access_token, new Date(response.data.expires_at+'Z'), response.data.role));
     };
 
     const signup = async ({ email, username, password }) => {
@@ -39,7 +39,7 @@ function useAuth() {
         };
 
         const response = await axios.post('/user/signup', requestData, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } });
-        setUser(new User(response.data.access_token, response.data.role));
+        setUser(new User(response.data.access_token, new Date(response.data.expires_at+'Z'), response.data.role));
     };
 
     const logout = () => {
@@ -49,10 +49,12 @@ function useAuth() {
 
     return {
         get user() {
+            if(user?.isExpired()) return null;
             if(user) return user;
             const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
             if(!storedUserData) return null;
             const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
+            if(storedUser.isExpired()) return null;
             return storedUser;
         },
         login,
@@ -69,8 +71,15 @@ function AuthContextProvider(props) {
             const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
             if(storedUserData) {
                 const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
-                setUser(storedUser);
+                if(storedUser.isExpired()) {
+                    localStorage.removeItem(LOCAL_STORAGE_USER_OBJECT_KEY);
+                } else {
+                    setUser(storedUser);
+                }
             }
+        } else if(user.isExpired()) {
+            localStorage.removeItem(LOCAL_STORAGE_USER_OBJECT_KEY);
+            setUser(null);
         }
     }, [user, setUser]);
 
