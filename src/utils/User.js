@@ -1,7 +1,12 @@
 class User {
-    constructor(accessToken, role) {
+    constructor(accessToken, tokenExpirationDate, role) {
         this.accessToken = accessToken;
+        this.tokenExpirationDate = tokenExpirationDate;
         this.role = role;
+    }
+
+    isExpired() {
+        return new Date() > this.tokenExpirationDate;
     }
 
     isAdmin() {
