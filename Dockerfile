@@ -16,10 +16,12 @@ RUN npm install -g npm@9.6.2
 RUN npm install -global yarn
 RUN yarn install
 
-RUN chmod +x start.sh
 
 EXPOSE 5297
 EXPOSE 4621
+
+RUN chmod +x start.sh
+RUN chmod 777 /architecture-center-input-form/vite.config.js
 
 CMD start.sh
 # gunicorn app:app -b 0.0.0.0:5297 -w 8 -k uvicorn.workers.UvicornWorker & yarn dev
