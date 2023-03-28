@@ -21,7 +21,7 @@ EXPOSE 5297
 EXPOSE 4621
 
 RUN chmod +x start.sh
-RUN chmod 777 /architecture-center-input-form/vite.config.js
+RUN chmod -v 777 /architecture-center-input-form
 
 CMD start.sh
 # gunicorn app:app -b 0.0.0.0:5297 -w 8 -k uvicorn.workers.UvicornWorker & yarn dev
