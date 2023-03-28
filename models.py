@@ -44,6 +44,7 @@ class Token(SQLModel):
     access_token: str
     token_type: str
     role: int
+    expires_at: datetime
 
 
 class CategoryBase(SQLModel):

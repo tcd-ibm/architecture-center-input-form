@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import api
 
+
+# Create FastAPI app and add CORS middleware
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -12,9 +14,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add API routes
 app.include_router(api.router)
 
 
+# redirect to docs
 @app.get("/")
 async def index():
     return RedirectResponse(url="/docs", status_code=302)

@@ -36,11 +36,12 @@ DEFAULT_PAGE = 1
 
 DEFAULT_PAGE_SIZE = 30
 MAX_PAGE_SIZE = 50
+# jinja2 template for server side render html
 # templates = Jinja2Templates(directory="templates")
 
-# 这里是 tokenUrl，而不是 token_url，是为了和 OAuth2 规范统一
-# tokenUrl 是为了指定 OpenAPI 前端登录时的接口地址
-# OAuthPasswordBearer 把 Authorization Header 的 Bearer 取出来，然后传给 tokenUrl
+# it is tokenUrl instead of kebab-case token_url to unify with OAuth2 scheme
+# tokenUrl is to specify OpenAPI route address of token endpoint for frontend login
+# OAuthPasswordBearer extracts Bearer from Authorization Header and send it to tokenUrl
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -51,6 +52,7 @@ async def startup():
     await init_db()
 
 
+# for further refactor the functions down below should be moved to a utils package
 def is_admin(user: User) -> bool:
     return True if user.role else False
 
@@ -86,6 +88,7 @@ def _decode_token(token: str) -> dict:
         raise unauthorized_error("Could not validate credentials")
 
 
+# warning: this function returns all the users without limit and offset
 async def get_all_users_db(session: AsyncSession = Depends(
     get_session)) -> List[User]:
     result = await session.execute(select(User))
@@ -108,6 +111,7 @@ async def get_user_with_email_db(
     # return [User(**user.__dict__) for user in users]
 
 
+# get current user from token by decoding it
 async def get_current_user(token: str = Depends(oauth2_bearer),
                            session: AsyncSession = Depends(
                                get_session)) -> User:
@@ -135,12 +139,7 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
     return user
 
 
-@router.on_event("startup")
-async def on_startup():
-    await init_db()
-
-
-@router.post("/user/signup")
+@router.post("/user/signup", response_model=Token)
 async def create_user(user: UserSignup,
                       session: AsyncSession = Depends(get_session)):
     if not user.email or not re.match(
@@ -176,7 +175,7 @@ async def create_user(user: UserSignup,
             "role": 0
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response = {"access_token": token, "token_type": "bearer", "role": 0}
+    response = {"access_token": token, "token_type": "bearer", "role": 0, "expires_at": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
     return response
 
 
@@ -287,7 +286,8 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
     response = {
         "access_token": token,
         "token_type": "bearer",
-        "role": user.role
+        "role": user.role,
+        "expires_at": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     }
     return response
 
@@ -330,11 +330,12 @@ async def admin_get_all_users(response: Response,
 
 
 @router.get("/admin/projects", response_model=List[ProjectWithUserAndTags])
-async def admin_get_all_projects(response: Response,
-                                 per_page: int = DEFAULT_PAGE_SIZE,
-                                 page: int = DEFAULT_PAGE,
-                                 session: AsyncSession = Depends(get_session),
-                                 current_user: User = Depends(get_current_user)):
+async def admin_get_all_projects(
+    response: Response,
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
