@@ -7,7 +7,7 @@ import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
 
 function LoginFormGeneric(props, ref) {
-    const {subheadingContentNode, errorText, setErrorText, inputType, rememberIdCheckbox, buttonText, onSubmit} = props;
+    const {subheadingContentNode, errorText, setErrorText, inputType, rememberIdCheckbox, backLink, buttonText, onSubmit} = props;
 
     const inputRef = useRef();
     const rememberIdCheckboxRef = useRef();
@@ -61,6 +61,9 @@ function LoginFormGeneric(props, ref) {
                     
                 </div>
                 <div className={styles.buttonContainer}>
+                    <div className={styles.flexColumn}>
+                        <Button href={backLink}>Back</Button>
+                    </div>
                     <div className={styles.flexColumn}></div>
                     <div className={styles.flexColumn}>
                         <Button renderIcon={ArrowRight} className={styles.button} type='submit'>{buttonText}</Button>

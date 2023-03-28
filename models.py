@@ -100,6 +100,7 @@ class Project(ProjectBase, table=True):
     id: UUID = Field(primary_key=True, nullable=False)
     date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_live: bool = Field(default=False)
+    is_featured: bool = Field(default=False)
     visit_count: int = Field(default=0)
     user_id: UUID = Field(foreign_key="users.id")
     user: User = Relationship(back_populates="projects")
@@ -112,6 +113,7 @@ class ProjectWithUserAndTags(SQLModel):
     link: str
     description: str
     is_live: bool
+    is_featured: bool
     visit_count: int
     date: datetime
     user: Optional[UserInfo] = None

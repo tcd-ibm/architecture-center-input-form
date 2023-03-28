@@ -98,6 +98,9 @@ function SignUpPage() {
 
                     </div>
                     <div className={styles.buttonContainer}>
+                        <div className={styles.flexColumn}>
+                            <Button href='/'>Back</Button>
+                        </div>
                         <div className={styles.flexColumn}></div>
                         <div className={styles.flexColumn}>
                             <Button renderIcon={ArrowRight} className={styles.button} type='submit'>Sign up</Button>
