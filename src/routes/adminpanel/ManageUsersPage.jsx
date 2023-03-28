@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
-    TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
+    TableToolbarContent, TableToolbarSearch, Table, TableHead, TableHeader, TableRow, 
+    TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
 import { TrashCan, UserRole } from '@carbon/icons-react';
 
 import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
 import useAuth from '@/hooks/useAuth';
+import { isAdminRole } from '@/utils/User';
 
 function ManageUsersPage() {
     const headers = [
@@ -60,6 +61,7 @@ function ManageUsersPage() {
         axios.get('/admin/users', requestConfig).then(res => {
             const data = res.data.map(user => ({ 
                 ...user, 
+                role: isAdminRole(user.role) ? 'admin' : 'user', 
                 signupDate: new Date(user.created_at).toISOString().substring(0, 10) 
             }));
             setData(data);
