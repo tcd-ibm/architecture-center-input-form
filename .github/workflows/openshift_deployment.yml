@@ -1,6 +1,6 @@
 name: OpenShift
 
-# test comment
+# test 
 
 env:
   APP_NAME: "architecture-center-input-form"
