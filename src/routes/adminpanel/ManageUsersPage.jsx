@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
-import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
-    TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Button } from '@carbon/react';
+import { Button, DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
+    TableToolbarContent, TableToolbarSearch, Table, TableHead, TableHeader, TableRow, 
+    TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
 import { TrashCan, UserRole } from '@carbon/icons-react';
 
 import styles from './ManageUsersPage.module.scss';
@@ -11,6 +11,7 @@ import styles from './ManageUsersPage.module.scss';
 import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
 import useAuth from '@/hooks/useAuth';
+import { isAdminRole } from '@/utils/User';
 
 function ManageUsersPage() {
     const headers = [
@@ -71,6 +72,7 @@ function ManageUsersPage() {
             const data = res.data.map(user => ({ 
                 ...user, 
                 signupDate: new Date(user.created_at).toISOString().substring(0, 10),
+                role: isAdminRole(user.role) ? 'admin' : 'user',
                 actionsChangeRole: <Button kind='ghost' renderIcon={UserRole}>Change role</Button>,
                 actionsDelete: <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
             }));
