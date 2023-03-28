@@ -11,6 +11,8 @@ RUN yum -y update
 RUN yum install -y python3 python3-pip vim npm sqlite
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+RUN npm install -g npm@9.6.2
+
 RUN npm install -global yarn
 RUN yarn install
 
