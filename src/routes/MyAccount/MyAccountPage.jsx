@@ -18,7 +18,7 @@ function MyAccountPage() {
 
     useEffect(() => {
         if(!user) {
-            // navigate('/login', { replace: true });
+            navigate('/login', { replace: true });
             const noUserEmail = 'example@example.com';
             setUserEmail(noUserEmail);
             setDate('0000-00-00');
@@ -26,7 +26,7 @@ function MyAccountPage() {
             axios.get('/user/info', { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } }).then(res => {
                 setUserEmail(res.data.email);
                 setDate(res.data.created_at.slice(0, 10));
-                console.log(res.data);
+                // console.log(res.data);
             })
             .catch(err => {
                 console.log(err);
@@ -66,7 +66,7 @@ function MyAccountPage() {
                         readOnly={true}
                         size='lg'
                     />
-                    <IconButton className={styles.icon} label='Edit' kind='ghost' >
+                    <IconButton href='/account/changeemail' className={styles.icon} label='Edit' kind='ghost' >
                         <Edit/>
                     </IconButton>
                 </div>
@@ -82,7 +82,7 @@ function MyAccountPage() {
                         type='password'
                         size='lg'
                     />
-                    <IconButton className={styles.icon} label='Edit' kind='ghost' >
+                    <IconButton href='/account/changepassword' className={styles.icon} label='Edit' kind='ghost' >
                         <Edit/>
                     </IconButton>
                 </div>
