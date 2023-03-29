@@ -54,6 +54,7 @@ function useAuth() {
             const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
             if(!storedUserData) return null;
             const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
+            storedUser.tokenExpirationDate = new Date(storedUser.tokenExpirationDate);
             if(storedUser.isExpired()) return null;
             return storedUser;
         },
@@ -71,6 +72,7 @@ function AuthContextProvider(props) {
             const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
             if(storedUserData) {
                 const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
+                storedUser.tokenExpirationDate = new Date(storedUser.tokenExpirationDate);
                 if(storedUser.isExpired()) {
                     localStorage.removeItem(LOCAL_STORAGE_USER_OBJECT_KEY);
                 } else {
