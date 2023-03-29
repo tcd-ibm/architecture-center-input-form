@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
-import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
+import { Button, DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, Table, TableHead, TableHeader, TableRow, 
     TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
-import { TrashCan, UserRole } from '@carbon/icons-react';
+import { Cube, TrashCan, UserRole } from '@carbon/icons-react';
+
+import styles from './ManageUsersPage.module.scss';
 
 import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
@@ -28,7 +30,15 @@ function ManageUsersPage() {
         {
             header: 'Role',
             key: 'role'
-        }
+        },
+        {
+            header: 'Number of projects',
+            key: 'numberOfProjects'
+        },
+        {
+            header: 'Actions',
+            key: 'actions'
+        },
     ];
 
     const navigate = useNavigate();
@@ -61,8 +71,14 @@ function ManageUsersPage() {
         axios.get('/admin/users', requestConfig).then(res => {
             const data = res.data.map(user => ({ 
                 ...user, 
-                role: isAdminRole(user.role) ? 'admin' : 'user', 
-                signupDate: new Date(user.created_at).toISOString().substring(0, 10) 
+                signupDate: new Date(user.created_at).toISOString().substring(0, 10),
+                role: isAdminRole(user.role) ? 'admin' : 'user',
+                numberOfProjects: '42 (7 unapproved)',
+                actions:    <> 
+                            <Button kind='ghost' renderIcon={Cube}>Projects</Button>
+                            <Button kind='ghost' renderIcon={UserRole}>Change role</Button>
+                            <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
+                            </>
             }));
             setData(data);
             setNumberOfEntries(parseInt(res.headers['x-total-count']));
@@ -133,9 +149,13 @@ function ManageUsersPage() {
                         <TableRow>
                             <TableSelectAll {...getSelectionProps()} />
                             {headers.map((header, i) => (
-                            <TableHeader key={i} {...getHeaderProps({ header })}>
-                                {header.header}
-                            </TableHeader>
+                                header.key === 'actions' ?
+                                <TableHeader key={i} {...getHeaderProps({ header })} className={styles.actionsHeaderCell}>
+                                    {header.header}
+                                </TableHeader> :
+                                <TableHeader key={i} {...getHeaderProps({ header })}>
+                                    {header.header}
+                                </TableHeader>
                             ))}
                         </TableRow>
                         </TableHead>
@@ -144,6 +164,8 @@ function ManageUsersPage() {
                             <TableRow key={i} {...getRowProps({ row })}>
                             <TableSelectRow {...getSelectionProps({ row })} />
                             {row.cells.map((cell) => (
+                                cell.info.header === 'actions' ?
+                                <TableCell key={cell.id} className={styles.actionsCell}>{cell.value}</TableCell> :
                                 <TableCell key={cell.id}>{cell.value}</TableCell>
                             ))}
                             </TableRow>
