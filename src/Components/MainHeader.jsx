@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Header, HeaderNavigation, HeaderGlobalBar, HeaderPanel, Switcher, SwitcherDivider } from '@carbon/react';
-import { User, DocumentAdd } from '@carbon/icons-react';
+import { Header, HeaderNavigation, HeaderGlobalBar, HeaderPanel, Switcher, SwitcherDivider, OverflowMenu, OverflowMenuItem } from '@carbon/react';
+import { User, DocumentAdd, Dashboard, InventoryManagement } from '@carbon/icons-react';
 
 import useAuth from '@/hooks/useAuth';
 import { CustomHeaderGlobalAction, CustomHeaderMenuItem, CustomHeaderName, CustomSwitcherItem } from './CustomCarbonNavigation';
@@ -22,26 +22,23 @@ function MainHeader() {
             <HeaderNavigation aria-label='Amazing SwEng Project'>
                 <CustomHeaderMenuItem href='/add'>
                     Add new project
+                    <DocumentAdd style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
                 </CustomHeaderMenuItem>
                 { user?.isAdmin() &&
                     <CustomHeaderMenuItem href='/adminpanel/dashboard'>
                         Admin panel
+                        <InventoryManagement style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
                     </CustomHeaderMenuItem>
                 }
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
-                    <HeaderNavigation aria-label='Account options'>
-                        <CustomHeaderGlobalAction href='/add' aria-label='Add new project'>
-                            <DocumentAdd />
-                        </CustomHeaderGlobalAction>
-                        <CustomHeaderGlobalAction isActive={open}
-                            aria-label='Account'
-                            tooltipAlignment='end'
-                            onClick={() => setOpen(!open)}>
-                            <User />
-                        </CustomHeaderGlobalAction>
-                    </HeaderNavigation>
+                    
+                    <OverflowMenu size='lg' renderIcon={User} flipped={true}>
+                            <OverflowMenuItem itemText='Filter A' />
+                            <OverflowMenuItem itemText='Filter B' />
+                    </OverflowMenu>
+                    
                 }
                 { !user &&
                     <HeaderNavigation aria-label='Account options'>
