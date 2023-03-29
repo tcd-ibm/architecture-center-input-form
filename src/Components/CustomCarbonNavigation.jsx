@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { useNavigate } from 'react-router';
-import { ClickableTile, HeaderGlobalAction, HeaderMenuItem, HeaderName, Link, SwitcherItem } from '@carbon/react';
+import { ClickableTile, HeaderGlobalAction, HeaderMenuItem, HeaderName, Link, OverflowMenuItem, SwitcherItem } from '@carbon/react';
 
 function ComponentWrapper(props) {
     const { href, Component, children, ...remainingProps } = props;
@@ -42,3 +42,4 @@ export const CustomHeaderMenuItem = props => <ComponentWrapper Component={Header
 export const CustomHeaderName = props => <ComponentWrapper Component={HeaderName} {...props} />;
 export const CustomLink = props => <ComponentWrapper Component={Link} {...props} />;
 export const CustomSwitcherItem = props => <ComponentWrapper Component={SwitcherItem} {...props} />;
+export const CustomOverflowMenuItem = props => <ComponentWrapper Component={OverflowMenuItem} {...props} />;
