@@ -10,7 +10,7 @@ export default function Card({projectData}) {
 		<CustomClickableTile className={styles.tile} href={`./details/${projectData.id}`} >
 			{/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
 			<CustomLink size='lg' className={styles.titleLink}>{projectData.title}</CustomLink>
-			<p>{projectData.description}</p>
+			<p className={styles.description}>{projectData.description}</p>
 			<div className={styles.tags}>
 				{projectData.tags.map(tagItem => 
 					<Tag type='magenta' title='Clear Filter' key={tagItem.tagId}>{tagItem.tagName}</Tag>

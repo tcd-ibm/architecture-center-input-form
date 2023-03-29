@@ -1,11 +1,13 @@
 #cardContainer {
-  grid-column-start: 3;
-  grid-auto-flow: row;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 20px;
   max-width: calc(2 * 400px + 1 * 20px);
   margin: auto;
+}
+
+#cardContainer :first-child {
+  grid-column: 1 / -1;
 }
 
 @media (min-width: 1600px) {
