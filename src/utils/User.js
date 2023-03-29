@@ -10,8 +10,12 @@ class User {
     }
 
     isAdmin() {
-        return this.role !== 0;
+        return isAdminRole(this.role);
     }
+}
+
+export function isAdminRole(role) {
+    return role !== 0;
 }
 
 export default User;

@@ -8,6 +8,8 @@ function ProjectQuerySidePanel(props, ref) {
     const selectedTagListRef = useRef([]);
     const [selectedTagList, setSelectedTagList] = useState([]);
 
+    const url = 'https://firebasestorage.googleapis.com/v0/b/arch-center.appspot.com/o/logo.png?alt=media&token=9f7ab576-c49a-40ec-879a-152942825667';
+
     useImperativeHandle(ref, () => ({
         get selectedTagList() {
             return selectedTagListRef.current;
@@ -56,6 +58,9 @@ function ProjectQuerySidePanel(props, ref) {
                         </fieldset>
                     </AccordionItem>)}
                 </Accordion>}
+                {/*
+                <img src={url} style={{maxWidth: '50%', marginLeft: 'auto', marginRight: 'auto', marginTop: '20px'}} onError={(event) => event.target.style.display = 'none'} />
+                */}
             </Stack>
             
         </SideNav>
