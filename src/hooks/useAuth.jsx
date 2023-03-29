@@ -22,7 +22,7 @@ function useAuth() {
         if(persist) {
             try {
                 localStorage.setItem(LOCAL_STORAGE_USER_OBJECT_KEY, JSON.stringify(
-                    new User(response.data.access_token, response.data.role)
+                    new User(response.data.access_token, new Date(response.data.expires_at+'Z'), response.data.role)
                 ));
             } catch(error) {
                 // write to localStorage failed, saving just in local state
