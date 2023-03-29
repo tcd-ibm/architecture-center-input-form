@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { Button, DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, Table, TableHead, TableHeader, TableRow, 
     TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
-import { TrashCan, UserRole } from '@carbon/icons-react';
+import { Cube, TrashCan, UserRole } from '@carbon/icons-react';
 
 import styles from './ManageUsersPage.module.scss';
 
@@ -32,12 +32,12 @@ function ManageUsersPage() {
             key: 'role'
         },
         {
-            header: 'Actions',
-            key: 'actionsChangeRole'
+            header: 'Number of projects',
+            key: 'numberOfProjects'
         },
         {
             header: 'Actions',
-            key: 'actionsDelete'
+            key: 'actions'
         },
     ];
 
@@ -73,8 +73,12 @@ function ManageUsersPage() {
                 ...user, 
                 signupDate: new Date(user.created_at).toISOString().substring(0, 10),
                 role: isAdminRole(user.role) ? 'admin' : 'user',
-                actionsChangeRole: <Button kind='ghost' renderIcon={UserRole}>Change role</Button>,
-                actionsDelete: <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
+                numberOfProjects: '42 (7 unapproved)',
+                actions:    <> 
+                            <Button kind='ghost' renderIcon={Cube}>Projects</Button>
+                            <Button kind='ghost' renderIcon={UserRole}>Change role</Button>
+                            <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
+                            </>
             }));
             setData(data);
             setNumberOfEntries(parseInt(res.headers['x-total-count']));
@@ -145,14 +149,13 @@ function ManageUsersPage() {
                         <TableRow>
                             <TableSelectAll {...getSelectionProps()} />
                             {headers.map((header, i) => (
-                                header.key === 'actionsChangeRole' ?
-                                    <TableHeader key={i} {...getHeaderProps({ header })} colspan={2} className={styles.actionsHeaderCell}>
-                                        {header.header}
-                                    </TableHeader> :
-                                header.key !== 'actionsDelete' &&
-                                    <TableHeader key={i} {...getHeaderProps({ header })}>
-                                        {header.header}
-                                    </TableHeader>
+                                header.key === 'actions' ?
+                                <TableHeader key={i} {...getHeaderProps({ header })} className={styles.actionsHeaderCell}>
+                                    {header.header}
+                                </TableHeader> :
+                                <TableHeader key={i} {...getHeaderProps({ header })}>
+                                    {header.header}
+                                </TableHeader>
                             ))}
                         </TableRow>
                         </TableHead>
@@ -161,7 +164,7 @@ function ManageUsersPage() {
                             <TableRow key={i} {...getRowProps({ row })}>
                             <TableSelectRow {...getSelectionProps({ row })} />
                             {row.cells.map((cell) => (
-                                (cell.info.header === 'actionsChangeRole' || cell.info.header === 'actionsDelete') ?
+                                cell.info.header === 'actions' ?
                                 <TableCell key={cell.id} className={styles.actionsCell}>{cell.value}</TableCell> :
                                 <TableCell key={cell.id}>{cell.value}</TableCell>
                             ))}
