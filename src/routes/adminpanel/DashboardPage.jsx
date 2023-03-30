@@ -1,7 +1,7 @@
 import { Badge, Events, Book } from '@carbon/icons-react';
 import { Heading, Tile } from '@carbon/react';
-import { SimpleBarChart } from '@carbon/charts-react';
-import styles from './DashboardPage.module.scss';
+import { SimpleBarChart, DonutChart} from '@carbon/charts-react';
+import styles from '@carbon/charts/styles.css';
 
 function DashboardPage() {
 const state = {
@@ -34,14 +34,45 @@ const state = {
                     mapsTo: 'value',
                 }
             },
-            height: '700px'
+            height: '300px'
+        }
+    };
+
+    const state2 = {
+        data2: [
+            {
+                group: 'a',
+                value: 1,
+            },
+            {
+                group: 'b',
+                value: 3,
+            },
+            {
+                group: 'c',
+                value: 5,
+            },
+            {
+                group: 'd',
+                value: 1,
+            }
+        ],
+        options2: {
+            title: '',
+            resizable: true,
+            donut: {
+                center: {
+                    label: 'Tags',
+                }
+            },
+            height: '300px'
         }
     };
 
     return (
         <>
         <Heading style={{marginBottom: '20px'}}>Dashboard</Heading>
-        <div className={styles.tileContainer}>
+        <div className = {styles.tileContainer}>
 
             {/*Users*/}
             <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
@@ -76,17 +107,21 @@ const state = {
         <div>
 
             {/*Tags*/}
-            <Tile style = {{maxWidth: '920px', minWidth: '850px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px'}}>
+            <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
                 <h4 style={{textAlign: 'center'}}>Popular Tags</h4>
+                <DonutChart
+                    data={state2.data2}
+                    options={state2.options2}>
+                </DonutChart>
             </Tile>
 
             {/*Project Additions*/}
-            <Tile style = {{maxWidth: '920px', minWidth: '850px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px'}}>
+            <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
                 <h4 style={{textAlign: 'center'}}>Showcase Project Additions</h4>
-                {/*    <SimpleBarChart 
+                <SimpleBarChart 
                     data={state.data}
                     options={state.options}>
-    </SimpleBarChart> */}
+                </SimpleBarChart>
             </Tile>
 
         </div>
