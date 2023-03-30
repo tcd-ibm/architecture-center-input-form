@@ -9,7 +9,7 @@ function DashboardPage() {
         <div className={styles.tileContainer}>
 
             {/*Users*/}
-            <Tile style = {{maxWidth: '300px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
+            <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
                 <div className={styles.divCenter}>
                     <Events style = {{height: '60px', width: '40px'}}></Events>
                 </div> 
@@ -18,7 +18,7 @@ function DashboardPage() {
             </Tile>
 
             {/*Projects*/}
-            <Tile style = {{maxWidth: '300px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
+            <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
                 <div className={styles.divCenter}>
                     <Book style={{height:'60px', width: '40px'}}></Book>
                 </div>
@@ -28,7 +28,7 @@ function DashboardPage() {
             
 
             {/*Sponsors*/}
-            <Tile style = {{maxWidth: '300px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
+            <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
                 <div className={styles.divCenter}>
                     <Badge style={{height:'60px', width:'40px'}}></Badge>
                 </div>
@@ -37,6 +37,23 @@ function DashboardPage() {
             </Tile>
 
         </div>
+
+        <br></br>
+        <br></br>
+        <div className={styles.tileContainer}>
+
+            {/*Tags*/}
+            <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
+                <h4 style={{textAlign: 'center'}}>Popular Tags</h4>
+            </Tile>
+
+            {/*Project Additions*/}
+            <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
+                <h4 style={{textAlign: 'center'}}>Showcase Project Additions</h4>
+            </Tile>
+
+        </div>
+
         </>
     );
 }
