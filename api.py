@@ -175,7 +175,16 @@ async def create_user(user: UserSignup,
             "role": 0
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response = {"access_token": token, "token_type": "bearer", "role": 0, "expires_at": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
+    response = {
+        "access_token":
+        token,
+        "token_type":
+        "bearer",
+        "role":
+        0,
+        "expires_at":
+        datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    }
     return response
 
 
@@ -284,10 +293,14 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
         },
         expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     response = {
-        "access_token": token,
-        "token_type": "bearer",
-        "role": user.role,
-        "expires_at": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        "access_token":
+        token,
+        "token_type":
+        "bearer",
+        "role":
+        user.role,
+        "expires_at":
+        datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     }
     return response
 
@@ -643,7 +656,7 @@ async def set_featured_project(id: str,
         return project
     # set project to featured and unset all other projects
     r = await session.execute(
-        select(Project).where(Project.is_featured is True))
+        select(Project).where(Project.is_featured == True))
     featured_projects = r.scalars().all()
     for p in featured_projects:
         p.is_featured = False
@@ -654,7 +667,11 @@ async def set_featured_project(id: str,
     project.is_featured = True
     session.add(project)
     await session.commit()
+
+    for p in featured_projects:
+        await session.refresh(p)
     await session.refresh(project)
+
     return project
 
 
