@@ -1,8 +1,43 @@
 import { Badge, Events, Book } from '@carbon/icons-react';
 import { Heading, Tile } from '@carbon/react';
+import { SimpleBarChart } from '@carbon/charts-react';
 import styles from './DashboardPage.module.scss';
 
 function DashboardPage() {
+const state = {
+        data: [
+            {
+                group: 'a',
+                value: 1,
+            },
+            {
+                group: 'b',
+                value: 3,
+            },
+            {
+                group: 'c',
+                value: 5,
+            },
+            {
+                group: 'd',
+                value: 1,
+            }
+        ],
+        options: {
+            title: '',
+            axes: {
+                left: {
+                    mapsTo: 'group',
+                    scaleType: 'labels',
+                },
+                bottom: {
+                    mapsTo: 'value',
+                }
+            },
+            height: '700px'
+        }
+    };
+
     return (
         <>
         <Heading style={{marginBottom: '20px'}}>Dashboard</Heading>
@@ -38,18 +73,20 @@ function DashboardPage() {
 
         </div>
 
-        <br></br>
-        <br></br>
-        <div className={styles.tileContainer}>
+        <div>
 
             {/*Tags*/}
-            <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
+            <Tile style = {{maxWidth: '920px', minWidth: '850px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px'}}>
                 <h4 style={{textAlign: 'center'}}>Popular Tags</h4>
             </Tile>
 
             {/*Project Additions*/}
-            <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
+            <Tile style = {{maxWidth: '920px', minWidth: '850px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px'}}>
                 <h4 style={{textAlign: 'center'}}>Showcase Project Additions</h4>
+                {/*    <SimpleBarChart 
+                    data={state.data}
+                    options={state.options}>
+    </SimpleBarChart> */}
             </Tile>
 
         </div>
