@@ -5,7 +5,7 @@ import { Edit } from '@carbon/icons-react';
 import axios from 'axios';
 import useAuth from '@/hooks/useAuth';
 import { useNavigate } from 'react-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 
 function MyAccountPage() {
@@ -13,20 +13,25 @@ function MyAccountPage() {
 
     const { user } = useAuth();
     const navigate = useNavigate();
-    let { userInfo } = useRef();
+    const [userEmail, setUserEmail] = useState(null);
+    const [date, setDate] = useState(null);
 
     useEffect(() => {
         if(!user) {
             navigate('/login', { replace: true });
+            const noUserEmail = 'example@example.com';
+            setUserEmail(noUserEmail);
+            setDate('0000-00-00');
+        } else {
+            axios.get('/user/info', { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } }).then(res => {
+                setUserEmail(res.data.email);
+                setDate(res.data.created_at.slice(0, 10));
+                // console.log(res.data);
+            })
+            .catch(err => {
+                console.log(err);
+            }); 
         }
-
-        axios.get('/user/info', { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } }).then(res => {
-            userInfo = res.data;
-            console.log(userInfo);
-        })
-        .catch(err => {
-            console.log(err);
-        });
 
     }, [navigate, user]);
 
@@ -57,11 +62,11 @@ function MyAccountPage() {
                         labelText=''
                         id='email'
                         className={styles.textBox} 
-                        defaultValue='example@example.com'
+                        defaultValue={userEmail}
                         readOnly={true}
                         size='lg'
                     />
-                    <IconButton className={styles.icon} label='Edit' kind='ghost' >
+                    <IconButton href='/account/changeemail' className={styles.icon} label='Edit' kind='ghost' >
                         <Edit/>
                     </IconButton>
                 </div>
@@ -77,9 +82,22 @@ function MyAccountPage() {
                         type='password'
                         size='lg'
                     />
-                    <IconButton className={styles.icon} label='Edit' kind='ghost' >
+                    <IconButton href='/account/changepassword' className={styles.icon} label='Edit' kind='ghost' >
                         <Edit/>
                     </IconButton>
+                </div>
+
+                <div className={styles.mainText}>
+                    <p>Created At</p>
+                    <TextInput
+                        labelText=''
+                        id='password'
+                        className={styles.textBox} 
+                        defaultValue={date}
+                        readOnly={true}
+                        type='text'
+                        size='lg'
+                    />
                 </div>
                 
             </div>

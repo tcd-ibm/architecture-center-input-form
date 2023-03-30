@@ -12,6 +12,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["X-Total-Count", "X-Total-Pages"]
 )
 
 # Add API routes

@@ -6,6 +6,7 @@ import styles from './MainPage.module.scss';
 import MainHeader from '@/Components/MainHeader';
 import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
 import Card from '@/Components/Card';
+import FeaturedCard from '../Components/FeaturedCard';
 
 function MainPage() {
 
@@ -61,6 +62,7 @@ function MainPage() {
         <Content>
             { isLoading ? <div>Loading...</div> : 
                 <div id={styles.cardContainer}>
+                    <FeaturedCard project={projects[0]} />
                     {projects.map((projectData, index) => (
                         <Card projectData={projectData} key={index} />
                     ))}

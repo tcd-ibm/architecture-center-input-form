@@ -39,10 +39,25 @@
 }
 
 .titleLink {
+    padding-left:  4px;
+    padding-right: 4px;
     padding-bottom: 1rem;
     cursor: pointer;
+    font-size: 20px;
+}
+
+.description {
+    padding-left:  4px;
+    padding-right: 4px;
+    font-size: 18px;
 }
 
 .tags {
     padding-top: 1rem;
+}
+
+.featuredTag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }

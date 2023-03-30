@@ -12,7 +12,14 @@ import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
 import ProjectDetails from './routes/ProjectDetails';
-import MyAccountPage from './routes/MyAccountPage';
+import ShowcaseSettingsPage from './routes/adminpanel/ShowcaseSettingsPage';
+import ContentSettingsPage from './routes/adminpanel/ContentSettingsPage';
+import ManageUsersPage from './routes/adminpanel/ManageUsersPage';
+import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
+import DashboardPage from './routes/adminpanel/DashboardPage';
+import AdminPanel from './routes/AdminPanel';
+import MyAccountPage from './routes/MyAccount/MyAccountPage';
+import ChangePasswordPage from './routes/MyAccount/ChangePasswordPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
 
@@ -37,12 +44,42 @@ const router = createBrowserRouter([
     element: <SignUpPage />
   },
   {
-    path: '/account',
-    element: <MyAccountPage />
-  },
-  {
     path: '/details/:projectId',
     element: <ProjectDetails />,
+  },
+  {
+    path: '/account',
+    element: <MyAccountPage />,
+  },
+  {
+    path: '/account/changepassword',
+    element: <ChangePasswordPage />
+  },
+  {
+    path: '/adminpanel',
+    element: <AdminPanel />,
+    children: [
+      {
+        path: 'showcase',
+        element: <ShowcaseSettingsPage />
+      },
+      {
+        path: 'content',
+        element: <ContentSettingsPage />
+      },
+      {
+        path: 'users',
+        element: <ManageUsersPage />
+      },
+      {
+        path: 'projects',
+        element: <ManageProjectsPage />
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardPage />
+      }
+    ]
   }
 ]);
  

@@ -22,7 +22,7 @@ function useAuth() {
         if(persist) {
             try {
                 localStorage.setItem(LOCAL_STORAGE_USER_OBJECT_KEY, JSON.stringify(
-                    new User(response.data.access_token, response.data.role)
+                    new User(response.data.access_token, new Date(response.data.expires_at+'Z'), response.data.role)
                 ));
             } catch(error) {
                 // write to localStorage failed, saving just in local state
@@ -54,6 +54,7 @@ function useAuth() {
             const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
             if(!storedUserData) return null;
             const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
+            storedUser.tokenExpirationDate = new Date(storedUser.tokenExpirationDate);
             if(storedUser.isExpired()) return null;
             return storedUser;
         },
@@ -71,6 +72,7 @@ function AuthContextProvider(props) {
             const storedUserData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_OBJECT_KEY));
             if(storedUserData) {
                 const storedUser = Object.setPrototypeOf(storedUserData, User.prototype);
+                storedUser.tokenExpirationDate = new Date(storedUser.tokenExpirationDate);
                 if(storedUser.isExpired()) {
                     localStorage.removeItem(LOCAL_STORAGE_USER_OBJECT_KEY);
                 } else {
