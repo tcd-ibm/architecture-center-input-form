@@ -2,6 +2,7 @@ import { Badge, Events, Book } from '@carbon/icons-react';
 import { Heading, Tile } from '@carbon/react';
 import { SimpleBarChart, DonutChart} from '@carbon/charts-react';
 import styles from '@carbon/charts/styles.css';
+import styles2 from './DashboardPage.module.scss';
 
 function DashboardPage() {
 const state = {
@@ -72,11 +73,11 @@ const state = {
     return (
         <>
         <Heading style={{marginBottom: '20px'}}>Dashboard</Heading>
-        <div className = {styles.tileContainer}>
+        <div className = {styles2.tileContainer}>
 
             {/*Users*/}
             <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
-                <div className={styles.divCenter}>
+                <div className={styles2.divCenter}>
                     <Events style = {{height: '60px', width: '40px'}}></Events>
                 </div> 
                 <h4 style={{textAlign: 'center'}}>Users</h4>
@@ -85,7 +86,7 @@ const state = {
 
             {/*Projects*/}
             <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
-                <div className={styles.divCenter}>
+                <div className={styles2.divCenter}>
                     <Book style={{height:'60px', width: '40px'}}></Book>
                 </div>
                 <h4 style={{textAlign: 'center'}}>Projects</h4>
@@ -95,7 +96,7 @@ const state = {
 
             {/*Sponsors*/}
             <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
-                <div className={styles.divCenter}>
+                <div className={styles2.divCenter}>
                     <Badge style={{height:'60px', width:'40px'}}></Badge>
                 </div>
                 <h4 style={{textAlign: 'center'}}>Sponsors</h4>
@@ -104,14 +105,15 @@ const state = {
 
         </div>
 
-        <div>
+        <br></br>
 
+        <div className = {styles2.tileContainer}>
             {/*Tags*/}
             <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
                 <h4 style={{textAlign: 'center'}}>Popular Tags</h4>
-                <DonutChart
-                    data={state2.data2}
-                    options={state2.options2}>
+                <DonutChart 
+                        data={state2.data2}
+                        options={state2.options2}>
                 </DonutChart>
             </Tile>
 
