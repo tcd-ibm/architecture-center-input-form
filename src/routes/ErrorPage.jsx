@@ -11,8 +11,8 @@ function ErrorPage() {
          <MainHeader />
             <Content className={styles.mainContainer}>
                     <Heading className={styles.notFound}>{error.status} {error.statusText}!</Heading>
-                    <p class='text' >{error.error.message}</p>
-                    <p class='text' >Please click <a href='/'>here</a> to return to the Home Page.</p>
+                    <p>{error.error?.message}</p>
+                    <p>Please click <a href='/'>here</a> to return to the Home Page.</p>
             </Content>
         </>
     );

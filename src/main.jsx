@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
 // eslint-disable-next-line custom-rules/no-global-css
@@ -29,60 +29,70 @@ axios.defaults.baseURL = 'http://localhost:5297/api/v1/';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainPage />,
-    errorElement: <ErrorPage />
-  },
-  {
-    path: '/add',
-    element: <AddProjectPage />
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />
-  },
-  {
-    path: '/login',
-    element: <LoginPage />
-  },
-  {
-    path: '/signup',
-    element: <SignUpPage />
-  },
-  {
-    path: '/details/:projectId',
-    element: <ProjectDetails />,
-  },
-  {
-    path: '/account',
-    element: <MyAccountPage />,
-  },
-  {
-    path: '/account/changepassword',
-    element: <ChangePasswordPage />
-  },
-  {
-    path: '/adminpanel',
-    element: <AdminPanel />,
+    element: <Outlet />,
+    errorElement: <ErrorPage />,
     children: [
       {
-        path: 'showcase',
-        element: <ShowcaseSettingsPage />
+        index: true,
+        element: <MainPage />
       },
       {
-        path: 'content',
-        element: <ContentSettingsPage />
+        path: 'add',
+        element: <AddProjectPage />
       },
       {
-        path: 'users',
-        element: <ManageUsersPage />
+        path: 'settings',
+        element: <SettingsPage />
       },
       {
-        path: 'projects',
-        element: <ManageProjectsPage />
+        path: 'login',
+        element: <LoginPage />
       },
       {
-        path: 'dashboard',
-        element: <DashboardPage />
+        path: 'signup',
+        element: <SignUpPage />
+      },
+      {
+        path: 'details/:projectId',
+        element: <ProjectDetails />,
+      },
+      {
+        path: 'account',
+        element: <MyAccountPage />,
+      },
+      {
+        path: 'account/changepassword',
+        element: <ChangePasswordPage />
+      },
+      {
+        path: 'adminpanel',
+        element: <AdminPanel />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to='dashboard' replace={true} />
+          },
+          {
+            path: 'showcase',
+            element: <ShowcaseSettingsPage />
+          },
+          {
+            path: 'content',
+            element: <ContentSettingsPage />
+          },
+          {
+            path: 'users',
+            element: <ManageUsersPage />
+          },
+          {
+            path: 'projects',
+            element: <ManageProjectsPage />
+          },
+          {
+            path: 'dashboard',
+            element: <DashboardPage />
+          }
+        ]
       }
     ]
   }
