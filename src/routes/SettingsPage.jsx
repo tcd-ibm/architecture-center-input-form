@@ -11,6 +11,7 @@ function SettingsPage() {
           stored === 'true' ? true : false);
         
     const color=(toggleDarkMode ? '161616': 'white');
+    const text=(toggleDarkMode ? 'Dark Mode': 'Light Mode');
 
     return (
         <>
@@ -24,7 +25,7 @@ function SettingsPage() {
                         setToggleDarkMode(!toggleDarkMode);
                         localStorage.setItem('toggleDarkMode', !toggleDarkMode);
                     }}>
-                        Change Mode
+                        {text}
                     </Button>
                 </div>
             </Theme>
