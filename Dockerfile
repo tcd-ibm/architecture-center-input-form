@@ -11,13 +11,17 @@ RUN yum -y update
 RUN yum install -y python3 python3-pip vim npm sqlite
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+RUN npm install -g npm@9.6.2
+
 RUN npm install -global yarn
 RUN yarn install
 
-RUN chmod +x start.sh
 
 EXPOSE 5297
 EXPOSE 4621
+
+RUN chmod +x start.sh
+RUN chmod -R 777 /architecture-center-input-form
 
 CMD start.sh
 # gunicorn app:app -b 0.0.0.0:5297 -w 8 -k uvicorn.workers.UvicornWorker & yarn dev
