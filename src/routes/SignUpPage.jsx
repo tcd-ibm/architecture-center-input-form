@@ -2,9 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MainHeader from '@/Components/MainHeader';
-import EmailInput from '@/Components/EmailInput';
-import ValidatedPasswordInput from '../Components/ValidatedPasswordInput';
-import ValidatedPasswordConfirmationInput from '../Components/ValidatedPasswordConfirmationInput';
+import { EmailInput, NewPasswordConfirmationInput, NewPasswordInput } from '@/Components/ValidatedInputs';
 
 import { ArrowRight } from '@carbon/icons-react';
 import { Content, Tile, Button, InlineNotification, Link, FluidForm, Theme } from '@carbon/react';
@@ -43,9 +41,9 @@ function SignUpPage() {
         } catch (error) {
             if (error?.response?.status === 400) {
                 const detail = error.response.data.detail;
-                if (detail === 'Email registered already')
+                if (detail === 'Email already registered')
                     setErrorText(detail);
-                else if (detail === 'Password invalid, should be at least 8 characters')
+                else if (detail === 'Password should be at least 8 characters')
                     setErrorText(detail);
                 else
                     setErrorText(detail);
@@ -90,14 +88,14 @@ function SignUpPage() {
                                 ref={emailRef} 
                             />
 
-                            <ValidatedPasswordInput 
+                            <NewPasswordInput 
                                 className={styles.input} 
                                 id='password' 
                                 ref={passwordRef} 
                                 onChange={() => confirmPasswordRef.current.validate()} 
                             />
 
-                            <ValidatedPasswordConfirmationInput 
+                            <NewPasswordConfirmationInput 
                                 className={styles.input}
                                 id='passwordConfirmation' 
                                 primaryRef={passwordRef} 

@@ -3,8 +3,7 @@ import { Tile, FluidForm, InlineNotification, Checkbox, Button } from '@carbon/r
 import { ArrowRight } from '@carbon/icons-react';
 import styles from './LoginFormGeneric.module.scss';
 
-import EmailInput from './EmailInput';
-import PasswordInput from './PasswordInput';
+import { EmailInput, PasswordInput } from './ValidatedInputs';
 
 function LoginFormGeneric(props, ref) {
     const {subheadingContentNode, errorText, setErrorText, inputType, rememberIdCheckbox, backLink, buttonText, onSubmit} = props;
