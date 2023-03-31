@@ -21,6 +21,9 @@ function MainHeader() {
                     Add new project
                     <DocumentAdd style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
                 </CustomHeaderMenuItem>
+                <CustomHeaderMenuItem href='/settings'>
+                    Settings
+                </CustomHeaderMenuItem>
                 { user?.isAdmin() &&
                     <CustomHeaderMenuItem href='/adminpanel/dashboard'>
                         Admin panel

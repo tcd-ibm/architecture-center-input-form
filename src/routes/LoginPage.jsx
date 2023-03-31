@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Content } from '@carbon/react';
+import { Content, Theme } from '@carbon/react';
+import {Helmet} from 'react-helmet';
 import styles from './LoginPage.module.scss';
 
 import MainHeader from '@/Components/MainHeader';
@@ -17,6 +18,9 @@ function LoginPage() {
     const [errorText, setErrorText] = useState(null);
     const inputRef = useRef();
     const navigate = useNavigate();
+
+    const stored = localStorage.getItem('toggleDarkMode');
+    const color=(stored==='true' ? '161616': 'white');
 
     const handleEmailSubmit = () => {
         if(inputRef.current.validate()) {
@@ -51,15 +55,20 @@ function LoginPage() {
 
     return (
         <>
-        <MainHeader />
-        <Content>
-            <div className={styles.loginFormContainer}>
-                { email ?
-                    <LoginFormPasswordStep email={email} onSubmit={getPassword} errorText={errorText} setErrorText={setErrorText} ref={inputRef} /> :
-                    <LoginFormEmailStep onSubmit={handleEmailSubmit} ref={inputRef} />
-                }
-            </div>
-        </Content>
+        <Theme theme ={stored==='true' ? 'g100' : 'white'}>
+            <Helmet>
+                <style>{'body { background-color:#'+ color + '; }'}</style> 
+            </Helmet>
+            <MainHeader />
+            <Content>
+                <div className={styles.loginFormContainer}>
+                    { email ?
+                        <LoginFormPasswordStep email={email} onSubmit={getPassword} errorText={errorText} setErrorText={setErrorText} ref={inputRef} /> :
+                        <LoginFormEmailStep onSubmit={handleEmailSubmit} ref={inputRef} />
+                    }
+                </div>
+            </Content>
+        </Theme>
         </>
     );
 }

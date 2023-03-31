@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Content } from '@carbon/react';
+import { Content, Theme } from '@carbon/react';
 import styles from './MainPage.module.scss';
+import {Helmet} from 'react-helmet';
 
 import MainHeader from '@/Components/MainHeader';
 import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
@@ -14,6 +15,9 @@ function MainPage() {
     const [projects, setProjects] = useState([]);
     const [queryMenuContent, setQueryMenuContent] = useState([]);
     const queryMenuRef = useRef();
+
+    const stored = localStorage.getItem('toggleDarkMode');
+    const color=(stored==='true' ? '161616': 'white');
 
     useEffect(() => {
         axios.get('/tags').then(res => {
@@ -56,19 +60,24 @@ function MainPage() {
 
     return (
         <>
-        <MainHeader />
-        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
-        
-        <Content>
-            { isLoading ? <div>Loading...</div> : 
-                <div id={styles.cardContainer}>
-                    <FeaturedCard project={projects[0]} />
-                    {projects.map((projectData, index) => (
-                        <Card projectData={projectData} key={index} />
-                    ))}
-                </div>
-            }
-        </Content>
+        <Theme theme ={stored==='true' ? 'g100' : 'white'}>
+            <Helmet>
+                <style>{'body { background-color:#'+ color + '; }'}</style> 
+            </Helmet>
+            <MainHeader />
+            <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
+            
+            <Content>
+                { isLoading ? <div>Loading...</div> : 
+                    <div id={styles.cardContainer}>
+                        <FeaturedCard project={projects[0]} />
+                        {projects.map((projectData, index) => (
+                            <Card projectData={projectData} key={index} />
+                        ))}
+                    </div>
+                }
+            </Content>
+        </Theme>
         </>
     );
 }
