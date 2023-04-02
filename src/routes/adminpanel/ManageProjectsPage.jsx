@@ -114,10 +114,9 @@ function ManageProjectsPage() {
 
 
     function handleModifyProject(selectedRows) {
-        if (selectedRows.length > 1) {
-            setPassiveModalOpen(true);
-        } else {
-            navigate(`/editproject/${selectedRows[0].id}`);
+        if (selectedRows.length == 1) {
+            const projectId = selectedRows[0].id;
+            navigate(`/editproject/${projectId}`);
         }
     }
 

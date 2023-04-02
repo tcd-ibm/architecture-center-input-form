@@ -52,7 +52,7 @@ export default function EditProject({projectData, user, isEdit}) {
         try {
             console.log(requestBody);
             if (isEdit) { // If editing an existing project
-                await axios.put('/user/project/${projectData.projectId}', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+                await axios.put(`/user/project/${projectData.id}`, requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
             } else {      // If creating a new project
                 await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
             }
