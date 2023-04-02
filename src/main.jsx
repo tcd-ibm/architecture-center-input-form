@@ -8,6 +8,7 @@ import './index.scss';
 
 import MainPage from './routes/MainPage';
 import AddProjectPage from './routes/AddProjectPage';
+import EditProjectPage from './routes/EditProjectPage';
 import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: '/add',
     element: <AddProjectPage />
+  },
+  {
+    path: '/editproject/:projectId',
+    element: <EditProjectPage />,
   },
   {
     path: '/login',
