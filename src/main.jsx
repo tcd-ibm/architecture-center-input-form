@@ -31,39 +31,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Outlet />,
-    errorElement: <ErrorPage />
-  },
-  {
-    path: '/add',
-    element: <AddProjectPage />
-  },
-  {
-    path: '/editproject/:projectId',
-    element: <EditProjectPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />
-  },
-  {
-    path: '/signup',
-    element: <SignUpPage />
-  },
-  {
-    path: '/details/:projectId',
-    element: <ProjectDetails />,
-  },
-  {
-    path: '/account',
-    element: <MyAccountPage />,
-  },
-  {
-    path: '/account/changepassword',
-    element: <ChangePasswordPage />
-  },
-  {
-    path: '/adminpanel',
-    element: <AdminPanel />,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -72,6 +40,10 @@ const router = createBrowserRouter([
       {
         path: 'add',
         element: <AddProjectPage />
+      },
+      {
+        path: 'edit/:projectId',
+        element: <EditProjectPage />,
       },
       {
         path: 'settings',
@@ -130,6 +102,7 @@ const router = createBrowserRouter([
     ]
   }
 ]);
+
  
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

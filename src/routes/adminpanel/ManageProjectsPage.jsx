@@ -116,7 +116,7 @@ function ManageProjectsPage() {
     function handleModifyProject(selectedRows) {
         if (selectedRows.length == 1) {
             const projectId = selectedRows[0].id;
-            navigate(`/editproject/${projectId}`);
+            navigate(`/edit/${projectId}`);
         }
     }
 
