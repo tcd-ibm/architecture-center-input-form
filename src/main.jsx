@@ -9,6 +9,7 @@ import './index.scss';
 import MainPage from './routes/MainPage';
 import AddProjectPage from './routes/AddProjectPage';
 import SettingsPage from './routes/SettingsPage';
+import EditProjectPage from './routes/EditProjectPage';
 import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
@@ -30,7 +31,39 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Outlet />,
-    errorElement: <ErrorPage />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: '/add',
+    element: <AddProjectPage />
+  },
+  {
+    path: '/editproject/:projectId',
+    element: <EditProjectPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />
+  },
+  {
+    path: '/signup',
+    element: <SignUpPage />
+  },
+  {
+    path: '/details/:projectId',
+    element: <ProjectDetails />,
+  },
+  {
+    path: '/account',
+    element: <MyAccountPage />,
+  },
+  {
+    path: '/account/changepassword',
+    element: <ChangePasswordPage />
+  },
+  {
+    path: '/adminpanel',
+    element: <AdminPanel />,
     children: [
       {
         index: true,
