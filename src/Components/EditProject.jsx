@@ -18,6 +18,7 @@ export default function EditProject({projectData, user, isEdit}) {
     const completionDateInputRef = useRef();
     const previewDescriptionInputRef = useRef();
     const contentInputRef = useRef();
+    const [content, setContent] = useState(projectData.content);
 
 	useEffect(() => {
         if(!user) {
@@ -152,7 +153,7 @@ export default function EditProject({projectData, user, isEdit}) {
                 </Tile>
                 <Tile style={{paddingBottom: '0px', paddingTop: '10px', paddingRight: '0px'}}>
                     {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
-                    <DocEditor ref={contentInputRef} />
+                    <DocEditor code={content} ref={contentInputRef} />
                 </Tile>
                 <Button type='submit'>Save</Button>
             </Stack>

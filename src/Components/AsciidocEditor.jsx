@@ -1,4 +1,4 @@
-import { useState, useImperativeHandle, forwardRef } from 'react';
+import { useState, useImperativeHandle, forwardRef, useEffect } from 'react';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-asciidoc';
@@ -25,6 +25,14 @@ function DocEditor(props, ref) {
   const [code, setCode] = useState(
     'This is an interactive editor.\nUse it to try https://asciidoc.org[AsciiDoc].\n\n== Section Title\n\n* A list item\n* Another list item'
   );
+
+  
+  useEffect (() => {
+    if (props.code !== null) {
+      setCode(props.code);
+    }
+  }, [props.code]);
+  
 
   useImperativeHandle(ref, () => ({
     get value() {

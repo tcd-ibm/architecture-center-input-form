@@ -30,7 +30,7 @@ function MainHeader() {
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
-                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{boxShadow: 'none'}}>
+                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{boxShadow: 'none'}} ariaLabel='My Account'>
                             <CustomOverflowMenuItem itemText='My Account' href='/account' />
                             <CustomOverflowMenuItem itemText='Log out' onClick={logout} />
                     </OverflowMenu>
