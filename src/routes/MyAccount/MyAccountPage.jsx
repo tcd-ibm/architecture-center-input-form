@@ -1,5 +1,5 @@
 import { Content, SideNav, SideNavItems, Theme, Heading } from '@carbon/react';
-import { Cube, Dashboard} from '@carbon/icons-react';
+import { CubeView, Information} from '@carbon/icons-react';
 import MainHeader from '@/Components/MainHeader';
 import CustomSideNavLink from '@/Components/CustomSideNavLink';
 import { Outlet } from 'react-router';
@@ -25,14 +25,13 @@ function MyAccountPage() {
                 isFixedNav
                 expanded={true}
                 isChildOfHeader={false}
-                aria-label='Admin panel navigation'
-                large>
+                aria-label='Admin panel navigation'>
 
                 <SideNavItems>
-                    <CustomSideNavLink href='user-info' renderIcon={Dashboard}>
+                    <CustomSideNavLink href='user-info' renderIcon={Information}>
                         User Info
                     </CustomSideNavLink>
-                    <CustomSideNavLink href='my-projects' renderIcon={Cube}>
+                    <CustomSideNavLink href='my-projects' renderIcon={CubeView}>
                         My Projects
                     </CustomSideNavLink>
                 </SideNavItems>

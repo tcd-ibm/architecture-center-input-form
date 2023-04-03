@@ -148,7 +148,7 @@ function ManageProjectsPage() {
                 <Modal open={dangerModalOpen}
                     danger
                     size='sm'
-                    modalHeading='Are you sure you want to delete the currently selected project(s)? This action is irreversible.'
+                    modalHeading='Are you sure you want to delete the selected projects? This action is irreversible.'
                     modalLabel='Delete Projects'
                     primaryButtonText='Delete'
                     secondaryButtonText='Cancel'
