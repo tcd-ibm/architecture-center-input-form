@@ -57,9 +57,9 @@ function MainPage() {
     return (
         <>
         <MainHeader />
-        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
+        <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} ariaLabel='Sidenav' />
         
-        <Content>
+        <Content ariaLabel='Content'>
             { isLoading ? <div>Loading...</div> : 
                 <div id={styles.cardContainer}>
                     <FeaturedCard project={projects[0]} />
