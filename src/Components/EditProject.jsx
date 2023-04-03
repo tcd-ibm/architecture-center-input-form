@@ -29,7 +29,7 @@ export default function EditProject({projectData, user, isEdit}) {
                 const tempTags = res.data.map(categoryItem => categoryItem.tags).flat();
                 if (isEdit) {
                     setTags(tempTags.map(item =>
-                        (projectData.tags.includes(item) ? { ...item, selected: true } : item)
+                        (projectData.tags.some(selectedTag => selectedTag.tagId === item.tagId) ? { ...item, selected: true } : item)
                     ));
                 } else {
                     setTags(tempTags);
