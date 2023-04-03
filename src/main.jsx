@@ -21,6 +21,8 @@ import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
 import DashboardPage from './routes/adminpanel/DashboardPage';
 import AdminPanel from './routes/AdminPanel';
 import MyAccountPage from './routes/MyAccount/MyAccountPage';
+import MyProjectsPage from './routes/MyAccount/MyProjectsPage';
+import UserInfoPage from './routes/MyAccount/UserInfoPage';
 import ChangePasswordPage from './routes/MyAccount/ChangePasswordPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
@@ -64,10 +66,24 @@ const router = createBrowserRouter([
       {
         path: 'account',
         element: <MyAccountPage />,
-      },
-      {
-        path: 'account/changepassword',
-        element: <ChangePasswordPage />
+        children: [
+          {
+            index: true,
+            element: <Navigate to='user-info' replace={true} />
+          },
+          {
+            path: 'user-info',
+            element: <UserInfoPage />
+          },
+          {
+            path: 'change-password',
+            element: <ChangePasswordPage />
+          },
+          {
+            path: 'my-projects',
+            element: <MyProjectsPage />
+          }
+        ]
       },
       {
         path: 'adminpanel',

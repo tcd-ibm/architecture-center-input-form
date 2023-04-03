@@ -29,15 +29,15 @@ function MainHeader() {
                     Add new project
                     <DocumentAdd style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
                 </CustomHeaderMenuItem>
-                <CustomHeaderMenuItem href='/settings'>
-                    <AsleepFilled style={{top: '2px', position: 'relative'}}/>
-                </CustomHeaderMenuItem>
                 { user?.isAdmin() &&
                     <CustomHeaderMenuItem href='/adminpanel/dashboard'>
                         Admin panel
                         <InventoryManagement style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
                     </CustomHeaderMenuItem>
                 }
+                <CustomHeaderMenuItem href='/settings'>
+                    <AsleepFilled style={{top: '2px', position: 'relative'}}/>
+                </CustomHeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar>
                 { user &&
