@@ -24,18 +24,19 @@ export default function EditProject({projectData, user, isEdit}) {
         if(!user) {
 			navigate('/login', { replace: true });
 		}
-        axios.get('/tags').then(res => {
-            setTags( 
-                res.data.map(categoryItem => categoryItem.tags).flat()
-            );
-        })
-        .catch(error => {
-            console.log(error);
-        });
-        if (isEdit) {
-            setTags(tags.map(item =>
-                (projectData.tags.includes(item) ? { ...item, selected: true } : item)
-            ));
+        try {
+            axios.get('/tags').then(res => {
+                const tempTags = res.data.map(categoryItem => categoryItem.tags).flat();
+                if (isEdit) {
+                    setTags(tempTags.map(item =>
+                        (projectData.tags.includes(item) ? { ...item, selected: true } : item)
+                    ));
+                } else {
+                    setTags(tempTags);
+                }
+            });
+        } catch (error) {
+            console.error(error);
         }
     }, [navigate, user]);
 
