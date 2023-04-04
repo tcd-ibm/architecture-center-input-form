@@ -66,7 +66,7 @@ function ProjectQuerySidePanel(props, ref) {
                     onKeyUp={handleSearch}
                 />
                 {menuContent && <Accordion>
-                    {menuContent.map((item, index) => <AccordionItem title={item.title} key={index}>
+                    {menuContent.map((item, index) => <AccordionItem title={item.title} key={index} open>
                         <fieldset className='cds--fieldset'>
                             {item.tags.map((tagItem, index) => 
                                 <Checkbox labelText={tagItem.name} id={tagItem.id} checked={selectedTagList.includes(tagItem.id)} onChange={handleFilterChange} key={index} />
