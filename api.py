@@ -17,7 +17,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured
+from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, CategoryBase, TagBase
 
 from datetime import timedelta, datetime
 
@@ -373,6 +373,163 @@ async def admin_get_all_projects(
                                         0)).limit(min(per_page,
                                                       MAX_PAGE_SIZE)))
     return result.scalars().all()
+
+
+@router.post("/admin/category", response_model=Category)
+async def create_category(new_category: Category,
+                          current_user: User = Depends(get_current_user),
+                          session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can create category")
+
+    if not new_category.categoryId or not new_category.categoryName:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="name and description are required")
+
+    r = await session.execute(select(Category).where(
+        Category.categoryId == new_category.categoryId))
+    if r.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Category already exists")
+
+    session.add(new_category)
+    await session.commit()
+    await session.refresh(new_category)
+    return new_category
+
+
+@router.put("/admin/category/{id}", response_model=CategoryBase)
+async def update_category(id: int,
+                          updated_category: CategoryBase,
+                          current_user: User = Depends(get_current_user),
+                          session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can update category")
+
+    if id != updated_category.categoryId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="id in url and body must match")
+
+    r = await session.execute(select(Category).where(Category.categoryId == id))
+    original_instance = r.scalar_one_or_none()
+    if not original_instance:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Category not found")
+
+    for k, v in updated_category.__dict__.items():
+        if v is not None:
+            setattr(original_instance, k, v)
+
+    session.add(original_instance)
+    await session.commit()
+    await session.refresh(original_instance)
+    return original_instance
+
+
+@router.delete("/admin/category/{id}")
+async def delete_category(id: int,
+                          current_user: User = Depends(get_current_user),
+                          session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can delete category")
+
+    r = await session.execute(select(Category).where(
+        Category.categoryId == id))
+    original_instance = r.scalar_one_or_none()
+
+    if not original_instance:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Category not found")
+
+    await session.delete(original_instance)
+    await session.commit()
+    await session.flush()
+    return {"status": "success"}
+
+
+@router.post("/admin/tag", response_model=Tag)
+async def create_tag(new_tag: Tag,
+                     current_user: User = Depends(get_current_user),
+                     session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can create category")
+
+    if not new_tag.tagId or not new_tag.tagName or not new_tag.categoryId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="id, name and category ID are required")
+
+    if (await session.execute(select(Tag).where(Tag.tagId == new_tag.tagId))).scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Tag already exists")
+
+    if not (await session.execute(select(Category).where(Category.categoryId == new_tag.categoryId))).scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Category not found")
+
+    session.add(new_tag)
+    await session.commit()
+    await session.refresh(new_tag)
+    return new_tag
+
+
+@router.put("/admin/tag/{id}", response_model=TagBase)
+async def update_tag(id: int,
+                     updated_tag: TagBase,
+                     current_user: User = Depends(get_current_user),
+                     session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can update tag")
+
+    if id != updated_tag.tagId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="id in url and body must match")
+
+    r = await session.execute(select(Tag).where(Tag.tagId == id))
+    original_instance = r.scalar_one_or_none()
+
+    if not original_instance:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Tag not found")
+
+    for k, v in updated_tag.__dict__.items():
+        if v is not None:
+            if k == "categoryId":
+                r = await session.execute(select(Category).where(Category.categoryId == v))
+                if not r.scalar_one_or_none():
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                        detail="Category not found")
+
+            setattr(original_instance, k, v)
+
+    session.add(original_instance)
+    await session.commit()
+    await session.refresh(original_instance)
+    return original_instance
+
+
+@router.delete("/admin/tag/{id}")
+async def delete_tag(id: int,
+                     current_user: User = Depends(get_current_user),
+                     session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can delete tag")
+
+    r = await session.execute(select(Tag).where(Tag.tagId == id))
+    original_instance = r.scalar_one_or_none()
+    if not original_instance:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Tag not found")
+
+    await session.delete(original_instance)
+    await session.commit()
+    await session.flush()
+    return {"status": "success"}
 
 
 @router.get("/user/{id}/projects", response_model=List[ProjectWithUserAndTags])
