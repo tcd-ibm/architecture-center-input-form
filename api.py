@@ -17,7 +17,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo
+from models import User, UserSignup, UserUpdate, Token, ProjectBase, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured
 
 from datetime import timedelta, datetime
 
@@ -662,13 +662,18 @@ async def query_user_projects(
     return r.scalars().all()
 
 
-@router.get("/project/featured")
-async def get_featured_project(session: AsyncSession = Depends(get_session)):
+@router.get("/project/featured", response_model=ProjectFeatured)
+async def get_featured_project(session: AsyncSession = Depends(
+    get_session)) -> ProjectFeatured:
     if not id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Project ID is required")
 
-    r = await session.execute(select(Project).where(Project.is_featured))
+    # == True is required because SQLAlchemy doesn't know how to compare
+    r = await session.execute(
+        select(Project).options(selectinload(
+            Project.tags)).where(Project.is_featured == True).limit(1))
+
     project = r.scalar_one_or_none()
 
     if not project:

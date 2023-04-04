@@ -124,5 +124,10 @@ class ProjectFull(ProjectWithUserAndTags):
     content: str
 
 
+class ProjectFeatured(ProjectBase):
+    tags: List["Tag"] = []
+    date: datetime
+
+
 ProjectWithUserAndTags.update_forward_refs()
 CategoryWithTags.update_forward_refs()
