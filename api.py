@@ -532,12 +532,17 @@ async def delete_tag(id: int,
     return {"status": "success"}
 
 
-@router.get("/user/{id}/projects", response_model=List[ProjectWithUserAndTags])
+@router.get("/admin/user/{id}/projects", response_model=List[ProjectWithUserAndTags])
 async def get_projects_by_user_id(id: str,
                                   response: Response,
                                   per_page: int = DEFAULT_PAGE_SIZE,
                                   page: int = DEFAULT_PAGE,
-                                  session: AsyncSession = Depends(get_session)):
+                                  session: AsyncSession = Depends(get_session),
+                                  current_user: User = Depends(get_current_user)):
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can get projects by user id")
 
     id = id.replace("-", "")
     if len(id) != 32:
