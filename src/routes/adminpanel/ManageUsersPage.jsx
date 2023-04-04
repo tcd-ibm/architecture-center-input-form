@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { Button, DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, Table, TableHead, TableHeader, TableRow, 
-    TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination } from '@carbon/react';
+    TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal } from '@carbon/react';
 import { Cube, TrashCan, UserRole } from '@carbon/icons-react';
 
 import styles from './ManageUsersPage.module.scss';
@@ -12,8 +12,10 @@ import ModalBulkUserDeletion from '@/Components/ModalBulkUserDeletion';
 
 import useAuth from '@/hooks/useAuth';
 import { isAdminRole } from '@/utils/User';
+import ProjectManager from '../../Components/ProjectManager';
 
 function ManageUsersPage() {
+
     const headers = [
         {
             header: 'Email',
@@ -48,9 +50,11 @@ function ManageUsersPage() {
     const { user } = useAuth();
 
     const [data, setData] = useState([]);
+    const [userID, setUserID] = useState();
     const [numberOfEntries, setNumberOfEntries] = useState();
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [projectsModalOpen, setProjectsModalOpen] = useState(false);
 
     useEffect(() => {
         if(!user) {
@@ -75,7 +79,7 @@ function ManageUsersPage() {
                 role: isAdminRole(user.role) ? 'admin' : 'user',
                 numberOfProjects: '42 (7 unapproved)',
                 actions:    <> 
-                            <Button kind='ghost' renderIcon={Cube}>Projects</Button>
+                            <Button kind='ghost' renderIcon={Cube} onClick={() => handleProjectsModal(user.id)}>Projects</Button>
                             <Button kind='ghost' renderIcon={UserRole}>Change role</Button>
                             <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
                             </>
@@ -91,6 +95,12 @@ function ManageUsersPage() {
     const handlePaginationChange = event => {
         setPage(event.page);
         setPageSize(event.pageSize);
+    };
+
+    const handleProjectsModal = (tempID) => {
+        setUserID(tempID);
+        setProjectsModalOpen(true);
+        console.log(tempID);
     };
 
     return (
@@ -188,6 +198,15 @@ function ManageUsersPage() {
             }}
         </DataTable>
         <ModalBulkUserDeletion users={data} onConfirm={selectedIds => console.log(selectedIds)} ref={deletionModalRef} />
+        <Modal
+            open={projectsModalOpen}
+            passiveModal
+            modalLabel='View Projects'
+            onRequestClose={() => setProjectsModalOpen(false)}
+            >
+            <ProjectManager userID={userID} />
+        </Modal>
+
         </>
     );
 }

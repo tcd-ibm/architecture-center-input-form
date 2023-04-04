@@ -23,7 +23,6 @@ import AdminPanel from './routes/AdminPanel';
 import MyAccountPage from './routes/MyAccount/MyAccountPage';
 import MyProjectsPage from './routes/MyAccount/MyProjectsPage';
 import UserInfoPage from './routes/MyAccount/UserInfoPage';
-import ChangePasswordPage from './routes/MyAccount/ChangePasswordPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
 
@@ -74,10 +73,6 @@ const router = createBrowserRouter([
           {
             path: 'user-info',
             element: <UserInfoPage />
-          },
-          {
-            path: 'change-password',
-            element: <ChangePasswordPage />
           },
           {
             path: 'my-projects',
