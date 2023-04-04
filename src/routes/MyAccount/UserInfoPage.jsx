@@ -6,6 +6,7 @@ import useAuth from '@/hooks/useAuth';
 import { useNavigate } from 'react-router';
 import { useEffect, useState, useRef } from 'react';
 import { EmailInput, PasswordInput } from '@/Components/ValidatedInputs';
+import ProjectManager from '../../Components/ProjectManager';
 
 
 function UserInfoPage() {
@@ -139,6 +140,8 @@ function UserInfoPage() {
                       ref={passwordInputRef}
                     />
                 </Modal>
+
+                
             </div>
         </>
     );
