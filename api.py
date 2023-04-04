@@ -375,6 +375,34 @@ async def admin_get_all_projects(
     return result.scalars().all()
 
 
+@router.get("/user/{id}/projects", response_model=List[ProjectWithUserAndTags])
+async def get_projects_by_user_id(id: str,
+                                  response: Response,
+                                  per_page: int = DEFAULT_PAGE_SIZE,
+                                  page: int = DEFAULT_PAGE,
+                                  session: AsyncSession = Depends(get_session)):
+
+    id = id.replace("-", "")
+    if len(id) != 32:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid user id")
+
+    count = (await session.execute(select(func.count(Project.id)).where(
+        Project.user_id == id))).scalar_one_or_none()
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
+
+    result = await session.execute(
+        select(Project).options(selectinload(Project.user),
+                                selectinload(Project.tags)).where(
+                                    Project.user_id == id).offset(
+                                        max((page - 1) * per_page,
+                                            0)).limit(min(per_page,
+                                                          MAX_PAGE_SIZE)))
+    return result.scalars().all()
+
+
 @router.post("/user/project")
 async def create_project(title: str = Form(),
                          link: str = Form(),
