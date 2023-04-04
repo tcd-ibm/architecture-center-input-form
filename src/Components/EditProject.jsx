@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState, useRef, useImperativeHandle  } from 'react';
-import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag, DatePicker, DatePickerInput } from '@carbon/react';
+import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag, DatePicker, DatePickerInput, FormItem, FileUploaderDropContainer, FileUploaderItem } from '@carbon/react';
 import { useNavigate } from 'react-router';
 
 import DocEditor from '@/Components/AsciidocEditor';
@@ -19,6 +19,7 @@ export default function EditProject({projectData, user, isEdit}) {
     const previewDescriptionInputRef = useRef();
     const contentInputRef = useRef();
     const [content, setContent] = useState(projectData.content);
+    const [file, setFile] = useState();
 
 	useEffect(() => {
         if(!user) {
@@ -40,6 +41,12 @@ export default function EditProject({projectData, user, isEdit}) {
         }
     }, [navigate, user]);
 
+    const handleFileChange = event => {
+        if(event.target.files) {
+          setFile(event.target.files[0]);
+        }
+    };
+
     const handleSubmit = async event => {
         event.preventDefault();
         const requestBody = {
@@ -54,9 +61,18 @@ export default function EditProject({projectData, user, isEdit}) {
         try {
             console.log(requestBody);
             if (isEdit) { // If editing an existing project
+                //TODO image handling for edit requests, required changes in the backend
                 await axios.put(`/user/project/${projectData.id}`, requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
             } else {      // If creating a new project
-                await axios.post('/user/project', requestBody, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+                const formData = new FormData();
+                formData.append('title', titleInputRef.current.value);
+                formData.append('link', linkInputRef.current.value);
+                formData.append('description', previewDescriptionInputRef.current.value);
+                formData.append('content', contentInputRef.current.value);
+                formData.append('date', date);
+                formData.append('tags', tags.filter(item => item?.selected).map(item => item.tagId));
+                formData.append('imageFile', file);
+                await axios.post('/user/project', formData, { headers: { Authorization: `Bearer ${user.accessToken}` } });
             }
             navigate('/');
         } catch(error) {
@@ -156,6 +172,39 @@ export default function EditProject({projectData, user, isEdit}) {
                     {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
                     <DocEditor code={content} ref={contentInputRef} />
                 </Tile>
+                {
+                    file ?
+                    <FileUploaderItem
+                        name={file.name}
+                        status='edit'
+                        onDelete={() => setFile(null)}
+                    />
+                    :
+                    <FormItem>
+                        <p className='cds--file--label'>
+                            Upload files
+                        </p>
+                        <p className='cds--label-description'>
+                            Max file size is 500kb. Supported file types are .jpg and .png.
+                        </p>
+                        <FileUploaderDropContainer
+                            accept={[
+                                'image/jpeg',
+                                'image/png'
+                            ]}
+                            innerRef={{
+                                current: '[Circular]'
+                            }}
+                            labelText='Drag and drop files here or click to upload'
+                            name=''
+                            onAddFiles={handleFileChange}
+                            onChange={handleFileChange}
+                            tabIndex={0}
+                            disabled={isEdit}
+                        />
+                        <div className='cds--file-container cds--file-container--drop' />
+                    </FormItem>
+                }
                 <Button type='submit'>Save</Button>
             </Stack>
             </Form>
