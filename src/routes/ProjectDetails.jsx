@@ -39,7 +39,7 @@ function ProjectDetails() {
                     <Grid className={styles.contentsGrid}>
                         <Column sm={4} md={6} lg={12}>
                             <div className={styles.descriptionBody} dangerouslySetInnerHTML={{ __html: asciidoctor.convert(project.content) }} />
-                            <img src={`http://localhost:5297/api/v1/project/${projectId}/image`} alt='Project'
+                            <img src={`http://localhost:5297/api/v1/project/${projectId}/image`} style={{width:'100%', maxWidth: '600px'}} alt='Project'
                                 onError={event => event.target.style.display = 'none'} />
                         </Column>
                         <Column sm={0} md={2} lg={4}>

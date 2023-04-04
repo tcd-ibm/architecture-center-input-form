@@ -22,9 +22,14 @@
 // }
 
 .tile {
-    //height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.featuredTile {
+    display: flex;
+    flex-direction: column;
+    grid-column-end: span 2;
 }
 
 .cardImage {

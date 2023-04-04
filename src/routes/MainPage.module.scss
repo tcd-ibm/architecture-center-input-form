@@ -6,10 +6,6 @@
   margin: auto;
 }
 
-#cardContainer :first-child {
-  grid-column: 1 / -1;
-}
-
 @media (min-width: 1600px) {
   #cardContainer {
     grid-template-columns: 1fr 1fr 1fr;
