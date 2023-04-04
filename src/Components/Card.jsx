@@ -9,11 +9,13 @@ export default function Card({projectData}) {
 	return (
 		<CustomClickableTile className={styles.tile} href={`./details/${projectData.id}`} >
 			{/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
+			<img src={`http://localhost:5297/api/v1/project/${projectData.id}/image`} alt='Project' className={styles.cardImage}
+                                onError={event => event.target.style.display = 'none'} />
 			<CustomLink size='lg' className={styles.titleLink}>{projectData.title}</CustomLink>
 			<p className={styles.description}>{projectData.description}</p>
 			<div className={styles.tags}>
 				{projectData.tags.map(tagItem => 
-					<Tag type='magenta' title='Clear Filter' key={tagItem.tagId}>{tagItem.tagName}</Tag>
+					<Tag type='magenta' title='Clear Filter' style={{marginLeft: '0px', marginRight: '5px'}} key={tagItem.tagId}>{tagItem.tagName}</Tag>
 				)}
 			</div>
 		</CustomClickableTile>

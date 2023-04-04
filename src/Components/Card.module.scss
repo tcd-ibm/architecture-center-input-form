@@ -1,17 +1,4 @@
-// .card {
-//     //min-width: 400px;
-//     width: 100%;
-//     //max-width: fit-content;
-// }
 
-// .cardImage {
-//     z-index: -10;
-//     position: absolute;
-//     opacity: 0%;
-//     width: auto;
-//     height: 200px;
-//     object-fit: cover;
-// }
 
 // .cardHeader {
 //     background-color: #e5e5e5;
@@ -35,25 +22,32 @@
 // }
 
 .tile {
-    height: fit-content;
+    //height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardImage {
+    width:100%;
+    max-width: 400px;
+    margin-bottom:10px;
 }
 
 .titleLink {
-    padding-left:  4px;
-    padding-right: 4px;
-    padding-bottom: 1rem;
+    padding-bottom: 5px;
+    padding-top: 5px;
     cursor: pointer;
     font-size: 20px;
 }
 
 .description {
-    padding-left:  4px;
-    padding-right: 4px;
+    padding-bottom: 10px;
+    padding-top: 5px;
     font-size: 18px;
 }
 
 .tags {
-    padding-top: 1rem;
+    margin-top: auto;
 }
 
 .featuredTag {
