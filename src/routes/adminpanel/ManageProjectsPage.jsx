@@ -1,8 +1,8 @@
 //import { Heading } from '@carbon/react';
-import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
+import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, Dropdown,
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, ModalWrapper } from '@carbon/react';
-import { TrashCan, Edit } from '@carbon/icons-react';
+    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, Button } from '@carbon/react';
+import { TrashCan, Edit, DataCheck, CheckmarkOutline } from '@carbon/icons-react';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
@@ -17,9 +17,8 @@ function ManageProjectsPage() {
     const [pageSize, setPageSize] = useState(10);
     const [numberOfEntries, setNumberOfEntries] = useState();
     const navigate = useNavigate();
-
+    const [filter, setFilter] = useState('All projects');
     const [passiveModalOpen, setPassiveModalOpen] = useState(false);
-
     const { user } = useAuth();
 
 
@@ -40,24 +39,31 @@ function ManageProjectsPage() {
             } 
         };
         axios.get('/admin/projects', requestConfig).then(res => {
-            const projects = res.data;
-            setProjects(projects);
-            setNumberOfEntries(parseInt(res.headers['x-total-count']));
+            let projects = [];
+            if (filter === 'All projects') {
+                projects = res.data;
+                setProjects(projects);
+                setNumberOfEntries(parseInt(res.headers['x-total-count']));
+            } else if (filter === 'Approved projects') {
+                projects = res.data.filter((project) => project.is_live);
+                setProjects(projects);
+                setNumberOfEntries(projects.length);
+            } else if (filter === 'Pending approval') {
+                projects = res.data.filter((project) => !project.is_live);
+                setProjects(projects);
+                setNumberOfEntries(projects.length);
+            }
         })
         .catch(err => {
             console.log(err);
         });
-    }, [navigate, user, page, pageSize]);
+    }, [navigate, user, page, pageSize, filter]);
 
 
     const headers = [
         {
             header: 'Project',
             key: 'title'
-        },
-        {
-            header: 'ID',
-            key: 'id'
         },
         {
             header: 'Date Added',
@@ -74,6 +80,10 @@ function ManageProjectsPage() {
         {
             header: 'Visit Count',
             key: 'visit_count'
+        },
+        {
+            header: 'Approval status',
+            key: 'is_live'
         }
     ];
 
@@ -81,8 +91,7 @@ function ManageProjectsPage() {
     function handleCell(cell) {
         if (cell.info.header ==='date') {
             return cell.value.slice(0,10);
-        } 
-        if (cell.info.header ==='tags') {
+        } else if (cell.info.header ==='tags') {
             let first = true;
             let currentTag =''; 
             return cell.value.map(tag => {
@@ -90,6 +99,14 @@ function ManageProjectsPage() {
                 first = false;
                 return currentTag;
             });
+        } else if (cell.info.header === 'is_live')  {
+            if (cell.value) {
+                return 'Approved';
+            } else {
+                const newCell = {...cell,
+                            id: cell.id.substring(0, cell.id.indexOf(':'))};
+                return <Button kind='ghost' onClick={() => handleApproveProject([newCell])} renderIcon={DataCheck}>Approve</Button>;
+            } 
         } else return cell.value;
     }
 
@@ -120,9 +137,50 @@ function ManageProjectsPage() {
         }
     }
 
+    function handleApproveProject(selectedProjects) {
+        console.log(selectedProjects);
+        const requestConfig = { 
+            params: {
+                page: page,
+                per_page: pageSize
+            },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${user.accessToken}` 
+            } 
+        };
+        selectedProjects.map(async(project) => {
+            const currentId = project.id;
+            let toApprove = {};
+            try {
+                console.log(currentId);
+                await axios.get(`/user/project/${currentId}`, requestConfig).then(res => {
+                    toApprove = res.data;
+                    console.log(toApprove);
+                });
+            } catch(error) {
+                console.log(error);
+            } try {
+                await axios.put(`/user/project/${currentId}`, {is_live: true}, requestConfig);
+                window.location.reload(true);
+            } catch(error) {
+                console.log(error);
+            }
+        });
+    }
+
     return (
 
         <>
+        <Dropdown
+            id='approval-status-filter'
+            label={filter}
+            titleText='Choose which projects to display'
+            items={['All projects', 'Approved projects', 'Pending approval']}
+            size='md'
+            onChange={(label) => setFilter(label.selectedItem)}
+        />
         <DataTable headers={headers} rows={projects} >
             {({
                 rows,
@@ -178,6 +236,12 @@ function ManageProjectsPage() {
                                 >
                                 Modify Project
                             </TableBatchAction>
+                            <TableBatchAction {...getToolbarProps({onClick: () => handleApproveProject(selectedRows)})}
+                                tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
+                                renderIcon={CheckmarkOutline}
+                                >
+                                Approve Project
+                            </TableBatchAction>
                         </TableBatchActions>
                         <TableToolbarContent aria-hidden={batchActionProps.shouldShowBatchActions}>
                             <TableToolbarSearch
@@ -205,7 +269,7 @@ function ManageProjectsPage() {
                             <TableSelectRow {...getSelectionProps({ row })} />
                             {row.cells.map((cell) => (
                                 <TableCell key={cell.id}>
-                                    {(cell.info.header==='date'||cell.info.header==='tags') ? handleCell(cell) : cell.value}
+                                    {handleCell(cell)}
                                 </TableCell>
                             ))}
                             </TableRow>
