@@ -13,11 +13,27 @@ function MainPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [projects, setProjects] = useState([]);
+    const [isOnMobile, setIsOnMobile] = useState([]);
     const [queryMenuContent, setQueryMenuContent] = useState([]);
     const queryMenuRef = useRef();
 
     const stored = localStorage.getItem('toggleDarkMode');
     const color=(stored==='true' ? '161616': 'white');
+
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        const handleResize = () => {
+          if (mediaQuery.matches) {
+            setIsOnMobile(true);
+          } else {
+            setIsOnMobile(false);
+          }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
 
     useEffect(() => {
         axios.get('/tags').then(res => {
@@ -67,7 +83,7 @@ function MainPage() {
             <MainHeader />
             <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
             
-            <Content>
+            <Content style={isOnMobile? {padding: '16px',  margin: 0, 'margin-top':'64px'}: {} }>
                 { isLoading ? <div>Loading...</div> : 
                     <div id={styles.cardContainer}>
                         <FeaturedCard project={projects[0]} />

@@ -1,4 +1,4 @@
-import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
 import { SideNav, Stack, Search, Accordion, AccordionItem, Checkbox } from '@carbon/react';
 import styles from './ProjectQuerySidePanel.module.scss';
 
@@ -7,6 +7,21 @@ function ProjectQuerySidePanel(props, ref) {
 
     const selectedTagListRef = useRef([]);
     const [selectedTagList, setSelectedTagList] = useState([]);
+    const [isOnMobile, setIsOnMobile] = useState([]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        const handleResize = () => {
+          if (mediaQuery.matches) {
+            setIsOnMobile(true);
+          } else {
+            setIsOnMobile(false);
+          }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
 
     const url = 'https://firebasestorage.googleapis.com/v0/b/arch-center.appspot.com/o/logo.png?alt=media&token=9f7ab576-c49a-40ec-879a-152942825667';
 
@@ -38,8 +53,9 @@ function ProjectQuerySidePanel(props, ref) {
 
     return (
         <SideNav
+            className='sideNav1'
             isFixedNav
-            expanded={true}
+            expanded={isOnMobile? false: true}
             isChildOfHeader={false}
             aria-label='Search and filter'>
 

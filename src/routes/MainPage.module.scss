@@ -12,12 +12,14 @@
 
 @media (min-width: 1600px) {
   #cardContainer {
-      grid-template-columns: 1fr 1fr 1fr;
-      max-width: calc(3 * 400px + 2 * 20px)
+    grid-template-columns: 1fr 1fr 1fr;
+    max-width: calc(3 * 400px + 2 * 20px);
   }
 }
 
-
-
-
-
+@media (max-width: 768px) {
+  #cardContainer {
+    grid-template-columns: 1fr;
+    max-width: calc(400px);
+  }
+}
