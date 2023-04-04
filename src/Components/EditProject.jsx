@@ -11,7 +11,7 @@ export default function EditProject({projectData, user, isEdit}) {
 	const navigate = useNavigate();
 
 	const [tags, setTags] = useState([]);
-    const [date, setDate] = useState(projectData.date);
+    const [date, setDate] = useState(new Date(projectData.date));
 
     const titleInputRef = useRef();
     const linkInputRef = useRef();
