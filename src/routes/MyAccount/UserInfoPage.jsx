@@ -3,7 +3,7 @@ import styles from './MyAccountPage.module.scss';
 import { Edit } from '@carbon/icons-react';
 import axios from 'axios';
 import useAuth from '@/hooks/useAuth';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useEffect, useState, useRef } from 'react';
 import { EmailInput, PasswordInput } from '@/Components/ValidatedInputs';
 
