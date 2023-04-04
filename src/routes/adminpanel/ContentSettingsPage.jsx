@@ -1,4 +1,8 @@
-import { Heading, Form, Stack, Dropdown, Checkbox, Button } from '@carbon/react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Accordion, AccordionItem, Heading, Form, Stack, Dropdown, Checkbox, Button, Tag } from '@carbon/react';
+
+import AddTagForm from '@/Components/AddTagForm';
 
 import styles from './ContentSettingsPage.module.scss';
 
@@ -18,6 +22,23 @@ function ContentSettingsPage() {
         }
     ];
 
+    const [tags, setTags] = useState([]);
+
+    const fetchTags = () => {
+        axios.get('/tags').then(res => {
+            setTags(res.data);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    };
+
+    useEffect(fetchTags, []);
+
+    const handleAddTag = (categoryId, tagName) => {
+        console.log(categoryId, tagName);
+    };
+
     return (
         <>
         <Heading style={{marginBottom: '20px'}}>Content Settings</Heading>
@@ -31,20 +52,36 @@ function ContentSettingsPage() {
                     type='inline'
                     items={items}
                     itemToString={(item) => (item ? item.text : '')}
+                    disabled={true}
                 />
                 <Checkbox 
                     labelText='New projects have to be approved by an admin' 
                     id='new-projects-approved-checkbox' 
                     checked={true}
+                    disabled={true}
                 />
                 <Checkbox 
                     labelText='Project edits have to be approved by an admin' 
                     id='project-edits-approved-checkbox' 
                     checked={true}
+                    disabled={true}
                 />
-                <Button style={{marginTop: '10px', marginBottom: '50px'}}>Save</Button>
+                <Button style={{marginTop: '10px', marginBottom: '50px'}} disabled={true}>Save</Button>
             </Stack>
         </Form>
+        <Heading style={{marginBottom: '20px'}}>Project Tags</Heading>
+        <Accordion style={{maxWidth: '400px'}}>
+            {tags.map(category => 
+                <AccordionItem key={category.categoryId} title={category.categoryName}>
+                    <div style={{width: '100%'}}>
+                        {category.tags.map(tag => 
+                            <Tag type='magenta' title='Clear Filter' key={tag.tagId}>{tag.tagName}</Tag>    
+                        )}
+                        <AddTagForm onSubmit={tagName => handleAddTag(category.categoryId, tagName)} />
+                    </div>
+                </AccordionItem>
+            )}
+        </Accordion>
         </>
     );
 }

@@ -11,7 +11,7 @@ function SettingsPage() {
           stored === 'true' ? true : false);
         
     const color=(toggleDarkMode ? '161616': 'white');
-    const text=(toggleDarkMode ? 'Dark Mode': 'Light Mode');
+    const text=(toggleDarkMode ? 'Light Mode': 'Dark Mode');
 
     return (
         <>

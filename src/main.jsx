@@ -9,6 +9,7 @@ import './index.scss';
 import MainPage from './routes/MainPage';
 import AddProjectPage from './routes/AddProjectPage';
 import SettingsPage from './routes/SettingsPage';
+import EditProjectPage from './routes/EditProjectPage';
 import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
 import SignUpPage from './routes/SignUpPage';
@@ -20,6 +21,8 @@ import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
 import DashboardPage from './routes/adminpanel/DashboardPage';
 import AdminPanel from './routes/AdminPanel';
 import MyAccountPage from './routes/MyAccount/MyAccountPage';
+import MyProjectsPage from './routes/MyAccount/MyProjectsPage';
+import UserInfoPage from './routes/MyAccount/UserInfoPage';
 import ChangePasswordPage from './routes/MyAccount/ChangePasswordPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
@@ -41,6 +44,10 @@ const router = createBrowserRouter([
         element: <AddProjectPage />
       },
       {
+        path: 'edit/:projectId',
+        element: <EditProjectPage />,
+      },
+      {
         path: 'settings',
         element: <SettingsPage />
       },
@@ -59,10 +66,24 @@ const router = createBrowserRouter([
       {
         path: 'account',
         element: <MyAccountPage />,
-      },
-      {
-        path: 'account/changepassword',
-        element: <ChangePasswordPage />
+        children: [
+          {
+            index: true,
+            element: <Navigate to='user-info' replace={true} />
+          },
+          {
+            path: 'user-info',
+            element: <UserInfoPage />
+          },
+          {
+            path: 'change-password',
+            element: <ChangePasswordPage />
+          },
+          {
+            path: 'my-projects',
+            element: <MyProjectsPage />
+          }
+        ]
       },
       {
         path: 'adminpanel',
@@ -97,6 +118,7 @@ const router = createBrowserRouter([
     ]
   }
 ]);
+
  
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

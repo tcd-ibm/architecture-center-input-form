@@ -49,6 +49,10 @@ const validatePassword = (value, setInvalidText) => {
         setInvalidText('Password is required');
         return false;
     }
+    if(value.length < 8) {
+        setInvalidText('Password must be at least 8 characters');
+        return false;
+    }
     setInvalidText(null);
     return true;
 };

@@ -1,4 +1,3 @@
-//import { Heading } from '@carbon/react';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, ModalWrapper } from '@carbon/react';
@@ -9,8 +8,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router';
 import useAuth from '@/hooks/useAuth';
 
-function ManageProjectsPage() {
 
+function MyProjectsPage() {
+    
     const [projects, setProjects] = useState([]);
     const [dangerModalOpen, setDangerModalOpen] = useState(false);
     const [page, setPage] = useState(1);
@@ -39,7 +39,7 @@ function ManageProjectsPage() {
                 'Authorization': `Bearer ${user.accessToken}` 
             } 
         };
-        axios.get('/admin/projects', requestConfig).then(res => {
+        axios.get('/user/projects', requestConfig).then(res => {
             const projects = res.data;
             setProjects(projects);
             setNumberOfEntries(parseInt(res.headers['x-total-count']));
@@ -231,4 +231,4 @@ function ManageProjectsPage() {
     );
 }
 
-export default ManageProjectsPage;
+export default MyProjectsPage;

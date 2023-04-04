@@ -1,5 +1,8 @@
 '''API v1 for the database'''
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Response, UploadFile, Form
+from fastapi.responses import FileResponse
+from PIL import Image
+import os
 # from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
@@ -373,14 +376,25 @@ async def admin_get_all_projects(
 
 
 @router.post("/user/project")
-async def create_project(project: ProjectBase,
+async def create_project(title: str = Form(),
+                         link: str = Form(),
+                         description: str = Form(),
+                         content: str = Form(),
+                         tags: str = Form(""),
+                         imageFile: UploadFile | None = None,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
 
-    data = project.dict(exclude_unset=True)
+    data = {
+        "title": title,
+        "link": link,
+        "description": description,
+        "content": content,
+        "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
+    }
     tags = []
     for tagId in data["tags"]:
         if not isinstance(tagId, int):
@@ -399,6 +413,40 @@ async def create_project(project: ProjectBase,
                           user_id=current_user.id,
                           date=datetime.utcnow(),
                           user=current_user)
+    
+    #TODO refactor to a separate function
+    if imageFile:
+        tempFilePath = "./database/content/images/temp-"+str(new_project.id)+"-"+imageFile.filename
+        try:
+            contents = imageFile.file.read()
+            with open(tempFilePath, 'wb') as f:
+                f.write(contents)
+        except Exception:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            imageFile.file.close()
+        
+        try:
+            im = Image.open(tempFilePath)
+            im.verify()
+        except Exception:
+            if os.path.exists(tempFilePath):
+                os.remove(tempFilePath)
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                detail="Invalid image file format")
+        finally:
+            im.close()
+
+        filePath = "./database/content/images/"+str(new_project.id)+".png"
+        try:
+            im = Image.open(tempFilePath)
+            im.save(filePath)
+        except Exception:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            im.close()
+            if os.path.exists(tempFilePath):
+                os.remove(tempFilePath)
 
     session.add(new_project)
     await session.commit()
@@ -673,6 +721,16 @@ async def set_featured_project(id: str,
     await session.refresh(project)
 
     return project
+
+
+@router.get("/project/{id}/image")
+async def get_project_image(id: str):
+    filePath = "./database/content/images/"+id+".png"
+    if os.path.exists(filePath):
+        return FileResponse(filePath)
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project image not found")
 
 
 @router.get("/project/{id}", response_model=ProjectFull)
