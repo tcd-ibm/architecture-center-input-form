@@ -13,6 +13,7 @@ function MainPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [projects, setProjects] = useState([]);
+    const [featuredProject, setFeaturedProject] = useState();
     const [isOnMobile, setIsOnMobile] = useState([]);
     const [queryMenuContent, setQueryMenuContent] = useState([]);
     const queryMenuRef = useRef();
@@ -58,6 +59,16 @@ function MainPage() {
         });
     }, []);
 
+    // useEffect(() => {
+    //     axios.get('/project/featured').then(res => {
+    //         setFeaturedProject(res.data);
+    //         console.log(res.data);
+    //     })
+    //     .catch(err => {
+    //         console.log(err);
+    //     });
+    // }, []);
+
 
     const handleSearchAndFilterChange = () => {
         const params = {
@@ -86,7 +97,7 @@ function MainPage() {
             <Content style={isOnMobile? {padding: '16px',  margin: 0, 'margin-top':'64px'}: {} }>
                 { isLoading ? <div>Loading...</div> : 
                     <div id={styles.cardContainer}>
-                        <FeaturedCard project={projects[0]} />
+                        { featuredProject && <FeaturedCard project={featuredProject} /> }
                         {projects.map((projectData, index) => (
                             <Card projectData={projectData} key={index} />
                         ))}

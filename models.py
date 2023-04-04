@@ -23,7 +23,7 @@ class User(UserBase, table=True):
     password_version: int = Field(default=0)
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
-    projects: List["Project"] = Relationship(back_populates="user")
+    projects: List["Project"] = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "delete"})
 
 
 class UserInfo(UserBase):
@@ -55,7 +55,7 @@ class CategoryBase(SQLModel):
 class Category(CategoryBase, table=True):
     __tablename__ = 'categories'
 
-    tags: List["Tag"] = Relationship(back_populates="category")
+    tags: List["Tag"] = Relationship(back_populates="category", sa_relationship_kwargs={"cascade": "delete"})
 
 
 class CategoryWithTags(CategoryBase):
@@ -67,14 +67,19 @@ class project_tags(SQLModel, table=True):
     tag_id: int = Field(foreign_key="tags.tagId", primary_key=True, nullable=False)
 
 
-class Tag(SQLModel, table=True):
-    __tablename__ = 'tags'
-    tagId: int = Field(primary_key=True, nullable=False)
+class TagBase(SQLModel):
+    tagId: int
     tagName: str
     tagNameShort: str
+    categoryId: int
+
+
+class Tag(TagBase, table=True):
+    __tablename__ = 'tags'
+    tagId: int = Field(primary_key=True, nullable=False)
     categoryId: int = Field(default=None, foreign_key="categories.categoryId")
-    projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags)
-    category: Category = Relationship(back_populates="tags")
+    projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags, sa_relationship_kwargs={"cascade": "delete"})
+    category: Category = Relationship(back_populates="tags", sa_relationship_kwargs={"cascade": "delete"})
 
 
 class ProjectBase(SQLModel):
@@ -103,8 +108,8 @@ class Project(ProjectBase, table=True):
     is_featured: bool = Field(default=False)
     visit_count: int = Field(default=0)
     user_id: UUID = Field(foreign_key="users.id")
-    user: User = Relationship(back_populates="projects")
-    tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags)
+    user: User = Relationship(back_populates="projects", sa_relationship_kwargs={"cascade": "delete"})
+    tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags, sa_relationship_kwargs={"cascade": "delete"})
 
 
 class ProjectWithUserAndTags(SQLModel):
@@ -122,6 +127,11 @@ class ProjectWithUserAndTags(SQLModel):
 
 class ProjectFull(ProjectWithUserAndTags):
     content: str
+
+
+class ProjectFeatured(ProjectBase):
+    tags: List["Tag"] = []
+    date: datetime
 
 
 ProjectWithUserAndTags.update_forward_refs()
