@@ -71,7 +71,7 @@ export default function EditProject({projectData, user, isEdit}) {
                 formData.append('content', contentInputRef.current.value);
                 formData.append('date', date);
                 formData.append('tags', tags.filter(item => item?.selected).map(item => item.tagId));
-                formData.append('imageFile', file);
+                if(file) formData.append('imageFile', file);
                 await axios.post('/user/project', formData, { headers: { Authorization: `Bearer ${user.accessToken}` } });
             }
             navigate('/');
