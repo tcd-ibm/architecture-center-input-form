@@ -36,6 +36,10 @@ class UserInfo(UserBase):
     role: int
 
 
+class UserInfoInProject(SQLModel):
+    username: Optional[str] = None
+
+
 class UserUpdate(UserBase):
     email: Optional[str] = None
     password: Optional[str] = None
@@ -154,7 +158,7 @@ class ProjectWithUserAndTags(SQLModel):
     is_featured: bool
     visit_count: int
     date: datetime
-    user: Optional[UserInfo] = None
+    user: Optional[UserInfoInProject] = None
     tags: List["Tag"] = []
 
 

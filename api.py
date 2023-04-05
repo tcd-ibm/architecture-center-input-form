@@ -366,6 +366,31 @@ async def admin_get_all_users(response: Response,
     return result.scalars().all()
 
 
+@router.put("/admin/project/live/{id}")
+async def toggle_project_is_live(id: str,
+                                 session: AsyncSession = Depends(get_session),
+                                 current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admin can access this endpoint")
+
+    result = await session.execute(select(Project).where(Project.id == id))
+    project = result.scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Project not found")
+
+    project.is_live = not project.is_live
+    session.add(project)
+    await session.commit()
+    await session.refresh(project)
+    return {"status": "success", "is_live": project.is_live}
+
+
 @router.get("/admin/projects/total")
 async def admin_get_total_projects(
         session: AsyncSession = Depends(get_session),
@@ -413,6 +438,7 @@ async def admin_get_all_projects(
     response: Response,
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
+    is_live: bool = None,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)):
     if not current_user:
@@ -423,18 +449,21 @@ async def admin_get_all_projects(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Only admin can access this endpoint")
 
-    count = (await session.execute(select(func.count(Project.id))
-                                   )).scalar_one_or_none()
+    query = select(func.count(Project.id))
+    if is_live is not None:
+        query = query.where(Project.is_live == is_live)
+    count = (await session.execute(query)).scalar_one_or_none()
     response.headers['X-Total-Count'] = str(count)
     response.headers['X-Total-Pages'] = str(count // per_page +
                                             (1 if count % per_page else 0))
 
-    result = await session.execute(
-        select(Project).options(
-            selectinload(Project.user),
-            selectinload(Project.tags)).order_by(Project.date.desc()).offset(
-                max((page - 1) * per_page,
-                    0)).limit(min(per_page, MAX_PAGE_SIZE)))
+    query = select(Project).options(selectinload(Project.user),
+                                    selectinload(Project.tags))
+    if is_live is not None:
+        query = query.where(Project.is_live == is_live)
+    query = query.order_by(Project.date.desc()).offset(
+        max((page - 1) * per_page, 0)).limit(min(per_page, MAX_PAGE_SIZE))
+    result = await session.execute(query)
     return result.scalars().all()
 
 
@@ -1018,6 +1047,32 @@ async def get_featured_project(session: AsyncSession = Depends(
                             detail="Project not found")
 
     return project
+
+
+@router.delete("/project/featured")
+async def delete_featured_project(session: AsyncSession = Depends(get_session),
+                                  current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admins can set feature projects")
+
+    r = await session.execute(
+        select(Project).where(Project.is_featured == True).limit(1))
+    projects = r.scalars().all()
+    if projects:
+        for project in projects:
+            project.is_featured = False
+            session.add(project)
+
+        await session.commit()
+        for project in projects:
+            await session.refresh(project)
+
+    return {"status": "success"}
 
 
 @router.put("/project/featured/{id}")
