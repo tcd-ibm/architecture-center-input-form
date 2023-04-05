@@ -4,8 +4,13 @@ import { SimpleBarChart, DonutChart} from '@carbon/charts-react';
 import styles from '@carbon/charts/styles.css';
 import styles2 from './DashboardPage.module.scss';
 
+import useAppTheme from '@/hooks/useAppTheme';
+
 function DashboardPage() {
-const state = {
+    
+    const [theme, setTheme] = useAppTheme();
+
+    const state = {
         data: [
             {
                 group: 'a',
@@ -35,7 +40,8 @@ const state = {
                     mapsTo: 'value',
                 }
             },
-            height: '300px'
+            height: '300px',
+            theme: theme
         }
     };
 
@@ -66,7 +72,8 @@ const state = {
                     label: 'Tags',
                 }
             },
-            height: '300px'
+            height: '300px',
+            theme: theme
         }
     };
 
