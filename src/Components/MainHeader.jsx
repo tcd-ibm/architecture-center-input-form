@@ -1,5 +1,5 @@
 import { Header, HeaderNavigation, HeaderGlobalBar, OverflowMenu } from '@carbon/react';
-import { User, DocumentAdd, InventoryManagement } from '@carbon/icons-react';
+import { User, DocumentAdd, InventoryManagement, AsleepFilled } from '@carbon/icons-react';
 
 import { CustomHeaderMenuItem, CustomHeaderName, CustomOverflowMenuItem } from './CustomCarbonNavigation';
 import useAuth from '@/hooks/useAuth';
@@ -36,7 +36,7 @@ function MainHeader() {
                         if(theme === 'white') setTheme('g100');
                         else setTheme('white');
                     }}>
-                        Dark mode
+                        <AsleepFilled />
                     </CustomHeaderMenuItem>
                 </HeaderNavigation>
                 { user &&
