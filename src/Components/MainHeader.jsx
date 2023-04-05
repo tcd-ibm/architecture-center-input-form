@@ -1,4 +1,4 @@
-import { Header, HeaderNavigation, HeaderGlobalBar, OverflowMenu } from '@carbon/react';
+import { Header, HeaderNavigation, HeaderGlobalBar, OverflowMenu, HeaderGlobalAction } from '@carbon/react';
 import { User, DocumentAdd, InventoryManagement, Asleep } from '@carbon/icons-react';
 
 import { CustomHeaderMenuItem, CustomHeaderName, CustomOverflowMenuItem } from './CustomCarbonNavigation';
@@ -32,12 +32,12 @@ function MainHeader() {
             </HeaderNavigation>
             <HeaderGlobalBar>
                 <HeaderNavigation style={{paddingLeft: '0px'}}>
-                    <CustomHeaderMenuItem onClick={() => {
+                    <HeaderGlobalAction aria-label='Change Theme' onClick={() => {
                         if(theme === 'white') setTheme('g100');
                         else setTheme('white');
                     }}>
                         <Asleep />
-                    </CustomHeaderMenuItem>
+                    </HeaderGlobalAction>
                 </HeaderNavigation>
                 { user &&
                     <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{boxShadow: 'none'}} aria-label='My Account'>     
