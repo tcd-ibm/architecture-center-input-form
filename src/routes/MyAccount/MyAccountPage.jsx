@@ -11,22 +11,6 @@ function MyAccountPage() {
     return (
         <>
             <MainHeader />
-            {/* <SideNav
-                isFixedNav
-                expanded={true}
-                isChildOfHeader={false}
-                aria-label='Admin panel navigation'>
-
-                <SideNavItems>
-                    <CustomSideNavLink href='user-info' renderIcon={Information}>
-                        User Info
-                    </CustomSideNavLink>
-                    <CustomSideNavLink href='my-projects' renderIcon={CubeView}>
-                        My Projects
-                    </CustomSideNavLink>
-                </SideNavItems>
-
-            </SideNav> */}
             <Content>
                 <Outlet />
                 <ProjectManager/>
