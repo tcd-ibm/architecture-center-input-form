@@ -17,7 +17,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, CategoryBase, TagBase
+from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, project_tags, TagCount, CategoryUpdate, TagUpdate
 
 from datetime import timedelta, datetime
 
@@ -319,6 +319,27 @@ async def get_current_user_info(current_user: User = Depends(get_current_user),
     return r.scalar_one_or_none()
 
 
+@router.get("/admin/users/total")
+async def admin_get_total_users(
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admin can access this endpoint")
+
+    count = (await session.execute(select(func.count(User.id))
+                                   )).scalar_one_or_none()
+    if not count:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No user found")
+
+    return {"total": count}
+
+
 @router.get("/admin/users", response_model=List[UserInfo])
 async def admin_get_all_users(response: Response,
                               per_page: int = DEFAULT_PAGE_SIZE,
@@ -345,6 +366,48 @@ async def admin_get_all_users(response: Response,
     return result.scalars().all()
 
 
+@router.get("/admin/projects/total")
+async def admin_get_total_projects(
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admin can access this endpoint")
+
+    count = (await session.execute(select(func.count(Project.id))
+                                   )).scalar_one_or_none()
+    if not count:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No project found")
+
+    return {"total": count}
+
+
+@router.get("/admin/projects/total/visit")
+async def admin_get_total_projects_visit(
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Unauthorized")
+
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Only admin can access this endpoint")
+
+    count = (await session.execute(select(func.sum(Project.visit_count))
+                                   )).scalar_one_or_none()
+    if not count:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No project found")
+
+    return {"total": count}
+
+
 @router.get("/admin/projects", response_model=List[ProjectWithUserAndTags])
 async def admin_get_all_projects(
     response: Response,
@@ -367,11 +430,11 @@ async def admin_get_all_projects(
                                             (1 if count % per_page else 0))
 
     result = await session.execute(
-        select(Project).options(selectinload(Project.user),
-                                selectinload(Project.tags)).offset(
-                                    max((page - 1) * per_page,
-                                        0)).limit(min(per_page,
-                                                      MAX_PAGE_SIZE)))
+        select(Project).options(
+            selectinload(Project.user),
+            selectinload(Project.tags)).order_by(Project.date.desc()).offset(
+                max((page - 1) * per_page,
+                    0)).limit(min(per_page, MAX_PAGE_SIZE)))
     return result.scalars().all()
 
 
@@ -387,8 +450,8 @@ async def create_category(new_category: Category,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="name and description are required")
 
-    r = await session.execute(select(Category).where(
-        Category.categoryId == new_category.categoryId))
+    r = await session.execute(
+        select(Category).where(Category.categoryId == new_category.categoryId))
     if r.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Category already exists")
@@ -399,9 +462,9 @@ async def create_category(new_category: Category,
     return new_category
 
 
-@router.put("/admin/category/{id}", response_model=CategoryBase)
+@router.put("/admin/category/{id}", response_model=CategoryUpdate)
 async def update_category(id: int,
-                          updated_category: CategoryBase,
+                          updated_category: CategoryUpdate,
                           current_user: User = Depends(get_current_user),
                           session: AsyncSession = Depends(get_session)):
     if not is_admin(current_user):
@@ -412,7 +475,8 @@ async def update_category(id: int,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="id in url and body must match")
 
-    r = await session.execute(select(Category).where(Category.categoryId == id))
+    r = await session.execute(
+        select(Category).where(Category.categoryId == id))
     original_instance = r.scalar_one_or_none()
     if not original_instance:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -436,8 +500,8 @@ async def delete_category(id: int,
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="only admin can delete category")
 
-    r = await session.execute(select(Category).where(
-        Category.categoryId == id))
+    r = await session.execute(
+        select(Category).where(Category.categoryId == id))
     original_instance = r.scalar_one_or_none()
 
     if not original_instance:
@@ -462,11 +526,14 @@ async def create_tag(new_tag: Tag,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="id, name and category ID are required")
 
-    if (await session.execute(select(Tag).where(Tag.tagId == new_tag.tagId))).scalar_one_or_none():
+    if (await session.execute(select(Tag).where(Tag.tagId == new_tag.tagId)
+                              )).scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Tag already exists")
 
-    if not (await session.execute(select(Category).where(Category.categoryId == new_tag.categoryId))).scalar_one_or_none():
+    if not (await session.execute(
+            select(Category).where(Category.categoryId == new_tag.categoryId)
+    )).scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Category not found")
 
@@ -476,9 +543,9 @@ async def create_tag(new_tag: Tag,
     return new_tag
 
 
-@router.put("/admin/tag/{id}", response_model=TagBase)
+@router.put("/admin/tag/{id}", response_model=TagUpdate)
 async def update_tag(id: int,
-                     updated_tag: TagBase,
+                     updated_tag: TagUpdate,
                      current_user: User = Depends(get_current_user),
                      session: AsyncSession = Depends(get_session)):
     if not is_admin(current_user):
@@ -499,10 +566,12 @@ async def update_tag(id: int,
     for k, v in updated_tag.__dict__.items():
         if v is not None:
             if k == "categoryId":
-                r = await session.execute(select(Category).where(Category.categoryId == v))
+                r = await session.execute(
+                    select(Category).where(Category.categoryId == v))
                 if not r.scalar_one_or_none():
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                        detail="Category not found")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Category not found")
 
             setattr(original_instance, k, v)
 
@@ -532,13 +601,87 @@ async def delete_tag(id: int,
     return {"status": "success"}
 
 
-@router.get("/admin/user/{id}/projects", response_model=List[ProjectWithUserAndTags])
-async def get_projects_by_user_id(id: str,
-                                  response: Response,
-                                  per_page: int = DEFAULT_PAGE_SIZE,
-                                  page: int = DEFAULT_PAGE,
-                                  session: AsyncSession = Depends(get_session),
-                                  current_user: User = Depends(get_current_user)):
+@router.get("/admin/projects/recent/{n}")
+async def get_projects_updated_count_in_n_days(
+    n: int,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can get recent projects")
+
+    if n < 1:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="n must be greater than 0")
+    # Calculate the start date for the query
+    n_days_ago = datetime.utcnow() - timedelta(days=n - 1)
+
+    # Define a subquery to group the projects by date and count the number of projects
+    subquery = (select(
+        func.date(Project.date).label('date'),
+        func.count(Project.id).label('count')).where(
+            Project.date >= n_days_ago).group_by(func.date(
+                Project.date)).alias())
+
+    # Select the counts of projects updated on each day in the last n days
+    query = (select(subquery.c.date,
+                    func.coalesce(subquery.c.count,
+                                  0).label("count")).order_by(subquery.c.date))
+
+    # Execute the query and get the results
+    r = await session.execute(query)
+
+    results = [{"date": row[0], "count": row[1]} for row in r]
+    dates = [result["date"] for result in results]
+
+    for date in range(n):
+        date = (n_days_ago + timedelta(days=date)).strftime("%Y-%m-%d")
+        if date not in dates:
+            results.append({"date": date, "count": 0})
+
+    results.sort(key=lambda x: x["date"])
+    return results
+
+
+@router.get("/admin/tags/popular/{n}", response_model=List[TagCount])
+async def get_top_n_popular_tags(
+    n: int,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can get popular tags")
+    # get the count of each tag
+    subquery = (select(project_tags.tag_id,
+                       func.count(
+                           project_tags.tag_id).label('count')).group_by(
+                               project_tags.tag_id).alias('subquery'))
+    # select the top 10 most used tags
+    query = (select(subquery.c.tag_id, subquery.c.count).order_by(
+        subquery.c.count.desc()).limit(n))
+
+    r = await session.execute(query)
+
+    sub_results = [(row[0], row[1]) for row in r]
+    results = []
+    for sub_result in sub_results:
+        r = await session.execute(
+            select(Tag).where(Tag.tagId == sub_result[0]))
+        tag = r.scalar_one_or_none()
+        results.append(TagCount(tag=tag, count=sub_result[1]))
+
+    return results
+
+
+@router.get("/admin/user/{id}/projects",
+            response_model=List[ProjectWithUserAndTags])
+async def get_projects_by_user_id(
+    id: str,
+    response: Response,
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)):
 
     if not is_admin(current_user):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -549,19 +692,19 @@ async def get_projects_by_user_id(id: str,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Invalid user id")
 
-    count = (await session.execute(select(func.count(Project.id)).where(
-        Project.user_id == id))).scalar_one_or_none()
+    count = (await session.execute(
+        select(func.count(Project.id)).where(Project.user_id == id)
+    )).scalar_one_or_none()
     response.headers['X-Total-Count'] = str(count)
     response.headers['X-Total-Pages'] = str(count // per_page +
                                             (1 if count % per_page else 0))
 
     result = await session.execute(
-        select(Project).options(selectinload(Project.user),
-                                selectinload(Project.tags)).where(
-                                    Project.user_id == id).offset(
-                                        max((page - 1) * per_page,
-                                            0)).limit(min(per_page,
-                                                          MAX_PAGE_SIZE)))
+        select(Project).options(
+            selectinload(Project.user),
+            selectinload(Project.tags)).where(Project.user_id == id).offset(
+                max((page - 1) * per_page,
+                    0)).limit(min(per_page, MAX_PAGE_SIZE)))
     return result.scalars().all()
 
 
@@ -603,36 +746,40 @@ async def create_project(title: str = Form(),
                           user_id=current_user.id,
                           date=datetime.utcnow(),
                           user=current_user)
-    
+
     #TODO refactor to a separate function
     if imageFile:
-        tempFilePath = "./database/content/images/temp-"+str(new_project.id)+"-"+imageFile.filename
+        tempFilePath = "./database/content/images/temp-" + str(
+            new_project.id) + "-" + imageFile.filename
         try:
             contents = imageFile.file.read()
             with open(tempFilePath, 'wb') as f:
                 f.write(contents)
         except Exception:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             imageFile.file.close()
-        
+
         try:
             im = Image.open(tempFilePath)
             im.verify()
         except Exception:
             if os.path.exists(tempFilePath):
                 os.remove(tempFilePath)
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                detail="Invalid image file format")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid image file format")
         finally:
             im.close()
 
-        filePath = "./database/content/images/"+str(new_project.id)+".png"
+        filePath = "./database/content/images/" + str(new_project.id) + ".png"
         try:
             im = Image.open(tempFilePath)
             im.save(filePath)
         except Exception:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             im.close()
             if os.path.exists(tempFilePath):
@@ -920,7 +1067,7 @@ async def set_featured_project(id: str,
 
 @router.get("/project/{id}/image")
 async def get_project_image(id: str):
-    filePath = "./database/content/images/"+id+".png"
+    filePath = "./database/content/images/" + id + ".png"
     if os.path.exists(filePath):
         return FileResponse(filePath)
     else:

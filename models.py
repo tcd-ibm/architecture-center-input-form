@@ -23,7 +23,8 @@ class User(UserBase, table=True):
     password_version: int = Field(default=0)
     is_active: bool = Field(default=True)
     role: int = Field(default=0)
-    projects: List["Project"] = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "delete"})
+    projects: List["Project"] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"cascade": "delete"})
 
 
 class UserInfo(UserBase):
@@ -52,10 +53,17 @@ class CategoryBase(SQLModel):
     categoryName: str
 
 
+class CategoryUpdate(CategoryBase):
+    CategoryId: Optional[int] = None
+    categoryName: Optional[str] = None
+
+
 class Category(CategoryBase, table=True):
     __tablename__ = 'categories'
 
-    tags: List["Tag"] = Relationship(back_populates="category", sa_relationship_kwargs={"cascade": "delete"})
+    tags: List["Tag"] = Relationship(
+        back_populates="category",
+        sa_relationship_kwargs={"cascade": "delete"})
 
 
 class CategoryWithTags(CategoryBase):
@@ -63,8 +71,12 @@ class CategoryWithTags(CategoryBase):
 
 
 class project_tags(SQLModel, table=True):
-    project_id: UUID = Field(foreign_key="projects.id", primary_key=True, nullable=False)
-    tag_id: int = Field(foreign_key="tags.tagId", primary_key=True, nullable=False)
+    project_id: UUID = Field(foreign_key="projects.id",
+                             primary_key=True,
+                             nullable=False)
+    tag_id: int = Field(foreign_key="tags.tagId",
+                        primary_key=True,
+                        nullable=False)
 
 
 class TagBase(SQLModel):
@@ -74,12 +86,28 @@ class TagBase(SQLModel):
     categoryId: int
 
 
+class TagUpdate(TagBase):
+    tagId: Optional[int] = None
+    tagName: Optional[str] = None
+    tagNameShort: Optional[str] = None
+    categoryId: Optional[int] = None
+
+
 class Tag(TagBase, table=True):
     __tablename__ = 'tags'
     tagId: int = Field(primary_key=True, nullable=False)
     categoryId: int = Field(default=None, foreign_key="categories.categoryId")
-    projects: List["Project"] = Relationship(back_populates="tags", link_model=project_tags, sa_relationship_kwargs={"cascade": "delete"})
-    category: Category = Relationship(back_populates="tags", sa_relationship_kwargs={"cascade": "delete"})
+    projects: List["Project"] = Relationship(
+        back_populates="tags",
+        link_model=project_tags,
+        sa_relationship_kwargs={"cascade": "delete"})
+    category: Category = Relationship(
+        back_populates="tags", sa_relationship_kwargs={"cascade": "delete"})
+
+
+class TagCount(SQLModel):
+    tag: Optional[Tag]
+    count: int
 
 
 class ProjectBase(SQLModel):
@@ -108,8 +136,12 @@ class Project(ProjectBase, table=True):
     is_featured: bool = Field(default=False)
     visit_count: int = Field(default=0)
     user_id: UUID = Field(foreign_key="users.id")
-    user: User = Relationship(back_populates="projects", sa_relationship_kwargs={"cascade": "delete"})
-    tags: List["Tag"] = Relationship(back_populates="projects", link_model=project_tags, sa_relationship_kwargs={"cascade": "delete"})
+    user: User = Relationship(back_populates="projects",
+                              sa_relationship_kwargs={"cascade": "delete"})
+    tags: List["Tag"] = Relationship(
+        back_populates="projects",
+        link_model=project_tags,
+        sa_relationship_kwargs={"cascade": "delete"})
 
 
 class ProjectWithUserAndTags(SQLModel):
