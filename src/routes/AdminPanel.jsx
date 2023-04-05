@@ -1,22 +1,14 @@
-import { Content, SideNav, SideNavItems, Theme } from '@carbon/react';
+import { Content, SideNav, SideNavItems } from '@carbon/react';
 import { Outlet } from 'react-router';
 
 import MainHeader from '@/Components/MainHeader';
 import CustomSideNavLink from '@/Components/CustomSideNavLink';
 import { Cube, Dashboard, Events, Settings } from '@carbon/icons-react';
-import { Helmet } from 'react-helmet';
 
 function AdminPanel() {
 
-    const stored = localStorage.getItem('toggleDarkMode');
-    const color=(stored==='true' ? '161616': 'white');
-
     return (
         <>
-        <Theme theme ={stored==='true' ? 'g100' : 'white'}>
-            <Helmet>
-                <style>{'body { background-color:#'+ color + '; }'}</style> 
-            </Helmet>
             <MainHeader />
             <SideNav
                 isFixedNav
@@ -46,7 +38,6 @@ function AdminPanel() {
             <Content>
                 <Outlet />
             </Content>
-        </Theme>
         </>
     );
 }

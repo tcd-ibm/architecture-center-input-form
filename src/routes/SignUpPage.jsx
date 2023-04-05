@@ -5,8 +5,7 @@ import MainHeader from '@/Components/MainHeader';
 import { EmailInput, NewPasswordConfirmationInput, NewPasswordInput } from '@/Components/ValidatedInputs';
 
 import { ArrowRight } from '@carbon/icons-react';
-import { Content, Tile, Button, InlineNotification, Link, FluidForm, Theme } from '@carbon/react';
-import {Helmet} from 'react-helmet';
+import { Content, Tile, Button, InlineNotification, Link, FluidForm } from '@carbon/react';
 
 import useAuth from '@/hooks/useAuth';
 
@@ -23,9 +22,6 @@ function SignUpPage() {
     const confirmPasswordRef = useRef(null);
 
     const navigate = useNavigate();
-
-    const stored = localStorage.getItem('toggleDarkMode');
-    const color=(stored==='true' ? '161616': 'white');
 
     const handleSubmit = async event => {
 
@@ -57,10 +53,6 @@ function SignUpPage() {
 
     return (
         <>
-        <Theme theme ={stored==='true' ? 'g100' : 'white'}>
-            <Helmet>
-                <style>{'body { background-color:#'+ color + '; }'}</style> 
-            </Helmet>
             <MainHeader />
             <Content className={styles.signupFormContainer}>
                 <Tile className={styles.signupFormTile}>
@@ -115,7 +107,6 @@ function SignUpPage() {
                     </FluidForm>
                 </Tile>
             </Content>
-        </Theme>
         </>
     );
 }
