@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Content, Theme } from '@carbon/react';
+import { Content } from '@carbon/react';
 import styles from './MainPage.module.scss';
-import {Helmet} from 'react-helmet';
 
 import MainHeader from '@/Components/MainHeader';
 import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
@@ -17,10 +16,6 @@ function MainPage() {
     const [isOnMobile, setIsOnMobile] = useState([]);
     const [queryMenuContent, setQueryMenuContent] = useState([]);
     const queryMenuRef = useRef();
-
-    const stored = localStorage.getItem('toggleDarkMode');
-    const color=(stored==='true' ? '161616': 'white');
-
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -87,13 +82,8 @@ function MainPage() {
 
     return (
         <>
-        <Theme theme ={stored==='true' ? 'g100' : 'white'}>
-            <Helmet>
-                <style>{'body { background-color:#'+ color + '; }'}</style> 
-            </Helmet>
             <MainHeader />
             <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
-            
             <Content style={isOnMobile? {padding: '16px',  margin: 0, 'margin-top':'64px'}: {} }>
                 { isLoading ? <div>Loading...</div> : 
                     <div id={styles.cardContainer}>
@@ -104,7 +94,6 @@ function MainPage() {
                     </div>
                 }
             </Content>
-        </Theme>
         </>
     );
 }

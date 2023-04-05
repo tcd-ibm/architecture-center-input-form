@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Accordion, AccordionItem, Heading, Form, Stack, Dropdown, Checkbox, Button, Tag } from '@carbon/react';
 
 import AddTagForm from '@/Components/AddTagForm';
+import AddCategoryForm from '@/Components/AddCategoryForm';
 
 import styles from './ContentSettingsPage.module.scss';
 
@@ -37,6 +38,10 @@ function ContentSettingsPage() {
 
     const handleAddTag = (categoryId, tagName) => {
         console.log(categoryId, tagName);
+    };
+
+    const handleAddCategory = (categoryName) => {
+        console.log(categoryName);
     };
 
     return (
@@ -82,6 +87,7 @@ function ContentSettingsPage() {
                 </AccordionItem>
             )}
         </Accordion>
+        <AddCategoryForm onSubmit={categoryName => handleAddCategory(categoryName)} />
         </>
     );
 }
