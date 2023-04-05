@@ -4,7 +4,7 @@ import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchA
 import { TrashCan, Edit } from '@carbon/icons-react';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-
+import styles from './ProjectManager.module.scss';
 import { useNavigate } from 'react-router';
 import useAuth from '@/hooks/useAuth';
 
@@ -151,7 +151,8 @@ export default function ProjectManager({userID}) {
 
             return (
                 <TableContainer
-                title='Projects'
+                className={styles.container}
+                title='My Projects'
                 description='List of all current projects'
                 {...getTableContainerProps()}>
 

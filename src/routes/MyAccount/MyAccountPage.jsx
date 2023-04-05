@@ -3,6 +3,8 @@ import { CubeView, Information} from '@carbon/icons-react';
 import MainHeader from '@/Components/MainHeader';
 import CustomSideNavLink from '@/Components/CustomSideNavLink';
 import { Outlet } from 'react-router';
+import ProjectManager from '../../Components/ProjectManager';
+import styles from './MyAccountPage.module.scss';
 
 function MyAccountPage() {
 
@@ -27,6 +29,7 @@ function MyAccountPage() {
             </SideNav> */}
             <Content>
                 <Outlet />
+                <ProjectManager/>
             </Content>
         </>
     );
