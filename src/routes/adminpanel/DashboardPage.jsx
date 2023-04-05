@@ -1,4 +1,4 @@
-import { Badge, Events, Book } from '@carbon/icons-react';
+import { Events, Book, Growth } from '@carbon/icons-react';
 import { Heading, Tile } from '@carbon/react';
 import { SimpleBarChart, DonutChart} from '@carbon/charts-react';
 import styles from '@carbon/charts/styles.css';
@@ -97,9 +97,9 @@ const state = {
             {/*Sponsors*/}
             <Tile style = {{maxWidth: '300px', minWidth: '250px', paddingBottom: '30px', marginBottom: '5px', marginRight: '10px', flex: '33.33%'}}>
                 <div className={styles2.divCenter}>
-                    <Badge style={{height:'60px', width:'40px'}}></Badge>
+                    <Growth style={{height:'60px', width:'40px'}}></Growth>
                 </div>
-                <h4 style={{textAlign: 'center'}}>Sponsors</h4>
+                <h4 style={{textAlign: 'center'}}>Page visits</h4>
                 <h1 style={{textAlign: 'center'}}>45</h1>
             </Tile>
 

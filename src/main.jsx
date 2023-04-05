@@ -8,7 +8,6 @@ import './index.scss';
 
 import MainPage from './routes/MainPage';
 import AddProjectPage from './routes/AddProjectPage';
-import SettingsPage from './routes/SettingsPage';
 import EditProjectPage from './routes/EditProjectPage';
 import LoginPage from './routes/LoginPage';
 import ErrorPage from './routes/ErrorPage';
@@ -25,6 +24,7 @@ import MyProjectsPage from './routes/MyAccount/MyProjectsPage';
 import UserInfoPage from './routes/MyAccount/UserInfoPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
+import { AppThemeProvider } from '@/hooks/useAppTheme';
 
 axios.defaults.baseURL = 'http://localhost:5297/api/v1/';
 
@@ -45,10 +45,6 @@ const router = createBrowserRouter([
       {
         path: 'edit/:projectId',
         element: <EditProjectPage />,
-      },
-      {
-        path: 'settings',
-        element: <SettingsPage />
       },
       {
         path: 'login',
@@ -118,7 +114,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthContextProvider>
-      <RouterProvider router={router} />
+      <AppThemeProvider>
+        <RouterProvider router={router} />
+      </AppThemeProvider>
     </AuthContextProvider>
   </React.StrictMode>
 );
