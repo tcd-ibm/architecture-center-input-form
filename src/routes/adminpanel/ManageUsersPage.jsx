@@ -56,7 +56,9 @@ function ManageUsersPage() {
     const [pageSize, setPageSize] = useState(10);
     const [projectsModalOpen, setProjectsModalOpen] = useState(false);
 
-    useEffect(() => {
+   
+
+    function onload() {
         if(!user) {
             navigate('/login', { replace: true });
             return;
@@ -80,8 +82,8 @@ function ManageUsersPage() {
                 numberOfProjects: '42 (7 unapproved)',
                 actions:    <> 
                             <Button kind='ghost' renderIcon={Cube} onClick={() => handleProjectsModal(user.id)}>Projects</Button>
-                            <Button kind='ghost' renderIcon={UserRole}>Change role</Button>
-                            <Button kind='danger--ghost' renderIcon={TrashCan}>Delete</Button>
+                            <Button kind='ghost' renderIcon={UserRole} onClick={() => handleRoleChange(user)}>Change role</Button>
+                            <Button kind='danger--ghost' renderIcon={TrashCan} onClick={() => handleUserDelete(user)}>Delete</Button>
                             </>
             }));
             setData(data);
@@ -90,7 +92,10 @@ function ManageUsersPage() {
         .catch(err => {
             console.log(err);
         });
-    }, [navigate, user, page, pageSize]);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(onload, [navigate, page, pageSize, user]);
 
     const handlePaginationChange = event => {
         setPage(event.page);
@@ -101,6 +106,30 @@ function ManageUsersPage() {
         setUserID(tempID);
         setProjectsModalOpen(true);
         console.log(tempID);
+    };
+
+    const handleRoleChange = async selectedUser => {
+        const currentID = selectedUser.id;
+        try {
+            if (selectedUser.role === 0) {
+                await axios.put(`/user/update/${currentID}`, { role: 1 }, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+            } else {
+                await axios.put(`/user/update/${currentID}`, { role: 0 }, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+            }
+            onload();
+        } catch(error) {
+            console.log(error);
+        }
+    };
+
+    const handleUserDelete = async selectedUser => {
+        const currentID = selectedUser.id;
+        try {
+            await axios.delete(`/user/delete/${currentID}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+            onload();
+        } catch(error) {
+            console.log(error);
+        }
     };
 
     return (

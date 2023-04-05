@@ -101,7 +101,7 @@ function ManageProjectsPage() {
             });
         } else if (cell.info.header === 'is_live')  {
             if (cell.value) {
-                return 'Approved';
+                return <Button kind='ghost' style={{color: '#00b200'}} renderIcon={CheckmarkOutline}>Approved</Button>;
             } else {
                 const newCell = {...cell,
                             id: cell.id.substring(0, cell.id.indexOf(':'))};
@@ -115,7 +115,6 @@ function ManageProjectsPage() {
         selectedProjects.map(async(project) => {
             const currentId = project.id;
             try {
-                console.log(currentId);
                 await axios.delete(`/user/project/${currentId}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
                 window.location.reload(true);
             } catch(error) {
