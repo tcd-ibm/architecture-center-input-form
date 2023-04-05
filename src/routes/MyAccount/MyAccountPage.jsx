@@ -9,7 +9,7 @@ function MyAccountPage() {
     return (
         <>
             <MainHeader />
-            <SideNav
+            {/* <SideNav
                 isFixedNav
                 expanded={true}
                 isChildOfHeader={false}
@@ -24,7 +24,7 @@ function MyAccountPage() {
                     </CustomSideNavLink>
                 </SideNavItems>
 
-            </SideNav>
+            </SideNav> */}
             <Content>
                 <Outlet />
             </Content>
