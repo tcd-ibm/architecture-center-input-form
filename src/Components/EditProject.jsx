@@ -13,6 +13,8 @@ export default function EditProject({projectData, user, isEdit}) {
 	const [tags, setTags] = useState([]);
     const [date, setDate] = useState(new Date(projectData.date));
 
+    const [isOnMobile, setIsOnMobile] = useState([]);
+
     const titleInputRef = useRef();
     const linkInputRef = useRef();
     const completionDateInputRef = useRef();
@@ -40,6 +42,20 @@ export default function EditProject({projectData, user, isEdit}) {
             console.error(error);
         }
     }, [navigate, user]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        const handleResize = () => {
+          if (mediaQuery.matches) {
+            setIsOnMobile(true);
+          } else {
+            setIsOnMobile(false);
+          }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleFileChange = event => {
         if(event.target.files) {
@@ -116,13 +132,13 @@ export default function EditProject({projectData, user, isEdit}) {
                 <TextInput labelText='Project Title' id='title' ref={titleInputRef} defaultValue={projectData.title} required />
                 <TextInput labelText='Link to Project' placeholder='https://example.com' defaultValue={projectData.link} id='link' invalid={Boolean(invalidText)} invalidText={invalidText} ref={linkInputRef} onBlur={validateLink}/>
                 {/*<TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />*/}
-                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(date)}>
+                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(date)} style={{width: '100%'}}>
                     <DatePickerInput
                       placeholder='dd/mm/yyyy'
                       labelText='Completion Date'
                       id='date'
                       ref={completionDateInputRef}
-                      style={{margin: '0px'}}
+                      style={isOnMobile? {margin: '0px', width: '85vw'}: {margin: '0px', width: '61vw'} }
                     />
                 </DatePicker>
 
@@ -172,6 +188,7 @@ export default function EditProject({projectData, user, isEdit}) {
                     {/* <h4 style={{marginBottom: '10px'}}>Main Content</h4> */}
                     <DocEditor code={content} ref={contentInputRef} />
                 </Tile>
+                <Tile>
                 {
                     file ?
                     <FileUploaderItem
@@ -182,10 +199,10 @@ export default function EditProject({projectData, user, isEdit}) {
                     :
                     <FormItem>
                         <p className='cds--file--label'>
-                            Upload files
+                            Upload preview image
                         </p>
                         <p className='cds--label-description'>
-                            Max file size is 500kb. Supported file types are .jpg and .png.
+                            Max file size is 50mb. Supported file types are .jpg and .png.
                         </p>
                         <FileUploaderDropContainer
                             accept={[
@@ -205,6 +222,7 @@ export default function EditProject({projectData, user, isEdit}) {
                         <div className='cds--file-container cds--file-container--drop' />
                     </FormItem>
                 }
+                </Tile>
                 <Button type='submit'>Save</Button>
             </Stack>
             </Form>
