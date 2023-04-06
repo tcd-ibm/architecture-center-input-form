@@ -1,11 +1,28 @@
 import { Header, HeaderNavigation, HeaderGlobalBar, OverflowMenu, HeaderGlobalAction } from '@carbon/react';
 import { User, DocumentAdd, InventoryManagement, Asleep } from '@carbon/icons-react';
 
+import { useState, useEffect } from 'react';
 import { CustomHeaderMenuItem, CustomHeaderName, CustomOverflowMenuItem } from './CustomCarbonNavigation';
 import useAuth from '@/hooks/useAuth';
 import useAppTheme from '@/hooks/useAppTheme';
 
 function MainHeader() {
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        const handleResize = () => {
+            if (mediaQuery.matches) {
+                setIsOnMobile(true);
+            } else {
+                setIsOnMobile(false);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const [isOnMobile, setIsOnMobile] = useState([]);
     const { user, logout } = useAuth();
     const [theme, setTheme] = useAppTheme();
 
@@ -15,37 +32,40 @@ function MainHeader() {
     return (
         <Header aria-label='Amazing SwEng Project'>
             <CustomHeaderName href='/' prefix=''>
-                <img src={url} style={{maxWidth: '50px', marginLeft: '15px', marginRight: '10px'}} onError={(event) => event.target.style.display = defaultURL} />
+                <img src={url} style={{ maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }} onError={(event) => event.target.style.display = defaultURL} />
                 Project Showcase
             </CustomHeaderName>
             <HeaderNavigation aria-label='Amazing SwEng Project'>
                 <CustomHeaderMenuItem href='/add'>
                     Add new project
-                    <DocumentAdd style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
+                    <DocumentAdd style={{ marginLeft: '10px', top: '2px', position: 'relative' }} />
                 </CustomHeaderMenuItem>
-                { user?.isAdmin() &&
+                {user?.isAdmin() &&
                     <CustomHeaderMenuItem href='/adminpanel/dashboard'>
                         Admin panel
-                        <InventoryManagement style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
+                        <InventoryManagement style={{ marginLeft: '10px', top: '2px', position: 'relative' }} />
                     </CustomHeaderMenuItem>
                 }
             </HeaderNavigation>
             <HeaderGlobalBar>
-                <HeaderNavigation style={{paddingLeft: '0px'}}>
-                    <HeaderGlobalAction aria-label='Change Theme' onClick={() => {
-                        if(theme === 'white') setTheme('g100');
-                        else setTheme('white');
-                    }}>
-                        <Asleep />
+                {isOnMobile &&
+                    <HeaderGlobalAction aria-label='Add new project' href='/add'>
+                        <DocumentAdd />
                     </HeaderGlobalAction>
-                </HeaderNavigation>
-                { user &&
-                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{boxShadow: 'none'}} aria-label='My Account'>     
+                }
+                <HeaderGlobalAction aria-label='Change Theme' onClick={() => {
+                    if (theme === 'white') setTheme('g100');
+                    else setTheme('white');
+                }}>
+                    <Asleep />
+                </HeaderGlobalAction>
+                {user &&
+                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{ boxShadow: 'none' }} aria-label='My Account'>
                         <CustomOverflowMenuItem itemText='My Account' href='/account' />
                         <CustomOverflowMenuItem itemText='Log out' onClick={logout} />
                     </OverflowMenu>
                 }
-                { !user &&
+                {!user &&
                     <HeaderNavigation aria-label='Account options'>
                         <CustomHeaderMenuItem href='/signup'>
                             Sign up
@@ -56,7 +76,7 @@ function MainHeader() {
                     </HeaderNavigation>
                 }
             </HeaderGlobalBar>
-        </Header>
+        </Header >
     );
 }
 
