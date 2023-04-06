@@ -15,37 +15,35 @@ function MainHeader() {
     return (
         <Header aria-label='Amazing SwEng Project'>
             <CustomHeaderName href='/' prefix=''>
-                <img src={url} style={{maxWidth: '50px', marginLeft: '15px', marginRight: '10px'}} onError={(event) => event.target.style.display = defaultURL} />
+                <img src={url} style={{ maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }} onError={(event) => event.target.style.display = defaultURL} />
                 Project Showcase
             </CustomHeaderName>
             <HeaderNavigation aria-label='Amazing SwEng Project'>
                 <CustomHeaderMenuItem href='/add'>
                     Add new project
-                    <DocumentAdd style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
+                    <DocumentAdd style={{ marginLeft: '10px', top: '2px', position: 'relative' }} />
                 </CustomHeaderMenuItem>
-                { user?.isAdmin() &&
+                {user?.isAdmin() &&
                     <CustomHeaderMenuItem href='/adminpanel/dashboard'>
                         Admin panel
-                        <InventoryManagement style={{marginLeft: '10px', top: '2px', position: 'relative'}}/>
+                        <InventoryManagement style={{ marginLeft: '10px', top: '2px', position: 'relative' }} />
                     </CustomHeaderMenuItem>
                 }
             </HeaderNavigation>
             <HeaderGlobalBar>
-                <HeaderNavigation style={{paddingLeft: '0px'}}>
-                    <HeaderGlobalAction aria-label='Change Theme' onClick={() => {
-                        if(theme === 'white') setTheme('g100');
-                        else setTheme('white');
-                    }}>
-                        <Asleep />
-                    </HeaderGlobalAction>
-                </HeaderNavigation>
-                { user &&
-                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{boxShadow: 'none'}} aria-label='My Account'>     
+                <HeaderGlobalAction aria-label='Change Theme' onClick={() => {
+                    if (theme === 'white') setTheme('g100');
+                    else setTheme('white');
+                }}>
+                    <Asleep />
+                </HeaderGlobalAction>
+                {user &&
+                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{ boxShadow: 'none' }} aria-label='My Account'>
                         <CustomOverflowMenuItem itemText='My Account' href='/account' />
                         <CustomOverflowMenuItem itemText='Log out' onClick={logout} />
                     </OverflowMenu>
                 }
-                { !user &&
+                {!user &&
                     <HeaderNavigation aria-label='Account options'>
                         <CustomHeaderMenuItem href='/signup'>
                             Sign up
