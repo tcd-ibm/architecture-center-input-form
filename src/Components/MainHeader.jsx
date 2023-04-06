@@ -1,11 +1,28 @@
 import { Header, HeaderNavigation, HeaderGlobalBar, OverflowMenu, HeaderGlobalAction } from '@carbon/react';
 import { User, DocumentAdd, InventoryManagement, Asleep } from '@carbon/icons-react';
 
+import { useState, useEffect } from 'react';
 import { CustomHeaderMenuItem, CustomHeaderName, CustomOverflowMenuItem } from './CustomCarbonNavigation';
 import useAuth from '@/hooks/useAuth';
 import useAppTheme from '@/hooks/useAppTheme';
 
 function MainHeader() {
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        const handleResize = () => {
+            if (mediaQuery.matches) {
+                setIsOnMobile(true);
+            } else {
+                setIsOnMobile(false);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const [isOnMobile, setIsOnMobile] = useState([]);
     const { user, logout } = useAuth();
     const [theme, setTheme] = useAppTheme();
 
@@ -31,6 +48,11 @@ function MainHeader() {
                 }
             </HeaderNavigation>
             <HeaderGlobalBar>
+                {isOnMobile &&
+                    <HeaderGlobalAction aria-label='Add new project' href='/add'>
+                        <DocumentAdd />
+                    </HeaderGlobalAction>
+                }
                 <HeaderGlobalAction aria-label='Change Theme' onClick={() => {
                     if (theme === 'white') setTheme('g100');
                     else setTheme('white');
@@ -54,7 +76,7 @@ function MainHeader() {
                     </HeaderNavigation>
                 }
             </HeaderGlobalBar>
-        </Header>
+        </Header >
     );
 }
 
