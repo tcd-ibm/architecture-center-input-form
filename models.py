@@ -61,6 +61,10 @@ class Token(SQLModel):
     expires_at: datetime
 
 
+class CategoryCreate(SQLModel):
+    categoryName: str
+
+
 class CategoryBase(SQLModel):
     categoryId: int = Field(primary_key=True, nullable=False)
     categoryName: str
@@ -89,6 +93,12 @@ class project_tags(SQLModel, table=True):
     tag_id: int = Field(foreign_key="tags.tagId",
                         primary_key=True,
                         nullable=False)
+
+
+class TagCreate(SQLModel):
+    tagName: str
+    tagNameShort: str
+    categoryId: Optional[int] = None
 
 
 class TagBase(SQLModel):

@@ -17,7 +17,7 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, project_tags, TagCount, CategoryUpdate, TagUpdate, ProjectCount
+from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, project_tags, TagCount, CategoryUpdate, TagUpdate, ProjectCount, CategoryCreate, TagCreate
 
 from datetime import timedelta, datetime
 
@@ -375,7 +375,14 @@ async def admin_get_all_users(response: Response,
     tasks = [get_user_projects_count_by_id(id, session) for id in ids]
     users_projects_counts = await asyncio.gather(*tasks)
 
-    results = [UserInfo(id=user.id, created_at=user.created_at, email=user.email, username=user.username if user.username else None, is_active=user.is_active, role=user.role if user.role else None) for user in users]
+    results = [
+        UserInfo(id=user.id,
+                 created_at=user.created_at,
+                 email=user.email,
+                 username=user.username if user.username else None,
+                 is_active=user.is_active,
+                 role=user.role if user.role else None) for user in users
+    ]
 
     for i in range(len(results)):
         results[i].projects_counts = users_projects_counts[i]
@@ -486,27 +493,30 @@ async def admin_get_all_projects(
 
 
 @router.post("/admin/category", response_model=Category)
-async def create_category(new_category: Category,
+async def create_category(new_category: CategoryCreate,
                           current_user: User = Depends(get_current_user),
                           session: AsyncSession = Depends(get_session)):
     if not is_admin(current_user):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="only admin can create category")
 
-    if not new_category.categoryId or not new_category.categoryName:
+    if not new_category.categoryName:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="name and description are required")
+                            detail="category name is required")
 
     r = await session.execute(
-        select(Category).where(Category.categoryId == new_category.categoryId))
+        select(Category).where(
+            Category.categoryName == new_category.categoryName))
     if r.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Category already exists")
+                            detail="category already exists")
 
-    session.add(new_category)
+    new_category_instance = Category(categoryName=new_category.categoryName)
+
+    session.add(new_category_instance)
     await session.commit()
-    await session.refresh(new_category)
-    return new_category
+    await session.refresh(new_category_instance)
+    return new_category_instance
 
 
 @router.put("/admin/category/{id}", response_model=CategoryUpdate)
@@ -562,32 +572,39 @@ async def delete_category(id: int,
 
 
 @router.post("/admin/tag", response_model=Tag)
-async def create_tag(new_tag: Tag,
+async def create_tag(new_tag: TagCreate,
                      current_user: User = Depends(get_current_user),
                      session: AsyncSession = Depends(get_session)):
     if not is_admin(current_user):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="only admin can create category")
 
-    if not new_tag.tagId or not new_tag.tagName or not new_tag.categoryId:
+    if not new_tag.tagName or not new_tag.tagNameShort:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="id, name and category ID are required")
+                            detail="tag name and short name are required")
 
-    if (await session.execute(select(Tag).where(Tag.tagId == new_tag.tagId)
-                              )).scalar_one_or_none():
+    if (await
+            session.execute(select(Tag).where(Tag.tagName == new_tag.tagName)
+                            )).scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Tag already exists")
 
-    if not (await session.execute(
-            select(Category).where(Category.categoryId == new_tag.categoryId)
-    )).scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Category not found")
+    if new_tag.categoryId is not None:
+        if not (await session.execute(
+                select(Category).where(
+                    Category.categoryId == new_tag.categoryId)
+        )).scalar_one_or_none():
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Category not found")
 
-    session.add(new_tag)
+    new_tag_instance = Tag(
+        tagName=new_tag.tagName,
+        tagNameShort=new_tag.tagNameShort,
+        categoryId=new_tag.categoryId if new_tag.categoryId else None)
+    session.add(new_tag_instance)
     await session.commit()
-    await session.refresh(new_tag)
-    return new_tag
+    await session.refresh(new_tag_instance)
+    return new_tag_instance
 
 
 @router.put("/admin/tag/{id}", response_model=TagUpdate)
