@@ -27,13 +27,20 @@ class User(UserBase, table=True):
         back_populates="user", sa_relationship_kwargs={"cascade": "delete"})
 
 
+class ProjectCount(SQLModel):
+    live_count: Optional[int] = None
+    draft_count: Optional[int] = None
+    total_count: Optional[int] = None
+
+
 class UserInfo(UserBase):
     id: UUID
     created_at: datetime
-    email: str
+    email: Optional[str] = None
     username: Optional[str] = None
-    is_active: bool
-    role: int
+    is_active: Optional[bool] = None
+    role: Optional[int] = None
+    projects_counts: Optional[ProjectCount] = None
 
 
 class UserInfoInProject(SQLModel):

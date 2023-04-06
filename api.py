@@ -17,11 +17,13 @@ from uuid import uuid4
 from jose import jwt, JWTError
 
 from db import get_session, init_db
-from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, project_tags, TagCount, CategoryUpdate, TagUpdate
+from models import User, UserSignup, UserUpdate, Token, Project, Tag, Category, CategoryWithTags, ProjectWithUserAndTags, ProjectFull, ProjectUpdate, UserInfo, ProjectFeatured, project_tags, TagCount, CategoryUpdate, TagUpdate, ProjectCount
 
 from datetime import timedelta, datetime
 
 from typing import List
+
+import asyncio
 
 import re
 
@@ -367,13 +369,25 @@ async def admin_get_all_users(response: Response,
     result = await session.execute(
         select(User).offset(max((page - 1) * per_page,
                                 0)).limit(min(per_page, MAX_PAGE_SIZE)))
-    return result.scalars().all()
+    users = result.scalars().all()
+    ids = [user.id for user in users]
+
+    tasks = [get_user_projects_count_by_id(id, session) for id in ids]
+    users_projects_counts = await asyncio.gather(*tasks)
+
+    results = [UserInfo(id=user.id, created_at=user.created_at, email=user.email, username=user.username if user.username else None, is_active=user.is_active, role=user.role if user.role else None) for user in users]
+
+    for i in range(len(results)):
+        results[i].projects_counts = users_projects_counts[i]
+
+    return results
 
 
 @router.put("/admin/project/live/{id}")
-async def toggle_project_is_live(id: str,
-                                 session: AsyncSession = Depends(get_session),
-                                 current_user: User = Depends(get_current_user)):
+async def toggle_project_is_live(
+    id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized")
@@ -706,33 +720,24 @@ async def get_top_n_popular_tags(
     return results
 
 
-@router.get("/admin/user/{id}/projects/count")
-async def get_user_projects_count_by_id(
-    id: str,
-    current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session)):
-    if not is_admin(current_user):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="only admin can get user projects count")
-
-    id = id.replace("-", "")
-    if len(id) != 32:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Invalid user id")
-
+async def get_user_projects_count_by_id(id: str, session: AsyncSession):
     r = await session.execute(
-        select(func.count(Project.id)).where(Project.user_id == id, Project.is_live == True))
+        select(func.count(Project.id)).where(Project.user_id == id,
+                                             Project.is_live == True))
     live_count = r.scalar_one_or_none()
 
     r = await session.execute(
-        select(func.count(Project.id)).where(Project.user_id == id, Project.is_live == False))
+        select(func.count(Project.id)).where(Project.user_id == id,
+                                             Project.is_live == False))
     draft_count = r.scalar_one_or_none()
 
     r = await session.execute(
         select(func.count(Project.id)).where(Project.user_id == id))
     total_count = r.scalar_one_or_none()
 
-    return {"live_count": live_count, "draft_count": draft_count, "total_count": total_count}
+    return ProjectCount(live_count=live_count,
+                        draft_count=draft_count,
+                        total_count=total_count)
 
 
 @router.get("/admin/user/{id}/projects",
