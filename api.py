@@ -706,6 +706,35 @@ async def get_top_n_popular_tags(
     return results
 
 
+@router.get("/admin/user/{id}/projects/count")
+async def get_user_projects_count_by_id(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session)):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="only admin can get user projects count")
+
+    id = id.replace("-", "")
+    if len(id) != 32:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid user id")
+
+    r = await session.execute(
+        select(func.count(Project.id)).where(Project.user_id == id, Project.is_live == True))
+    live_count = r.scalar_one_or_none()
+
+    r = await session.execute(
+        select(func.count(Project.id)).where(Project.user_id == id, Project.is_live == False))
+    draft_count = r.scalar_one_or_none()
+
+    r = await session.execute(
+        select(func.count(Project.id)).where(Project.user_id == id))
+    total_count = r.scalar_one_or_none()
+
+    return {"live_count": live_count, "draft_count": draft_count, "total_count": total_count}
+
+
 @router.get("/admin/user/{id}/projects",
             response_model=List[ProjectWithUserAndTags])
 async def get_projects_by_user_id(
