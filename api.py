@@ -592,13 +592,12 @@ async def create_tag(new_tag: TagCreate,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Tag already exists")
 
-    if new_tag.categoryId is not None:
-        if not (await session.execute(
-                select(Category).where(
-                    Category.categoryId == new_tag.categoryId)
-        )).scalar_one_or_none():
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Category not found")
+    if not (await session.execute(
+            select(Category).where(
+                Category.categoryId == new_tag.categoryId)
+    )).scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Category not found")
 
     new_tag_instance = Tag(
         tagName=new_tag.tagName,
