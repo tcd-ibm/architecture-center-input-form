@@ -183,6 +183,8 @@ async def create_user(user: UserSignup,
         token,
         "token_type":
         "bearer",
+        "email":
+        user.email,
         "role":
         0,
         "expires_at":
@@ -300,6 +302,8 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
         token,
         "token_type":
         "bearer",
+        "email":
+        user.email,
         "role":
         user.role,
         "expires_at":

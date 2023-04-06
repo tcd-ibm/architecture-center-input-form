@@ -49,6 +49,7 @@ class UserUpdate(UserBase):
 class Token(SQLModel):
     access_token: str
     token_type: str
+    email: str
     role: int
     expires_at: datetime
 
