@@ -579,6 +579,9 @@ async def create_tag(new_tag: TagCreate,
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="only admin can create category")
 
+    if new_tag.tagNameShort is None:
+        new_tag.tagNameShort = new_tag.tagName
+
     if not new_tag.tagName or not new_tag.tagNameShort:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="tag name and short name are required")

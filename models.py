@@ -97,7 +97,7 @@ class project_tags(SQLModel, table=True):
 
 class TagCreate(SQLModel):
     tagName: str
-    tagNameShort: str
+    tagNameShort: Optional[str]
     categoryId: Optional[int] = None
 
 
