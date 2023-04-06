@@ -2,7 +2,7 @@
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, Dropdown,
     TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, Button } from '@carbon/react';
-import { TrashCan, Edit, DataCheck, CheckmarkOutline } from '@carbon/icons-react';
+import { TrashCan, Edit, DataCheck, CheckmarkOutline, Star, StarFilled } from '@carbon/icons-react';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
@@ -84,6 +84,10 @@ function ManageProjectsPage() {
         {
             header: 'Approval status',
             key: 'is_live'
+        },
+        {
+            header: 'Featured',
+            key: 'is_featured'
         }
     ];
 
@@ -107,6 +111,14 @@ function ManageProjectsPage() {
                             id: cell.id.substring(0, cell.id.indexOf(':'))};
                 return <Button kind='ghost' onClick={() => handleApproveProject([newCell])} renderIcon={DataCheck}>Approve</Button>;
             } 
+        } else if (cell.info.header === 'is_featured') {
+            if (cell.value) {
+                return <Button kind='ghost' style={{color: '#d5a100'}} renderIcon={StarFilled}>Featured</Button>;
+            } else {
+                const newCell = {...cell,
+                    id: cell.id.substring(0, cell.id.indexOf(':'))};
+                return <Button kind='ghost' onClick={() => handleSetFeaturedProject(newCell)} renderIcon={Star}>Set as Featured</Button>;
+            }
         } else return cell.value;
     }
 
@@ -168,6 +180,30 @@ function ManageProjectsPage() {
             }
         });
     }
+
+    async function handleSetFeaturedProject(selectedProject) {
+        console.log(selectedProject);
+        const requestConfig = { 
+            params: {
+                page: page,
+                per_page: pageSize
+            },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${user.accessToken}` 
+            } 
+        };
+        try {
+            console.log(selectedProject.id);
+            await axios.put(`/project/featured/${selectedProject.id}`, {}, requestConfig);
+            window.location.reload(true);
+        } catch(error) {
+            console.log(error);
+        }
+    }   
+
+
 
     return (
 
