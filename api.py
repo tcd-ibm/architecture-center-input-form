@@ -589,8 +589,7 @@ async def create_tag(new_tag: TagCreate,
                             detail="Tag already exists")
 
     if not (await session.execute(
-            select(Category).where(
-                Category.categoryId == new_tag.categoryId)
+            select(Category).where(Category.categoryId == new_tag.categoryId)
     )).scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Category not found")
@@ -688,7 +687,7 @@ async def get_projects_updated_count_in_n_days(
     # Select the counts of projects updated on each day in the last n days
     query = (select(subquery.c.date,
                     func.coalesce(subquery.c.count,
-                                  0).label("count")).order_by(subquery.c.date))
+                                  0).label("count")).order_by(subquery.c.date.desc()))
 
     # Execute the query and get the results
     r = await session.execute(query)
@@ -989,6 +988,8 @@ async def get_project(id: str,
 @router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
 async def query_user_projects(
     response: Response,
+    start_date: datetime = datetime.min,
+    end_date: datetime = datetime.utcnow(),
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
@@ -1035,17 +1036,19 @@ async def query_user_projects(
 
             query = select(func.count(Project.id)).filter(
                 Project.user_id == current_user.id,
-                Project.title.like(f'%{keyword}%'))
+                Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+                Project.date <= end_date)
             query = query.filter(and_(*conditions)) if conditions else query
             count = (await session.execute(query)).scalar_one_or_none()
 
             query = select(Project).group_by(Project.id).filter(
                 Project.user_id == current_user.id,
-                Project.title.like(f'%{keyword}%')).options(
-                    selectinload(Project.user),
-                    selectinload(Project.tags)).order_by(Project.id).offset(
-                        max((page - 1) * per_page,
-                            0)).limit(min(per_page, MAX_PAGE_SIZE))
+                Project.title.like(f'%{keyword}%'),
+                Project.date >= start_date, Project.date <= end_date).options(
+                    selectinload(Project.user), selectinload(
+                        Project.tags)).order_by(Project.date.desc()).offset(
+                            max((page - 1) * per_page,
+                                0)).limit(min(per_page, MAX_PAGE_SIZE))
 
             query = query.filter(and_(*conditions)) if conditions else query
 
@@ -1062,14 +1065,17 @@ async def query_user_projects(
 
     query = select(func.count(
         Project.id)).where(Project.user_id == current_user.id).filter(
-            Project.title.like(f'%{keyword}%'))
+            Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+            Project.date <= end_date)
 
     r = await session.execute(query)
     count = r.scalar_one_or_none()
 
     query = select(Project).where(Project.user_id == current_user.id).filter(
-        Project.title.like(f'%{keyword}%')).options(selectinload(
-            Project.user), selectinload(Project.tags)).order_by(Project.id)
+        Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+        Project.date <= end_date).options(selectinload(Project.user),
+                                          selectinload(Project.tags)).order_by(
+                                              Project.date.desc())
 
     r = await session.execute(
         query.offset(max((page - 1) * per_page,
@@ -1211,6 +1217,8 @@ async def get_project_by_id(
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
 async def query_all_projects(
     response: Response,
+    start_date: datetime = datetime.min,
+    end_date: datetime = datetime.utcnow(),
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
@@ -1253,16 +1261,18 @@ async def query_all_projects(
                                          Tag.tagId.in_(tag_list)))), ))
 
             query = select(func.count(Project.id)).filter(
-                Project.title.like(f'%{keyword}%'))
+                Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+                Project.date <= end_date)
             query = query.filter(and_(*conditions)) if conditions else query
             count = (await session.execute(query)).scalar_one_or_none()
 
             query = select(Project).group_by(Project.id).filter(
-                Project.title.like(f'%{keyword}%')).options(
-                    selectinload(Project.user),
-                    selectinload(Project.tags)).order_by(Project.id).offset(
-                        max((page - 1) * per_page,
-                            0)).limit(min(per_page, MAX_PAGE_SIZE))
+                Project.title.like(f'%{keyword}%'),
+                Project.date >= start_date, Project.date <= end_date).options(
+                    selectinload(Project.user), selectinload(
+                        Project.tags)).order_by(Project.date.desc()).offset(
+                            max((page - 1) * per_page,
+                                0)).limit(min(per_page, MAX_PAGE_SIZE))
 
             query = query.filter(and_(*conditions)) if conditions else query
 
@@ -1278,7 +1288,8 @@ async def query_all_projects(
                                 detail="Tags must be integers")
 
     query = select(func.count(Project.id)).filter(
-        Project.title.like(f'%{keyword}%'))
+        Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+        Project.date <= end_date)
     count = (await session.execute(query)).scalar_one_or_none()
 
     response.headers['X-Total-Count'] = str(count)
@@ -1286,11 +1297,14 @@ async def query_all_projects(
                                             (1 if count % per_page else 0))
 
     r = await session.execute(
-        select(Project).filter(Project.title.like(f'%{keyword}%')).options(
-            selectinload(Project.user),
-            selectinload(Project.tags)).order_by(Project.id).offset(
-                max((page - 1) * per_page,
-                    0)).limit(min(per_page, MAX_PAGE_SIZE)))
+        select(Project).filter(
+            Project.title.like(f'%{keyword}%'),
+            Project.date >= start_date, Project.date <= end_date).options(
+                selectinload(Project.user),
+                selectinload(Project.tags)).order_by(
+                    Project.date.desc()).offset(max(
+                        (page - 1) * per_page,
+                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
     return r.scalars().all()
 
 
