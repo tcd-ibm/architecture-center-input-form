@@ -248,7 +248,7 @@ async def update_user(user: UserUpdate,
     session.add(user_to_update)
     await session.commit(
     )  # flush is actually not needed here since commit will flush automatically
-    await session.flush()
+    await session.refresh(user_to_update)
     user_data = user_to_update.__dict__
     user_data.pop("hashed_password")
     return user_data
