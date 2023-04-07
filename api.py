@@ -519,24 +519,20 @@ async def create_category(new_category: CategoryCreate,
     return new_category_instance
 
 
-@router.put("/admin/category/{id}", response_model=CategoryCreate)
+@router.put("/admin/category/{id}", response_model=Category)
 async def update_category(id: int,
-                          updated_category: CategoryUpdate,
+                          updated_category: CategoryCreate,
                           current_user: User = Depends(get_current_user),
                           session: AsyncSession = Depends(get_session)):
     if not is_admin(current_user):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="only admin can update category")
 
-    if id != updated_category.categoryId:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="id in url and body must match")
-
     r = await session.execute(
         select(Category).where(Category.categoryId == id))
     original_instance = r.scalar_one_or_none()
     if not original_instance:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Category not found")
 
     for k, v in updated_category.__dict__.items():
