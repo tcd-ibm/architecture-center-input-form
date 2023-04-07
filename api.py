@@ -519,7 +519,7 @@ async def create_category(new_category: CategoryCreate,
     return new_category_instance
 
 
-@router.put("/admin/category/{id}", response_model=CategoryUpdate)
+@router.put("/admin/category/{id}", response_model=CategoryCreate)
 async def update_category(id: int,
                           updated_category: CategoryUpdate,
                           current_user: User = Depends(get_current_user),
@@ -1298,13 +1298,17 @@ async def query_all_projects(
     return r.scalars().all()
 
 
-@router.get("/tag/{tagId}", response_model=List[Tag])
+@router.get("/tag/{tagId}", response_model=Tag)
 async def fetch_tag(request: Request,
                     session: AsyncSession = Depends(get_session),
                     tagId: int = 0) -> List[Tag]:
     r = await session.execute(
         select(Tag).filter_by(**request.query_params._dict, tagId=tagId))
-    return r.scalars().all()
+    tag = r.scalar_one_or_none()
+    if not tag:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Tag not found")
+    return tag
 
 
 @router.get("/tags", response_model=List[CategoryWithTags])
