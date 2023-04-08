@@ -22,7 +22,8 @@ function ManageProjectsPage() {
     const { user } = useAuth();
 
 
-    useEffect(() => {
+
+    function onLoad() {
         if(!user) {
             navigate('/login', { replace: true });
             return;
@@ -42,23 +43,22 @@ function ManageProjectsPage() {
             let projects = [];
             if (filter === 'All projects') {
                 projects = res.data;
-                setProjects(projects);
                 setNumberOfEntries(parseInt(res.headers['x-total-count']));
             } else if (filter === 'Approved projects') {
                 projects = res.data.filter((project) => project.is_live);
-                setProjects(projects);
                 setNumberOfEntries(projects.length);
             } else if (filter === 'Pending approval') {
                 projects = res.data.filter((project) => !project.is_live);
-                setProjects(projects);
                 setNumberOfEntries(projects.length);
             }
+            setProjects(projects);
         })
         .catch(err => {
             console.log(err);
         });
-    }, [navigate, user, page, pageSize, filter]);
+    }
 
+    useEffect(onLoad, [navigate, user, page, pageSize, filter]);
 
     const headers = [
         {
@@ -124,15 +124,28 @@ function ManageProjectsPage() {
 
 
     function handleDelete(selectedProjects) {
+        const requestConfig = { 
+            params: {
+                page: page,
+                per_page: pageSize
+            },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', 
+                'Authorization': `Bearer ${user.accessToken}` 
+            } 
+        };
         selectedProjects.map(async(project) => {
             const currentId = project.id;
             try {
-                await axios.delete(`/user/project/${currentId}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
-                window.location.reload(true);
+                await axios.delete(`/user/project/${currentId}`, requestConfig);
+                onLoad();
+                //window.location.reload(true);
             } catch(error) {
                 console.log(error);
             }
         });
+        setDangerModalOpen(false);
     }
 
     const handlePaginationChange = event => {
@@ -172,11 +185,14 @@ function ManageProjectsPage() {
                 });
             } catch(error) {
                 console.log(error);
-            } try {
-                await axios.put(`/user/project/${currentId}`, {is_live: true}, requestConfig);
-                window.location.reload(true);
-            } catch(error) {
-                console.log(error);
+            } if (!toApprove.is_live) {
+                try {
+                    await axios.put(`/user/project/${currentId}`, {is_live: true}, requestConfig);
+                    onLoad();
+                    //window.location.reload(true);
+                } catch(error) {
+                    console.log(error);
+                }
             }
         });
     }
@@ -197,7 +213,8 @@ function ManageProjectsPage() {
         try {
             console.log(selectedProject.id);
             await axios.put(`/project/featured/${selectedProject.id}`, {}, requestConfig);
-            window.location.reload(true);
+            onLoad();
+            //window.location.reload(true);
         } catch(error) {
             console.log(error);
         }
@@ -269,13 +286,13 @@ function ManageProjectsPage() {
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
                                 renderIcon={Edit}
                                 >
-                                Modify Project
+                                Modify
                             </TableBatchAction>
                             <TableBatchAction {...getToolbarProps({onClick: () => handleApproveProject(selectedRows)})}
                                 tabIndex={batchActionProps.shouldShowBatchActions ? 0 : -1}
                                 renderIcon={CheckmarkOutline}
                                 >
-                                Approve Project
+                                Approve
                             </TableBatchAction>
                         </TableBatchActions>
                         <TableToolbarContent aria-hidden={batchActionProps.shouldShowBatchActions}>
