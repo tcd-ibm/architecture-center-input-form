@@ -70,7 +70,9 @@ export default function EditProject({projectData, user, isEdit}) {
             link: linkInputRef.current.value,
             description: previewDescriptionInputRef.current.value,
             content: contentInputRef.current.value,
-            date: date,
+            // TODO fix
+            //completionDate: date.toISOString(),
+            completionDate: new Date(0).toISOString(),
             tags: tags.filter(item => item?.selected).map(item => item.tagId)
         };
 
@@ -85,7 +87,9 @@ export default function EditProject({projectData, user, isEdit}) {
                 formData.append('link', linkInputRef.current.value);
                 formData.append('description', previewDescriptionInputRef.current.value);
                 formData.append('content', contentInputRef.current.value);
-                formData.append('date', date);
+                // TODO fix
+                //formData.append('completionDate', date.toISOString());
+                formData.append('completionDate', new Date(0).toISOString());
                 formData.append('tags', tags.filter(item => item?.selected).map(item => item.tagId));
                 if(file) formData.append('imageFile', file);
                 await axios.post('/user/project', formData, { headers: { Authorization: `Bearer ${user.accessToken}` } });
@@ -132,7 +136,7 @@ export default function EditProject({projectData, user, isEdit}) {
                 <TextInput labelText='Project Title' id='title' ref={titleInputRef} defaultValue={projectData.title} required />
                 <TextInput labelText='Link to Project' placeholder='https://example.com' defaultValue={projectData.link} id='link' invalid={Boolean(invalidText)} invalidText={invalidText} ref={linkInputRef} onBlur={validateLink}/>
                 {/*<TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />*/}
-                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(date)} style={{width: '100%'}}>
+                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(new Date(date))} style={{width: '100%'}}>
                     <DatePickerInput
                       placeholder='dd/mm/yyyy'
                       labelText='Completion Date'

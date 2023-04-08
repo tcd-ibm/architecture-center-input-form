@@ -792,6 +792,7 @@ async def get_projects_by_user_id(
 @router.post("/user/project")
 async def create_project(title: str = Form(),
                          link: str = Form(),
+                         completionDate: str = Form(),
                          description: str = Form(),
                          content: str = Form(),
                          tags: str = Form(""),
@@ -805,6 +806,7 @@ async def create_project(title: str = Form(),
     data = {
         "title": title,
         "link": link,
+        "date": completionDate,
         "description": description,
         "content": content,
         "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
@@ -825,7 +827,7 @@ async def create_project(title: str = Form(),
     new_project = Project(**data,
                           id=str(uuid4()),
                           user_id=current_user.id,
-                          date=datetime.utcnow(),
+                          #date=datetime.utcnow(),
                           user=current_user)
 
     #TODO refactor to a separate function
