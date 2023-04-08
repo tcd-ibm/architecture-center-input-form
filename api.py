@@ -953,7 +953,6 @@ async def modify_project(project: ProjectUpdate,
             else:
                 setattr(originalProject, k, v)
 
-    originalProject.date = datetime.now()
     session.add(originalProject)
     await session.commit()
     await session.refresh(originalProject)
