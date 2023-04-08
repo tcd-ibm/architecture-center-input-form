@@ -182,6 +182,7 @@ class ProjectFull(ProjectWithUserAndTags):
 
 
 class ProjectFeatured(ProjectBase):
+    id: UUID
     tags: List["Tag"] = []
     date: datetime
 

@@ -6,6 +6,7 @@ import { CustomClickableTile, CustomLink } from './CustomCarbonNavigation';
 //const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
 
 export default function Card({projectData}) {
+
 	return (
 		<CustomClickableTile className={styles.tile} href={`./details/${projectData.id}`} >
 			{/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}

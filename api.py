@@ -953,7 +953,6 @@ async def modify_project(project: ProjectUpdate,
             else:
                 setattr(originalProject, k, v)
 
-    originalProject.date = datetime.now()
     session.add(originalProject)
     await session.commit()
     await session.refresh(originalProject)
@@ -1215,7 +1214,7 @@ async def get_project_by_id(
 
 
 @router.get("/projects", response_model=List[ProjectWithUserAndTags])
-async def query_all_projects(
+async def query_all_live_projects(
     response: Response,
     start_date: datetime = datetime.min,
     end_date: datetime = datetime.utcnow(),
@@ -1261,12 +1260,14 @@ async def query_all_projects(
                                          Tag.tagId.in_(tag_list)))), ))
 
             query = select(func.count(Project.id)).filter(
+                Project.is_live == True,
                 Project.title.like(f'%{keyword}%'), Project.date >= start_date,
                 Project.date <= end_date)
             query = query.filter(and_(*conditions)) if conditions else query
             count = (await session.execute(query)).scalar_one_or_none()
 
             query = select(Project).group_by(Project.id).filter(
+                Project.is_live == True,
                 Project.title.like(f'%{keyword}%'),
                 Project.date >= start_date, Project.date <= end_date).options(
                     selectinload(Project.user), selectinload(
@@ -1288,6 +1289,7 @@ async def query_all_projects(
                                 detail="Tags must be integers")
 
     query = select(func.count(Project.id)).filter(
+        Project.is_live == True,
         Project.title.like(f'%{keyword}%'), Project.date >= start_date,
         Project.date <= end_date)
     count = (await session.execute(query)).scalar_one_or_none()
@@ -1298,6 +1300,7 @@ async def query_all_projects(
 
     r = await session.execute(
         select(Project).filter(
+            Project.is_live == True,
             Project.title.like(f'%{keyword}%'),
             Project.date >= start_date, Project.date <= end_date).options(
                 selectinload(Project.user),
