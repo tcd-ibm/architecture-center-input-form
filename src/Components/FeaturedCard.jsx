@@ -6,13 +6,14 @@ import { CustomClickableTile, CustomLink } from './CustomCarbonNavigation';
 
 //const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
 
-export default function FeaturedCard({project}) {
+export default function FeaturedCard({project, isOnMobile}) {
 
 	return (
-		<CustomClickableTile className={styles.featuredTile} href={`./details/${project.id}`} >
+        <>
+		<CustomClickableTile className={isOnMobile ? styles.featuredTileMobile : styles.featuredTile} href={`./details/${project.id}`} >
 			{/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
 			<CustomLink size='lg' className={styles.titleLink}>{project.title}</CustomLink>
-			<Tag type='red' className={styles.featuredTag} renderIcon={Star}>FEATURED PROJECT</Tag>
+			<Tag type='red' className={isOnMobile ? styles.featuredTagMobile : styles.featuredTag} renderIcon={Star}>FEATURED PROJECT</Tag>
 			<p className={styles.description}>{project.description}</p>
 			<div className={styles.tags}>
 				{project.tags.map(tagItem => 
@@ -20,5 +21,6 @@ export default function FeaturedCard({project}) {
 				)}
 			</div>
 		</CustomClickableTile>
+		</>
 	);
 }
