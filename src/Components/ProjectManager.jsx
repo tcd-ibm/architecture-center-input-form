@@ -48,6 +48,7 @@ export default function ProjectManager({userID}) {
                 console.log(err);
             });
         } else {
+            console.log('UserID received', userID);
             axios.get(`/user/${userID}/projects`, requestConfig).then(res => {
                 const projects = res.data;
                 setProjects(projects);
