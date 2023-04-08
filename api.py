@@ -52,6 +52,10 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+def get_current_time():
+    return datetime.utcnow()
+
+
 @router.on_event("startup")
 async def startup():
     await init_db()
@@ -792,6 +796,7 @@ async def get_projects_by_user_id(
 @router.post("/user/project")
 async def create_project(title: str = Form(),
                          link: str = Form(),
+                         completionDate: str = Form(),
                          description: str = Form(),
                          content: str = Form(),
                          tags: str = Form(""),
@@ -805,6 +810,7 @@ async def create_project(title: str = Form(),
     data = {
         "title": title,
         "link": link,
+        "date": completionDate,
         "description": description,
         "content": content,
         "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
@@ -825,7 +831,7 @@ async def create_project(title: str = Form(),
     new_project = Project(**data,
                           id=str(uuid4()),
                           user_id=current_user.id,
-                          date=datetime.utcnow(),
+                          #date=datetime.utcnow(),
                           user=current_user)
 
     #TODO refactor to a separate function
@@ -988,7 +994,7 @@ async def get_project(id: str,
 async def query_user_projects(
     response: Response,
     start_date: datetime = datetime.min,
-    end_date: datetime = datetime.utcnow(),
+    end_date: datetime = Depends(get_current_time),
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
@@ -1217,7 +1223,7 @@ async def get_project_by_id(
 async def query_all_live_projects(
     response: Response,
     start_date: datetime = datetime.min,
-    end_date: datetime = datetime.utcnow(),
+    end_date: datetime = Depends(get_current_time),
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",

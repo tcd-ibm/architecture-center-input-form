@@ -19,3 +19,13 @@
 .titleHeading {
     text-align: center;
 }
+
+.tileContainer {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.divCenter {
+    display: flex;
+    justify-content: center;
+}
