@@ -54,15 +54,15 @@ function MainPage() {
         });
     }, []);
 
-    // useEffect(() => {
-    //     axios.get('/project/featured').then(res => {
-    //         setFeaturedProject(res.data);
-    //         console.log(res.data);
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //     });
-    // }, []);
+    useEffect(() => {
+        axios.get('/project/featured').then(res => {
+            setFeaturedProject(res.data);
+            console.log(res.data);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, []);
 
 
     const handleSearchAndFilterChange = () => {
@@ -87,7 +87,7 @@ function MainPage() {
             <Content style={isOnMobile? {padding: '16px',  margin: 0, 'margin-top':'64px'}: {} }>
                 { isLoading ? <div>Loading...</div> : 
                     <div id={styles.cardContainer}>
-                        { featuredProject && <FeaturedCard project={featuredProject} /> }
+                        { featuredProject && <FeaturedCard project={featuredProject} isOnMobile={isOnMobile} /> }
                         {projects.map((projectData, index) => (
                             <Card projectData={projectData} key={index} />
                         ))}
