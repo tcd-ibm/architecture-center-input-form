@@ -1,28 +1,14 @@
 import { Header, HeaderNavigation, HeaderGlobalBar, OverflowMenu, HeaderGlobalAction } from '@carbon/react';
 import { User, DocumentAdd, InventoryManagement, Asleep } from '@carbon/icons-react';
-
-import { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { CustomHeaderMenuItem, CustomHeaderName, CustomOverflowMenuItem } from './CustomCarbonNavigation';
 import useAuth from '@/hooks/useAuth';
 import useAppTheme from '@/hooks/useAppTheme';
 
 function MainHeader() {
 
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(max-width: 768px)');
-        const handleResize = () => {
-            if (mediaQuery.matches) {
-                setIsOnMobile(true);
-            } else {
-                setIsOnMobile(false);
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const isOnMobile = useMediaQuery({ query: '(max-width: 1060px)' });
 
-    const [isOnMobile, setIsOnMobile] = useState([]);
     const { user, logout } = useAuth();
     const [theme, setTheme] = useAppTheme();
 

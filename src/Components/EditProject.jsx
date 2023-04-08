@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { useEffect, useState, useRef, useImperativeHandle  } from 'react';
+import { useEffect, useState, useRef  } from 'react';
 import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag, DatePicker, DatePickerInput, FormItem, FileUploaderDropContainer, FileUploaderItem } from '@carbon/react';
 import { useNavigate } from 'react-router';
+import { useMediaQuery } from 'react-responsive';
 
 import DocEditor from '@/Components/AsciidocEditor';
 import styles from './EditProject.module.scss';
@@ -12,8 +13,8 @@ export default function EditProject({projectData, user, isEdit}) {
 
 	const [tags, setTags] = useState([]);
     const [date, setDate] = useState(new Date(projectData.date));
-
-    const [isOnMobile, setIsOnMobile] = useState([]);
+    const tagColors = ['red', 'magenta', 'purple', 'blue', 'cyan', 'teal', 'green', 'gray', 'cool-gray', 'warm-gray', 'high-contrast'];
+    const [colorMap, setColorMap] = useState(new Map());
 
     const titleInputRef = useRef();
     const linkInputRef = useRef();
@@ -23,13 +24,26 @@ export default function EditProject({projectData, user, isEdit}) {
     const [content, setContent] = useState(projectData.content);
     const [file, setFile] = useState();
 
+    const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
+
 	useEffect(() => {
         if(!user) {
 			navigate('/login', { replace: true });
 		}
         try {
             axios.get('/tags').then(res => {
-                const tempTags = res.data.map(categoryItem => categoryItem.tags).flat();
+                const map = new Map();
+                const tempTags = res.data.map(categoryItem => {
+                    const addColors = (tags, id, map) => {
+                      for (let i = 0; i < tags.length; i++) {
+                        map.set(tags[i].tagName, tagColors[id % 10]);
+                      }
+                      return tags;
+                    };
+                  
+                    return addColors(categoryItem.tags, categoryItem.categoryId, map);
+                  }).flat();
+                setColorMap(map);
                 if (isEdit) {
                     setTags(tempTags.map(item =>
                         (projectData.tags.some(selectedTag => selectedTag.tagId === item.tagId) ? { ...item, selected: true } : item)
@@ -42,20 +56,6 @@ export default function EditProject({projectData, user, isEdit}) {
             console.error(error);
         }
     }, [navigate, user]);
-
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(max-width: 768px)');
-        const handleResize = () => {
-          if (mediaQuery.matches) {
-            setIsOnMobile(true);
-          } else {
-            setIsOnMobile(false);
-          }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const handleFileChange = event => {
         if(event.target.files) {
@@ -125,7 +125,7 @@ export default function EditProject({projectData, user, isEdit}) {
 
 	return (
 		<>
-        <Content className={styles.contentBody}>
+        <Content className={styles.contentBody}> 
             <Form onSubmit={handleSubmit}>
             <Stack gap={6}>
                 <h1>Add New Project</h1>
@@ -158,7 +158,7 @@ export default function EditProject({projectData, user, isEdit}) {
                         {tags.filter(item => !item?.selected).map(item => {
                             return (
                             <Tag
-                                type='magenta'
+                                type={colorMap.get(item.tagName)}
                                 title='Clear Filter'
                                 key={item.tagId}
                                 onClick={() => handleTagAdd(item.tagId)}
@@ -173,7 +173,7 @@ export default function EditProject({projectData, user, isEdit}) {
                         {tags.filter(item => item?.selected).map(item => {
                             return (
                             <Tag
-                                type='magenta'
+                                type={colorMap.get(item.tagName)}
                                 title='Clear Filter'
                                 key={item.tagId}
                                 onClick={() => handleTagRemove(item.tagId)}

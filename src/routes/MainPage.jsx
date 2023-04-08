@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Content } from '@carbon/react';
 import styles from './MainPage.module.scss';
+import { useMediaQuery } from 'react-responsive';
 
 import MainHeader from '@/Components/MainHeader';
 import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
@@ -13,23 +14,10 @@ function MainPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [projects, setProjects] = useState([]);
     const [featuredProject, setFeaturedProject] = useState();
-    const [isOnMobile, setIsOnMobile] = useState([]);
     const [queryMenuContent, setQueryMenuContent] = useState([]);
     const queryMenuRef = useRef();
 
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(max-width: 768px)');
-        const handleResize = () => {
-          if (mediaQuery.matches) {
-            setIsOnMobile(true);
-          } else {
-            setIsOnMobile(false);
-          }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-      }, []);
+    const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
 
     useEffect(() => {
         axios.get('/tags').then(res => {
