@@ -48,7 +48,8 @@ export default function ProjectManager({userID}) {
                 console.log(err);
             });
         } else {
-            axios.get(`/user/${userID}/projects`, requestConfig).then(res => {
+            console.log('UserID received', userID);
+            axios.get(`/admin/user/${userID}/projects`, requestConfig).then(res => {
                 const projects = res.data;
                 setProjects(projects);
                 setNumberOfEntries(parseInt(res.headers['x-total-count']));

@@ -79,7 +79,7 @@ function ManageUsersPage() {
                 ...user, 
                 signupDate: new Date(user.created_at).toISOString().substring(0, 10),
                 role: isAdminRole(user.role) ? 'admin' : 'user',
-                numberOfProjects: '42 (7 unapproved)',
+                numberOfProjects: user.projects_counts.total_count,
                 actions:    <> 
                             <Button kind='ghost' renderIcon={Cube} onClick={() => handleProjectsModal(user.id)}>Projects</Button>
                             <Button kind='ghost' renderIcon={UserRole} onClick={() => handleRoleChange(user)}>Change role</Button>

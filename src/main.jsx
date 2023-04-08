@@ -20,8 +20,6 @@ import ManageProjectsPage from './routes/adminpanel/ManageProjectsPage';
 import DashboardPage from './routes/adminpanel/DashboardPage';
 import AdminPanel from './routes/AdminPanel';
 import MyAccountPage from './routes/MyAccount/MyAccountPage';
-import MyProjectsPage from './routes/MyAccount/MyProjectsPage';
-import UserInfoPage from './routes/MyAccount/UserInfoPage';
 
 import { AuthContextProvider } from '@/hooks/useAuth';
 import { AppThemeProvider } from '@/hooks/useAppTheme';
@@ -61,16 +59,6 @@ const router = createBrowserRouter([
       {
         path: 'account',
         element: <MyAccountPage />,
-        children: [
-          {
-            index: true,
-            element: <Navigate to='user-info' replace={true} />
-          },
-          {
-            path: 'user-info',
-            element: <UserInfoPage />
-          }
-        ]
       },
       {
         path: 'adminpanel',
