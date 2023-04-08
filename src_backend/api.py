@@ -496,7 +496,7 @@ async def admin_get_all_projects(
     return result.scalars().all()
 
 
-@router.post("/admin/category", response_model=Category)
+@router.post("/admin/category", response_model=Category, deprecated=True)
 async def create_category(new_category: CategoryCreate,
                           current_user: User = Depends(get_current_user),
                           session: AsyncSession = Depends(get_session)):
@@ -523,7 +523,7 @@ async def create_category(new_category: CategoryCreate,
     return new_category_instance
 
 
-@router.put("/admin/category/{id}", response_model=Category)
+@router.put("/admin/category/{id}", response_model=Category, deprecated=True)
 async def update_category(id: int,
                           updated_category: CategoryCreate,
                           current_user: User = Depends(get_current_user),
@@ -549,7 +549,7 @@ async def update_category(id: int,
     return original_instance
 
 
-@router.delete("/admin/category/{id}")
+@router.delete("/admin/category/{id}", deprecated=True)
 async def delete_category(id: int,
                           current_user: User = Depends(get_current_user),
                           session: AsyncSession = Depends(get_session)):

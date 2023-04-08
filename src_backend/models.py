@@ -62,7 +62,7 @@ class Token(SQLModel):
 
 
 class CategoryCreate(SQLModel):
-    categoryName: str
+    categoryName: str = Field(min_length=1)
 
 
 class CategoryBase(SQLModel):

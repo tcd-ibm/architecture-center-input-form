@@ -12,6 +12,7 @@ from sqlalchemy.future import select
 
 
 import api
+from routers import categories
 from api import get_current_user, oauth2_bearer
 from models import SQLModel, User
 from db import get_session
@@ -29,6 +30,7 @@ def start_application() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["X-Total-Count", "X-Total-Pages"]
     )
+    api.router.include_router(categories.router)
     app.include_router(api.router)
     return app
 
