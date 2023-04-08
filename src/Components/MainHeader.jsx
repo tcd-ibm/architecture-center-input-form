@@ -7,7 +7,7 @@ import useAppTheme from '@/hooks/useAppTheme';
 
 function MainHeader() {
 
-    const isOnMobile = useMediaQuery({ query: '(max-width: 1060px)' });
+    const isOnMobile = useMediaQuery({ query: '(max-width: 1056px)' });
 
     const { user, logout } = useAuth();
     const [theme, setTheme] = useAppTheme();
@@ -34,6 +34,11 @@ function MainHeader() {
                 }
             </HeaderNavigation>
             <HeaderGlobalBar>
+                {user?.isAdmin() && isOnMobile &&
+                    <HeaderGlobalAction aria-label='Admin Panel' href='/adminpanel'>
+                        <InventoryManagement />
+                    </HeaderGlobalAction>
+                }
                 {isOnMobile &&
                     <HeaderGlobalAction aria-label='Add new project' href='/add'>
                         <DocumentAdd />
@@ -60,6 +65,12 @@ function MainHeader() {
                             Log in
                         </CustomHeaderMenuItem>
                     </HeaderNavigation>
+                }
+                {!user && isOnMobile &&
+                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{ boxShadow: 'none' }} aria-label='My Account'>
+                        <CustomOverflowMenuItem itemText='Log in' href='/login' />
+                        <CustomOverflowMenuItem itemText='Sign up' href='/signup' />
+                    </OverflowMenu>
                 }
             </HeaderGlobalBar>
         </Header >

@@ -1,29 +1,17 @@
-import { useState, useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { SideNav, Stack, Search, Accordion, AccordionItem, Checkbox } from '@carbon/react';
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { SideNav, Stack, Search, Accordion, AccordionItem, Checkbox, DatePicker, DatePickerInput, Tile, Toggle } from '@carbon/react';
 import styles from './ProjectQuerySidePanel.module.scss';
+import { useMediaQuery } from 'react-responsive';
 
 function ProjectQuerySidePanel(props, ref) {
     const { menuContent, onChange } = props;
-
     const selectedTagListRef = useRef([]);
     const [selectedTagList, setSelectedTagList] = useState([]);
-    const [isOnMobile, setIsOnMobile] = useState([]);
+    const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
 
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(max-width: 768px)');
-        const handleResize = () => {
-            if (mediaQuery.matches) {
-                setIsOnMobile(true);
-            } else {
-                setIsOnMobile(false);
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const url = 'https://firebasestorage.googleapis.com/v0/b/arch-center.appspot.com/o/logo.png?alt=media&token=9f7ab576-c49a-40ec-879a-152942825667';
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
+    const [filterDate, setFilterDate] = useState(false);
 
     useImperativeHandle(ref, () => ({
         get selectedTagList() {
@@ -72,9 +60,33 @@ function ProjectQuerySidePanel(props, ref) {
                         </fieldset>
                     </AccordionItem>)}
                 </Accordion>}
-                {/*
-                <img src={url} style={{maxWidth: '50%', marginLeft: 'auto', marginRight: 'auto', marginTop: '20px'}} onError={(event) => event.target.style.display = 'none'} />
-                */}
+                <Tile style={{border: '1px solid gray'}}>
+                    <DatePicker style={{marginBottom: '20px'}} datePickerType='single' dateFormat='d/m/Y' value={startDate} onChange={date => setStartDate(new Date(date))}>
+                        <DatePickerInput
+                          id='date-picker-input-id-start'
+                          placeholder='dd/mm/yyyy'
+                          labelText='Start date'
+                          size='sm'
+                          style={{width: '190px'}}
+                        />
+                    </DatePicker>
+                    <DatePicker style={{marginBottom: '20px'}} datePickerType='single' dateFormat='d/m/Y' value={endDate} onChange={date => setEndDate(new Date(date))}>
+                         <DatePickerInput
+                           id='date-picker-input-id-finish'
+                           placeholder='dd/mm/yyyy'
+                           labelText='End date'
+                           size='sm'
+                           style={{width: '190px'}}
+                         />
+                    </DatePicker>
+                    <Toggle
+                        labelA='Off'
+                        labelB='On'
+                        id='toggle-1'
+                        size='sm'
+                        onToggle={event => setFilterDate(event)}
+                      />           
+                </Tile>
             </Stack>
 
         </SideNav>
