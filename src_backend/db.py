@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from dotenv import load_dotenv
 # get the database url from the environment variable
-load_dotenv("./database/database.env")
+load_dotenv("./database.env")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(DATABASE_URL, echo=True, future=True)
