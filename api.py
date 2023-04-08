@@ -52,6 +52,10 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+def get_current_time():
+    return datetime.utcnow()
+
+
 @router.on_event("startup")
 async def startup():
     await init_db()
@@ -990,7 +994,7 @@ async def get_project(id: str,
 async def query_user_projects(
     response: Response,
     start_date: datetime = datetime.min,
-    end_date: datetime = datetime.utcnow(),
+    end_date: datetime = Depends(get_current_time),
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
@@ -1219,7 +1223,7 @@ async def get_project_by_id(
 async def query_all_live_projects(
     response: Response,
     start_date: datetime = datetime.min,
-    end_date: datetime = datetime.utcnow(),
+    end_date: datetime = Depends(get_current_time),
     per_page: int = DEFAULT_PAGE_SIZE,
     page: int = DEFAULT_PAGE,
     keyword: str = "",
