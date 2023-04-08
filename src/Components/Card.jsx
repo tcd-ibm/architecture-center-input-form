@@ -3,9 +3,9 @@ import styles from './Card.module.scss';
 
 import { CustomClickableTile, CustomLink } from './CustomCarbonNavigation';
 
-//const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
-
 export default function Card({projectData}) {
+
+	const tagColors = ['red', 'magenta', 'purple', 'blue', 'cyan', 'teal', 'green', 'gray', 'cool-gray', 'warm-gray', 'high-contrast'];
 
 	return (
 		<CustomClickableTile className={styles.tile} href={`./details/${projectData.id}`} >
@@ -16,7 +16,7 @@ export default function Card({projectData}) {
 			<p className={styles.description}>{projectData.description}</p>
 			<div className={styles.tags}>
 				{projectData.tags.map(tagItem => 
-					<Tag type='magenta' title='Clear Filter' style={{marginLeft: '0px', marginRight: '5px'}} key={tagItem.tagId}>{tagItem.tagName}</Tag>
+					<Tag type={tagColors[tagItem.categoryId % 10]} title='Clear Filter' style={{marginLeft: '0px', marginRight: '5px'}} key={tagItem.tagId}>{tagItem.tagName}</Tag>
 				)}
 			</div>
 		</CustomClickableTile>

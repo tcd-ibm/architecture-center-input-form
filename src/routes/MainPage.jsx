@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Content } from '@carbon/react';
+import { Content, Loading } from '@carbon/react';
 import styles from './MainPage.module.scss';
 import { useMediaQuery } from 'react-responsive';
 
@@ -73,7 +73,7 @@ function MainPage() {
             <MainHeader />
             <ProjectQuerySidePanel menuContent={queryMenuContent} ref={queryMenuRef} onChange={handleSearchAndFilterChange} />
             <Content style={isOnMobile? {padding: '16px',  margin: 0, 'margin-top':'64px'}: {} }>
-                { isLoading ? <div>Loading...</div> : 
+                { isLoading ? <Loading withOverlay={false} style={{margin: 'auto', marginTop: '30px'}} /> : 
                     <div id={styles.cardContainer}>
                         { featuredProject && <FeaturedCard project={featuredProject} isOnMobile={isOnMobile} /> }
                         {projects.map((projectData, index) => (
