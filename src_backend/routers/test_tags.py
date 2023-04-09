@@ -1277,6 +1277,7 @@ class TestPatchTagsId:
         }
         assert response.json() == expected_response_body
 
+
 # Tests for DELETE /tags/{id}
 
 class TestDeleteTagsId:
