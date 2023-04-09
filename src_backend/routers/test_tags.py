@@ -483,7 +483,7 @@ class TestPostTags:
         # TEST
         response = await userClient.post('/tags', 
             json={ "tagName": "tag1", "tagNameShort": "tag1s", "categoryId": cat1Id })
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         # POSTCONDITIONS
         response = await client.get('/tags')
@@ -1205,7 +1205,7 @@ class TestPatchTagsId:
         # TEST
         response = await userClient.patch(f'/tags/{str(tag1Id)}', 
             json={ "tagName": "tag1new", "tagNameShort": "tag1snew" })
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         # POSTCONDITIONS
         response = await client.get('/tags')
@@ -1439,7 +1439,7 @@ class TestDeleteTagsId:
 
         # TEST
         response = await userClient.delete(f'/tags/{str(tag1Id)}')
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         # POSTCONDITIONS
         response = await client.get('/tags')

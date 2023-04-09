@@ -103,7 +103,7 @@ class TestPostCategories:
     async def test_post_category_as_user(self, userClient, client):
         # TEST
         response = await userClient.post('/categories', json={ "categoryName": "cat1" })
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         # POSTCONDITIONS
         response = await client.get('/tags')
@@ -315,7 +315,7 @@ class TestPatchCategories:
 
         # TEST
         response = await userClient.patch(f'/categories/{str(cat1Id)}', json={ "categoryName": "cat1new" })
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         # POSTCONDITIONS
         response = await client.get('/tags')
@@ -564,7 +564,7 @@ class TestDeleteCategories:
 
         # TEST
         response = await userClient.delete(f'/categories/{str(cat1Id)}')
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         # POSTCONDITIONS
         response = await client.get('/tags')
