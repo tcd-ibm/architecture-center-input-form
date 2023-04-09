@@ -5,12 +5,12 @@ from sqlmodel import SQLModel, Field, Relationship
 
 
 class UserBase(SQLModel):
-    email: str = Field(nullable=False, max_length=255)
-    username: Optional[str] = None
+    email: str = Field(nullable=False, max_length=255, regex=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+    #username: Optional[str] = None
 
 
 class UserSignup(UserBase):
-    password: str = Field(default=None)
+    password: str = Field(default=None, min_length=8, max_length=255)
 
 
 # table = True => in database
@@ -26,6 +26,8 @@ class User(UserBase, table=True):
     projects: List["Project"] = Relationship(
         back_populates="user", )
 
+class UserResponse(UserBase):
+    role: int = Field(default=0)
 
 class ProjectCount(SQLModel):
     live_count: Optional[int] = None
@@ -37,7 +39,7 @@ class UserInfo(UserBase):
     id: UUID
     created_at: datetime
     email: Optional[str] = None
-    username: Optional[str] = None
+    #username: Optional[str] = None
     is_active: Optional[bool] = None
     role: Optional[int] = None
     projects_counts: Optional[ProjectCount] = None
@@ -47,10 +49,10 @@ class UserInfoInProject(SQLModel):
     username: Optional[str] = None
 
 
-class UserUpdate(UserBase):
-    email: Optional[str] = None
-    password: Optional[str] = None
-    role: Optional[int] = None
+class UserUpdate(SQLModel):
+    #email: Optional[str] = None
+    password: str | None = Field(min_length=8, max_length=255)
+    role: int | None = None
 
 
 class Token(SQLModel):
