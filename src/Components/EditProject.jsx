@@ -14,7 +14,6 @@ export default function EditProject({projectData, user, isEdit}) {
 	const [tags, setTags] = useState([]);
     const [date, setDate] = useState(new Date(projectData.date));
     const tagColors = ['red', 'magenta', 'purple', 'blue', 'cyan', 'teal', 'green', 'gray', 'cool-gray', 'warm-gray', 'high-contrast'];
-    const [colorMap, setColorMap] = useState(new Map());
 
     const titleInputRef = useRef();
     const linkInputRef = useRef();
@@ -32,18 +31,7 @@ export default function EditProject({projectData, user, isEdit}) {
 		}
         try {
             axios.get('/tags').then(res => {
-                const map = new Map();
-                const tempTags = res.data.map(categoryItem => {
-                    const addColors = (tags, id, map) => {
-                      for (let i = 0; i < tags.length; i++) {
-                        map.set(tags[i].tagName, tagColors[id % 10]);
-                      }
-                      return tags;
-                    };
-                  
-                    return addColors(categoryItem.tags, categoryItem.categoryId, map);
-                  }).flat();
-                setColorMap(map);
+                const tempTags = res.data.map(categoryItem => categoryItem.tags).flat();
                 if (isEdit) {
                     setTags(tempTags.map(item =>
                         (projectData.tags.some(selectedTag => selectedTag.tagId === item.tagId) ? { ...item, selected: true } : item)
@@ -162,7 +150,7 @@ export default function EditProject({projectData, user, isEdit}) {
                         {tags.filter(item => !item?.selected).map(item => {
                             return (
                             <Tag
-                                type={colorMap.get(item.tagName)}
+                                type={tagColors[item.categoryId % 10]}
                                 title='Clear Filter'
                                 key={item.tagId}
                                 onClick={() => handleTagAdd(item.tagId)}
@@ -177,7 +165,7 @@ export default function EditProject({projectData, user, isEdit}) {
                         {tags.filter(item => item?.selected).map(item => {
                             return (
                             <Tag
-                                type={colorMap.get(item.tagName)}
+                                type={tagColors[item.categoryId % 10]}
                                 title='Clear Filter'
                                 key={item.tagId}
                                 onClick={() => handleTagRemove(item.tagId)}

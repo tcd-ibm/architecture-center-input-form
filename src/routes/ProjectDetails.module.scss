@@ -1,18 +1,31 @@
 .descriptionBody {
-    width: 100%;
-    max-height: 100%;
+    padding-top: 1.5%;
+    padding-left: 2%;
+    padding-bottom: 20px;
+    height: 100%;
+    border: 1px dashed gray;
 }
 
 .contentBox {
     padding: 0px;
+    margin-bottom: 20px;
+    width: 100%;
 }
 
-.contentsGrid {
+.normalGrid {
+    margin-bottom: 20px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.mobileGrid {
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 20px;
     margin-top: 20px;
 }
 
 .titleBox {
-    padding-left: 30px;
     align-content: left;
 }
 
@@ -21,8 +34,9 @@
 }
 
 .tileContainer {
-    display: flex;
-    flex-wrap: wrap;
+    margin: 0px;
+    border: 1px solid gray;
+    max-width: 100%;
 }
 
 .divCenter {
