@@ -66,9 +66,8 @@ function MyAccountPage() {
             <MainHeader/>
            
             <Content style={{maxWidth: '1200px', marginLeft:'auto', marginRight: 'auto'}}>
-            <Heading className={styles.mainHeading}>My Account</Heading>
-                <Tile style={{paddingTop: '0px', paddingBottom: '40px', marginBottom: '15px'}}>
-                    <div className={styles.mainContainer}>    
+            <h1 className={styles.mainHeading}>My Account</h1>
+                <Tile style={{paddingTop: '0px', paddingBottom: '40px', marginBottom: '15px'}} className={styles.mainContainer}>
                         <div className={styles.mainText}>
                             <p>Email</p>
                             <TextInput
@@ -146,7 +145,6 @@ function MyAccountPage() {
                               ref={passwordInputRef}
                             />
                         </Modal>
-                    </div>
                 </Tile>
                 <div style={{marginBottom: '30px'}}>
                 <ProjectManager/>

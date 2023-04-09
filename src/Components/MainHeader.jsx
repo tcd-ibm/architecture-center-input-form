@@ -19,7 +19,7 @@ function MainHeader() {
         <Header aria-label='Amazing SwEng Project'>
             <CustomHeaderName href='/' prefix=''>
                 <img src={url} style={{ maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }} onError={(event) => event.target.style.display = defaultURL} />
-                Project Showcase
+                <div>Project Showcase</div>
             </CustomHeaderName>
             <HeaderNavigation aria-label='Amazing SwEng Project'>
                 <CustomHeaderMenuItem href='/add'>
@@ -34,11 +34,6 @@ function MainHeader() {
                 }
             </HeaderNavigation>
             <HeaderGlobalBar>
-                {user?.isAdmin() && isOnMobile &&
-                    <HeaderGlobalAction aria-label='Admin Panel' href='/adminpanel'>
-                        <InventoryManagement />
-                    </HeaderGlobalAction>
-                }
                 {isOnMobile &&
                     <HeaderGlobalAction aria-label='Add new project' href='/add'>
                         <DocumentAdd />
