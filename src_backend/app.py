@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from routers import categories, tags, users
+from routers import categories, tags, users, projects
 import api
 
 
@@ -20,6 +20,7 @@ app.add_middleware(
 api.router.include_router(categories.router)
 api.router.include_router(tags.router)
 api.router.include_router(users.router)
+api.router.include_router(projects.router)
 app.include_router(api.router)
 
 

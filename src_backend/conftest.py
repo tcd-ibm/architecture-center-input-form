@@ -12,7 +12,7 @@ from sqlalchemy.future import select
 
 
 import api
-from routers import categories, tags, users
+from routers import categories, tags, users, projects
 from api import get_current_user, oauth2_bearer
 from models import SQLModel, User
 from db import get_session
@@ -33,6 +33,7 @@ def start_application() -> FastAPI:
     api.router.include_router(categories.router)
     api.router.include_router(tags.router)
     api.router.include_router(users.router)
+    api.router.include_router(projects.router)
     app.include_router(api.router)
     return app
 
