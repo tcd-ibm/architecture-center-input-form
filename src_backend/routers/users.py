@@ -12,12 +12,14 @@ from api import _create_token, ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_PAGE, DEFAUL
     get_current_user, get_password_hash, get_user_projects_count_by_id, get_user_with_email_db, \
     is_admin, MAX_PAGE_SIZE, SALT
 from db import get_session
-from utils.auth import require_admin
+from utils.auth import require_admin, require_authenticated
+from utils.data import set_count_headers
+from utils.sql import get_all, get_one, get_some
 from models import Token, User, UserInfo, UserSignup, UserUpdate
 
-# TODO refactor
 
 router = APIRouter(prefix='/users', tags=['users'])
+
 
 @router.get('', response_model=List[UserInfo], dependencies=[Depends(require_admin)])
 async def admin_get_all_users(response: Response,
@@ -25,19 +27,19 @@ async def admin_get_all_users(response: Response,
                               page: int = DEFAULT_PAGE,
                               session: AsyncSession = Depends(get_session)):
 
-    count = (await session.execute(select(func.count(User.id))
-                                   )).scalar_one_or_none()
-    response.headers['X-Total-Count'] = str(count)
-    response.headers['X-Total-Pages'] = str(count // per_page +
-                                            (1 if count % per_page else 0))
+    count = await get_one(session,
+        select(func.count(User.id))
+    )
 
-    result = await session.execute(
-        select(User).offset(max((page - 1) * per_page,
-                                0)).limit(min(per_page, MAX_PAGE_SIZE)))
-    users = result.scalars().all()
-    ids = [user.id for user in users]
+    set_count_headers(response, count, per_page)
 
-    tasks = [get_user_projects_count_by_id(id, session) for id in ids]
+    users = await get_some(session, page, per_page,
+        select(User)       
+    )
+    
+    # TODO research whether these queries can be optimised
+    ids = [ user.id for user in users ]
+    tasks = [ get_user_projects_count_by_id(id, session) for id in ids ]
     users_projects_counts = await asyncio.gather(*tasks)
 
     results = [
@@ -46,7 +48,8 @@ async def admin_get_all_users(response: Response,
                  email=user.email,
                  username=user.username if user.username else None,
                  is_active=user.is_active,
-                 role=user.role) for user in users
+                 role=user.role) 
+        for user in users
     ]
 
     for i in range(len(results)):
@@ -54,17 +57,26 @@ async def admin_get_all_users(response: Response,
 
     return results
 
+
 @router.get("/{id}", response_model=UserInfo)
-async def get_current_user_info(id: str,
-                                current_user: User = Depends(get_current_user),
-                                session: AsyncSession = Depends(get_session)):
-    if not current_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Unauthorized")
+async def get_user(id: str,
+                   user: User = Depends(require_authenticated),
+                   session: AsyncSession = Depends(get_session)):
+    
+    if not id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail="Invalid user id")
+    
+    ensure_admin_or_self(user, id)
 
-    r = await session.execute(select(User).where(User.id == current_user.id))
-    return r.scalar_one_or_none()
+    instance = await get_one(session,
+        select(User)
+        .where(User.id == id)
+    )
 
+    return instance
+
+# TODO refactor
 @router.post("", response_model=Token)
 async def create_user(user: UserSignup,
                       session: AsyncSession = Depends(get_session)):
@@ -115,7 +127,7 @@ async def create_user(user: UserSignup,
     }
     return response
 
-
+# TODO refactor
 @router.patch("/{id}", response_model=User)
 async def update_user(user: UserUpdate,
                       id: str,
@@ -177,28 +189,29 @@ async def update_user(user: UserUpdate,
 
 @router.delete('/{id}')
 async def delete_user(id: str,
-                      session: AsyncSession = Depends(get_session),
-                      current_user: User = Depends(get_current_user)):
+                      user: User = Depends(require_authenticated),
+                      session: AsyncSession = Depends(get_session)):
     if not id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Invalid user id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail="Invalid user id.")
+    
+    ensure_admin_or_self(user, id)
 
-    if not current_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Unauthorized")
+    instance = await get_one(session,
+        select(User)
+        .where(User.id == id)
+    )
 
-    result = await session.execute(select(User).where(User.id == id))
-    original_instance = result.scalar_one_or_none()
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User not found.")
 
-    if not original_instance:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="User not found")
-
-    if not is_admin(current_user) and original_instance.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Non-admin user can only delete self")
-
-    await session.delete(original_instance)
+    await session.delete(instance)
     await session.commit()
-    await session.flush()
-    return {"status": "success"}
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def ensure_admin_or_self(user: User, userId: str) -> None:
+    if not is_admin(user) and user.id != userId:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Non-admin user can only access self.")
