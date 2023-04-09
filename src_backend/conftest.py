@@ -12,7 +12,7 @@ from sqlalchemy.future import select
 
 
 import api
-from routers import categories, tags, users, projects
+from router import router
 from api import get_current_user, oauth2_bearer
 from models import SQLModel, User
 from db import get_session
@@ -30,11 +30,8 @@ def start_application() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["X-Total-Count", "X-Total-Pages"]
     )
-    api.router.include_router(categories.router)
-    api.router.include_router(tags.router)
-    api.router.include_router(users.router)
-    api.router.include_router(projects.router)
     app.include_router(api.router)
+    app.include_router(router)
     return app
 
 SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./test_db.test.db'

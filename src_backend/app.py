@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from routers import categories, tags, users, projects
+from router import router
 import api
 
 
@@ -17,11 +17,12 @@ app.add_middleware(
 )
 
 # Add API routes
-api.router.include_router(categories.router)
-api.router.include_router(tags.router)
-api.router.include_router(users.router)
-api.router.include_router(projects.router)
+# api.router.include_router(categories.router)
+# api.router.include_router(tags.router)
+# api.router.include_router(users.router)
+# api.router.include_router(projects.router)
 app.include_router(api.router)
+app.include_router(router)
 
 
 # redirect to docs
