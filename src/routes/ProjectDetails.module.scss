@@ -1,16 +1,21 @@
-.descriptionBody {
-    padding-top: 1.5%;
-    padding-left: 2%;
-    padding-bottom: 20px;
-    height: 100%;
-    border: 1px dashed gray;
-}
-
 .contentBox {
     padding: 0px;
     margin-bottom: 20px;
+    padding-top: 15px;
     width: 100%;
 }
+
+.descriptionBody {
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-bottom: 20px;
+    height: 100%;
+}
+
+.innerContainer {
+    padding: 1rem;
+    overflow-y: auto;
+  }
 
 .normalGrid {
     margin-bottom: 20px;
@@ -22,15 +27,17 @@
     margin-left: 15px;
     margin-right: 15px;
     margin-bottom: 20px;
-    margin-top: 20px;
 }
 
 .titleBox {
     align-content: left;
+    border: 1px solid gray;
+    margin-left: 0px;
+    padding-bottom: 15px;
 }
 
 .titleHeading {
-    text-align: center;
+    text-align: left;
 }
 
 .tileContainer {
@@ -42,4 +49,13 @@
 .divCenter {
     display: flex;
     justify-content: center;
+}
+
+.featuredTag {
+    margin-top: 15px; 
+    //padding: 10px;
+}
+
+.featuredTagMobile {
+    margin-top: 15px; 
 }
