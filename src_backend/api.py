@@ -1317,7 +1317,7 @@ async def query_all_live_projects(
     return r.scalars().all()
 
 
-@router.get("/tag/{tagId}", response_model=Tag)
+@router.get("/tag/{tagId}", response_model=Tag, deprecated=True)
 async def fetch_tag(request: Request,
                     session: AsyncSession = Depends(get_session),
                     tagId: int = 0) -> List[Tag]:
@@ -1330,11 +1330,11 @@ async def fetch_tag(request: Request,
     return tag
 
 
-@router.get("/tags", response_model=List[CategoryWithTags])
-async def fetch_tags(session: AsyncSession = Depends(
-    get_session)) -> List[CategoryWithTags]:
+# @router.get("/tags", response_model=List[CategoryWithTags])
+# async def fetch_tags(session: AsyncSession = Depends(
+#     get_session)) -> List[CategoryWithTags]:
 
-    r = await session.execute(
-        select(Category).options(selectinload(Category.tags)).order_by(
-            Category.categoryId))
-    return r.scalars().all()
+#     r = await session.execute(
+#         select(Category).options(selectinload(Category.tags)).order_by(
+#             Category.categoryId))
+#     return r.scalars().all()
