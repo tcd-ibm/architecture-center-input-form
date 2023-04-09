@@ -9,3 +9,10 @@ def patch_object(instance: T, patch: Any) -> T:
             setattr(instance, k, v)
 
     return instance
+
+def is_empty(object: Any) -> bool:
+    for k, v in object.__dict__.items():
+        if v is not None:
+            return False
+        
+    return True

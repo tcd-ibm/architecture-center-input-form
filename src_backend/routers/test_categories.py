@@ -471,27 +471,27 @@ class TestDeleteCategories:
     #     cat3Id = (response.json())['categoryId']
     #     assert cat3Id
 
-    #     response = await adminClient.post('/admin/tag', 
+    #     response = await adminClient.post('/tags', 
     #         json={ "tagName": "tag1", "tagNameShort": "tag1s", "categoryId": cat3Id })
     #     assert response.status_code == 200
     #     tag1Id = (response.json())['tagId']
     #     assert tag1Id
-    #     response = await adminClient.post('/admin/tag', 
+    #     response = await adminClient.post('/tags', 
     #         json={ "tagName": "tag2", "tagNameShort": "tag2s", "categoryId": cat1Id })
     #     assert response.status_code == 200
     #     tag2Id = (response.json())['tagId']
     #     assert tag2Id
-    #     response = await adminClient.post('/admin/tag', 
+    #     response = await adminClient.post('/tags', 
     #         json={ "tagName": "tag3", "tagNameShort": "tag3s", "categoryId": cat3Id })
     #     assert response.status_code == 200
     #     tag3Id = (response.json())['tagId']
     #     assert tag3Id
-    #     response = await adminClient.post('/admin/tag', 
+    #     response = await adminClient.post('/tags', 
     #         json={ "tagName": "tag4", "tagNameShort": "tag4s", "categoryId": cat3Id })
     #     assert response.status_code == 200
     #     tag4Id = (response.json())['tagId']
     #     assert tag4Id
-    #     response = await adminClient.post('/admin/tag', 
+    #     response = await adminClient.post('/tags', 
     #         json={ "tagName": "tag5", "tagNameShort": "tag5s", "categoryId": cat1Id })
     #     assert response.status_code == 200
     #     tag5Id = (response.json())['tagId']

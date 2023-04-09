@@ -571,7 +571,7 @@ async def delete_category(id: int,
     return {"status": "success"}
 
 
-@router.post("/admin/tag", response_model=Tag)
+@router.post("/admin/tag", response_model=Tag, deprecated=True)
 async def create_tag(new_tag: TagCreate,
                      current_user: User = Depends(get_current_user),
                      session: AsyncSession = Depends(get_session)):
@@ -608,7 +608,7 @@ async def create_tag(new_tag: TagCreate,
     return new_tag_instance
 
 
-@router.put("/admin/tag/{id}", response_model=TagUpdate)
+@router.put("/admin/tag/{id}", response_model=TagUpdate, deprecated=True)
 async def update_tag(id: int,
                      updated_tag: TagUpdate,
                      current_user: User = Depends(get_current_user),
@@ -646,7 +646,7 @@ async def update_tag(id: int,
     return original_instance
 
 
-@router.delete("/admin/tag/{id}")
+@router.delete("/admin/tag/{id}", deprecated=True)
 async def delete_tag(id: int,
                      current_user: User = Depends(get_current_user),
                      session: AsyncSession = Depends(get_session)):
