@@ -148,7 +148,7 @@ async def get_current_user(token: str = Depends(oauth2_bearer),
     return user
 
 
-@router.post("/user/signup", response_model=Token)
+@router.post("/user/signup", response_model=Token, deprecated=True)
 async def create_user(user: UserSignup,
                       session: AsyncSession = Depends(get_session)):
     if not user.email or not re.match(
@@ -199,7 +199,7 @@ async def create_user(user: UserSignup,
     return response
 
 
-@router.put("/user/update/{id}", response_model=User)
+@router.put("/user/update/{id}", response_model=User, deprecated=True)
 async def update_user(user: UserUpdate,
                       id: str,
                       session: AsyncSession = Depends(get_session),
@@ -258,7 +258,7 @@ async def update_user(user: UserUpdate,
     return user_data
 
 
-@router.delete('/user/delete/{id}')
+@router.delete('/user/delete/{id}', deprecated=True)
 async def delete_user(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
@@ -318,7 +318,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
     return response
 
 
-@router.get("/user/info", response_model=UserInfo)
+@router.get("/user/info", response_model=UserInfo, deprecated=True)
 async def get_current_user_info(current_user: User = Depends(get_current_user),
                                 session: AsyncSession = Depends(get_session)):
     if not current_user:
@@ -350,7 +350,7 @@ async def admin_get_total_users(
     return {"total": count}
 
 
-@router.get("/admin/users", response_model=List[UserInfo])
+@router.get("/admin/users", response_model=List[UserInfo], deprecated=True)
 async def admin_get_all_users(response: Response,
                               per_page: int = DEFAULT_PAGE_SIZE,
                               page: int = DEFAULT_PAGE,
