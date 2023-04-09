@@ -28,14 +28,7 @@ async def fetch_tags(session: AsyncSession = Depends(get_session)):
 async def fetch_tag(id: int,
                     session: AsyncSession = Depends(get_session)):
     
-    instance = await get_one(session,
-        select(Tag)
-        .where(Tag.tagId == id)
-    )
-
-    if not instance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Tag not found.")
+    instance = await get_tag_by_id(session, id)
     
     return instance
 
@@ -74,14 +67,7 @@ async def update_tag(id: int,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail="Patch body cannot be empty.")
     
-    instance = await get_one(session,
-        select(Tag)
-        .where(Tag.tagId == id)
-    )
-
-    if not instance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Tag not found.")
+    instance = await get_tag_by_id(session, id)
 
     if hasattr(tag_patch, 'categoryId') and tag_patch.categoryId:
         await ensure_category_exists(session, tag_patch.categoryId)
@@ -99,14 +85,7 @@ async def update_tag(id: int,
 async def delete_tag(id: int,
                      session: AsyncSession = Depends(get_session)):
 
-    instance = await get_one(session,
-        select(Tag)
-        .where(Tag.tagId == id)
-    )
-
-    if not instance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Tag not found.")
+    instance = await get_tag_by_id(session, id)
 
     await session.delete(instance)
     await session.commit()
@@ -134,3 +113,15 @@ async def ensure_no_duplicate_tags_exist(session: AsyncSession,
     if instance:
        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                            detail="Tag with this name exists.")
+    
+async def get_tag_by_id(session: AsyncSession, id: int) -> Category:
+    instance = await get_one(session,
+        select(Tag)
+        .where(Tag.tagId == id)
+    )
+
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Tag not found.")
+    
+    return instance

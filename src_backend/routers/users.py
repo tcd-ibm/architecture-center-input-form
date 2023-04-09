@@ -12,7 +12,7 @@ from api import _create_token, ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_PAGE, DEFAUL
     get_password_hash, get_user_projects_count_by_id, is_admin, SALT
 from db import get_session
 from utils.auth import require_admin, require_authenticated
-from utils.data import patch_object, set_count_headers
+from utils.data import is_empty, patch_object, set_count_headers
 from utils.sql import get_one, get_some
 from models import Token, User, UserInfo, UserResponse, UserSignup, UserUpdate
 
@@ -117,6 +117,10 @@ async def update_user(user_patch: UserUpdate,
                       current_user: User = Depends(require_authenticated)):
     
     ensure_admin_or_self(current_user, id)
+
+    if is_empty(user_patch):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                            detail="Patch body cannot be empty.")
 
     if hasattr(user_patch, 'role'):
         await require_admin(current_user)
