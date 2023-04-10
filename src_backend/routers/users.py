@@ -45,7 +45,8 @@ async def admin_get_all_users(response: Response,
         UserInfo(id=user.id,
                  created_at=user.created_at,
                  email=user.email,
-                 username=user.username if user.username else None,
+                 username='thisisdumb',
+                 #user.username if user.username else None,
                  is_active=user.is_active,
                  role=user.role) 
         for user in users
@@ -93,7 +94,7 @@ async def create_user(user: UserSignup,
     # TODO refactor auth code
     token = _create_token(
         data={
-            "sub": user.username,
+            "sub": 'thisisdumb',
             "password_version": 0,
             "role": 0
         },
