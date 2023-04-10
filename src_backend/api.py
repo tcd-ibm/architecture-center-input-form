@@ -793,7 +793,7 @@ async def get_projects_by_user_id(
     return result.scalars().all()
 
 
-@router.post("/user/project")
+@router.post("/user/project", deprecated=True)
 async def create_project(title: str = Form(),
                          link: str = Form(),
                          completionDate: str = Form(),
