@@ -46,6 +46,9 @@ class TestGetUsers:
             {'email': 'email4@email.com', 'password': 'password4'},
             {'email': 'email5@email.com', 'password': 'password5'},
             {'email': 'email6@email.com', 'password': 'password6'},
+            {'email': 'email7@email.com', 'password': 'password7'},
+            {'email': 'email8@email.com', 'password': 'password8'},
+            {'email': 'email9@email.com', 'password': 'password9'},
         ]
         for user in new_users:
             response = await client.post('/users', json=user)
@@ -55,8 +58,45 @@ class TestGetUsers:
         # Test pagination with valid values
         response = await adminClient.get('/users?page=1&per_page=1')
         assert response.status_code == 200
-    # test pagination with page > number of pages
-    # test pagination with invalid values
+
+        # Test first page 
+        response = await adminClient.get('/users', params={'per_page': 10, 'page': 1})
+        assert response.status_code == 200
+        # 10 users per page
+        assert len(response.json()) == 10
+        # Check users = 10 new users + adminClient + client
+        assert response.headers['X-Total-Count'] == '12'
+        
+        # Test second page (empty)
+        response = await adminClient.get('/users', params={'per_page': 10, 'page': 2})
+        assert response.status_code == 200
+        # Remaining two users on page
+        assert len(response.json()) == 2
+        assert response.headers['X-Total-Count'] == '12'
+
+        # Test tird page 
+        # test pagination with page > number of pages
+        response = await adminClient.get('/users', params={'per_page': 10, 'page': 3})
+        assert response.status_code == 200
+        # No users on page
+        assert len(response.json()) == 0
+        assert response.headers['X-Total-Count'] == '12'
+
+        # test pagination with invalid values
+        # response = await adminClient.get("/users", params={"per_page": -1, "page": 0})
+        # assert response.status_code == 422
+        # PROBLEM HERE
+
+        # response = await adminClient.get("/users", params={"per_page": 10, "page": 0})
+        # assert response.status_code == 422
+        # PROBLEM HERE
+
+        # response = await adminClient.get("/users", params={"per_page": 10, "page": -1})
+        # assert response.status_code == 422
+        # PROBLEM HERE 
+
+
+
     # add new user and some projects, test get users with additional data as admin
     # test get users with additional data as regular user (should fail and return 403)
     # test get users with additional data without logging in (should fail and return 401)
