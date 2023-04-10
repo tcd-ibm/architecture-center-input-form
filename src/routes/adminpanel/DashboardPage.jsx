@@ -14,15 +14,39 @@ import useAppTheme from '@/hooks/useAppTheme';
 function DashboardPage() {
     
     const [theme, setTheme] = useAppTheme();
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
 
     const [numberOfUsers, setNumberOfUsers] = useState([]);
     const [numberOfProjects, setNumberOfProjects] = useState([]);
     const [numberOfVisits, setNumberOfVisits] = useState([]);
-    const [recentProjectsData, setRecentProjectsData] = useState();
-    const [popularTags, setPopularTags] = useState();
+    const [recentProjectsData, setRecentProjectsData] = useState(null);
+    const [popularTagsData, setPopularTagsData] = useState(null);
 
+    const popularTagsChartOptions = {
+        title: '',
+        resizable: true,
+        donut: {
+            center: {
+                label: 'Tags',
+            }
+        },
+        height: '300px',
+        theme: theme
+    };
+
+    const recentProjectsChartOptions = {
+        title: '',
+        axes: {
+            left: {
+                mapsTo: 'group',
+                scaleType: 'labels',
+            },
+            bottom: {
+                mapsTo: 'value',
+            }
+        },
+        height: '300px',
+        theme: theme
+    };
 
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -33,10 +57,6 @@ function DashboardPage() {
             return;
         }
         const requestConfig = { 
-            params: {
-                page: page,
-                per_page: pageSize
-            },
             headers: { 
                 'Content-Type': 'application/json', 
                 'Accept': 'application/json', 
@@ -69,44 +89,9 @@ function DashboardPage() {
         });
 
         axios.get('/admin/tags/popular/5', requestConfig).then(res => {
-            const state2 = {
-                data2: [
-                    {
-                        group: res.data[0].tag,
-                        value: res.data[0].count
-                    },
-                    {
-                        group: res.data[1].tag,
-                        value: res.data[1].count
-                    },
-                    {
-                        group: res.data[2].tag,
-                        value: res.data[2].count
-                    },
-                    {
-                        group: res.data[3].tag,
-                        value: res.data[3].count
-                    },
-                    {
-                        group: res.data[4].tag,
-                        value: res.data[4].count
-                    }
-                ],
-                options2: {
-                    title: '',
-                    resizable: true,
-                    donut: {
-                        center: {
-                            label: 'Tags',
-                        }
-                    },
-                    height: '300px',
-                    theme: theme
-                }
-            };
-            setPopularTags(state2);
-            //console.log(res.data);
-            //console.log(state2);
+            setPopularTagsData(
+                res.data.map(item => ({ group: item.tag.tagName, value: item.count }))
+            );
         })
         .catch(err => {
             console.log(err);
@@ -114,59 +99,16 @@ function DashboardPage() {
           
 
         axios.get('/admin/projects/recent/5', requestConfig).then(res => {
-            const state = {
-                data: [
-                    {
-                        group: res.data[0].date,
-                        value: res.data[0].count
-                    },
-                    {
-                        group: res.data[1].date,
-                        value: res.data[1].count
-                    },
-                    {
-                        group: res.data[2].date,
-                        value: res.data[2].count
-                    },
-                    {
-                        group: res.data[3].date,
-                        value: res.data[3].count
-                    },
-                    {
-                        group: res.data[4].date,
-                        value: res.data[4].count
-                    }
-                ],
-                options: {
-                    title: '',
-                    axes: {
-                        left: {
-                            mapsTo: 'group',
-                            scaleType: 'labels',
-                        },
-                        bottom: {
-                            mapsTo: 'value',
-                        }
-                    },
-                    height: '300px',
-                    theme: theme
-                }
-            };
-            setRecentProjectsData(state);
-            //console.log(res.data);
-            //console.log(state);
+            setRecentProjectsData(
+                res.data.map(item => ({ group: item.date, value: item.count }))
+            );
         })
         .catch(err => {
             console.log(err);
         });
     }
 
-    //console.log(recentProjectsData);
-
-    useEffect(onLoad, [ user, page, pageSize]);
-
-
-
+    useEffect(onLoad, [navigate, user]);
 
     return (
         <>
@@ -209,19 +151,23 @@ function DashboardPage() {
             {/*Tags*/}
             <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
                 <h4 style={{textAlign: 'center'}}>Popular Tags</h4>
-                <DonutChart 
-                        data={popularTags.data2}
-                        options={popularTags.options2}>
-                </DonutChart>
+                {popularTagsData && 
+                    <DonutChart 
+                        data={popularTagsData}
+                        options={popularTagsChartOptions}>
+                    </DonutChart>
+                }
             </Tile>
 
             {/*Project Additions*/}
             <Tile style = {{maxWidth: '450px', minWidth: '400px', paddingBottom: '30px', marginBottom: '50px', marginRight: '10px', flex: '50%'}}>
                 <h4 style={{textAlign: 'center'}}>Showcase Project Additions</h4>
-                <SimpleBarChart
-                    data={recentProjectsData.data}
-                    options={recentProjectsData.options}>
-                </SimpleBarChart>
+                {recentProjectsData && 
+                    <SimpleBarChart
+                        data={recentProjectsData}
+                        options={recentProjectsChartOptions}>
+                    </SimpleBarChart>
+                }
             </Tile>
 
         </div>
