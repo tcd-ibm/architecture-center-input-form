@@ -1184,7 +1184,7 @@ async def set_featured_project(id: str,
     return project
 
 
-@router.get("/project/{id}/image")
+@router.get("/project/{id}/image", deprecated=True)
 async def get_project_image(id: str):
     filePath = "./database/content/images/" + id + ".png"
     if os.path.exists(filePath):

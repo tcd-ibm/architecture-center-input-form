@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, Response, status, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from uuid import uuid4
@@ -55,7 +55,8 @@ async def create_project(title: str = Form(),
                           user=current_user)
 
     if imageFile:
-        file_storage.write(f'images/{str(new_project.id)}.png')
+        contents = imageFile.file.read()
+        file_storage.write(f'images/{str(new_project.id)}.png', contents)
         # tempFilePath = "./database/content/images/temp-" + str(
         #     new_project.id) + "-" + imageFile.filename
         # try:
@@ -96,3 +97,15 @@ async def create_project(title: str = Form(),
     await session.commit()
     await session.refresh(new_project)
     return new_project
+
+@router.get('/{id}/image')
+async def get_project_image(id: str):
+
+    filePath = f'images/{id}.png'
+    image_bytes = file_storage.read_if_exists(filePath)
+
+    if image_bytes:
+        return Response(content=image_bytes, media_type="image/png")
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Project image not found")
