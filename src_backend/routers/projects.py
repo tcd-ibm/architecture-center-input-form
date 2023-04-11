@@ -265,6 +265,50 @@ async def modify_project(id: str,
     return instance
 
 
+@router.delete("/{id}")
+async def delete_project(id: str,
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(require_authenticated)):
+    # if not current_user:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    #                         detail="Unauthorized")
+
+    instance = await get_one(session,
+        select(Project)
+        .options(selectinload(Project.user),
+                 selectinload(Project.tags))
+        .where(Project.id == id)                     
+    )
+
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+
+    # r = await session.execute(
+    #     select(Project).options(selectinload(Project.user),
+    #                             selectinload(
+    #                                 Project.tags)).where(Project.id == id))
+    # originalProject = r.scalar_one_or_none()
+
+    # if not originalProject:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail=f"Project with ID {id} not found")
+
+    # if not is_admin(
+    #         current_user) and originalProject.user.id != current_user.id:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    #                         detail="Unauthorized")
+    
+    if not is_admin(current_user) and instance.user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Non-admin user can only access their projects.")
+
+    await session.delete(instance)
+    await session.commit()
+    #await session.flush()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 # TODO ensure that project is live
 @router.get('/{id}/image')
 async def get_project_image(id: str):

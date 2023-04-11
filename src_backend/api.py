@@ -880,7 +880,7 @@ async def create_project(title: str = Form(),
     return new_project
 
 
-@router.delete("/user/project/{id}")
+@router.delete("/user/project/{id}", deprecated=True)
 async def delete_project(id: str,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
