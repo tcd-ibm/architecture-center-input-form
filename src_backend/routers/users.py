@@ -102,11 +102,12 @@ async def create_user(user: UserSignup,
     )
 
     response = {
+        "id" : new_user.id,
         "access_token": token,
         "token_type": "bearer",
         "email": user.email,
         "role": 0,
-        "expires_at": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        "expires_at": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
 
     return response
@@ -142,9 +143,9 @@ async def update_user(user_patch: UserUpdate,
 async def delete_user(id: str,
                       user: User = Depends(require_authenticated),
                       session: AsyncSession = Depends(get_session)):
-    
-    ensure_admin_or_self(user, id)
 
+    ensure_admin_or_self(user, id)
+    
     instance = await get_user_by_id(session, id)
 
     await session.delete(instance)
@@ -153,7 +154,10 @@ async def delete_user(id: str,
 
 
 def ensure_admin_or_self(user: User, userId: str) -> None:
-    if not is_admin(user) and user.id != userId:
+    if is_admin(user) and str(user.id) == userId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Admin user cannot delete themselves.")
+    if not is_admin(user) and str(user.id) != userId:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Non-admin user can only access self.")
     

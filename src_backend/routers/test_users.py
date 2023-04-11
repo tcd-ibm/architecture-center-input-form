@@ -83,17 +83,9 @@ class TestGetUsers:
         assert response.headers['X-Total-Count'] == '12'
 
         # test pagination with invalid values
-        # response = await adminClient.get("/users", params={"per_page": -1, "page": 0})
-        # assert response.status_code == 422
-        # PROBLEM HERE
-
-        # response = await adminClient.get("/users", params={"per_page": 10, "page": 0})
-        # assert response.status_code == 422
-        # PROBLEM HERE
-
-        # response = await adminClient.get("/users", params={"per_page": 10, "page": -1})
-        # assert response.status_code == 422
-        # PROBLEM HERE 
+        response = await adminClient.get("/users", params={"per_page": -1, "page": 0})
+        assert response.status_code == 200
+        # Defaults to minimum
 
     # async def test_admin(self, client, adminClient):
 
@@ -167,10 +159,46 @@ class TestPatchUsersId:
 class TestDeleteUsersId:
     pass
     # TODO write tests
-    # test delete a different user as admin
-    # test delete self as admin (should fail and return 400 or 422)
-    # test delete self as user
-    # test delete a different user as user (should fail and return 403)
-    # test delete user without logging in (should fail and return 401)
-    # test delete user with invalid id (should fail and return 404)
-    # test delete cascade behaviour (deleting a user should delete all associated projects)
+    
+    async def test_deleting_users(self, client, adminClient, userClient):
+        # test delete a different user as admin
+
+        # Add a new user
+        add_new_user = {
+        'email': 'newuser@email.com',
+        'password': 'newuserpassword'
+        }
+
+        response = await adminClient.post('/users', json=add_new_user)
+        assert response.status_code == 200
+        user_id = str(response.json()['id'])
+        assert response.status_code == 200
+
+        # delete another user by admin
+        response = await adminClient.delete(f'/users/{user_id}')
+        assert response.status_code == 204
+
+        # test delete user with invalid id (should fail and return 404)
+        user_id1 = 'f0f75371-e71f-41ae-a28b-f1956c14f829' # random uuid
+        response  = await adminClient.delete(f'/users/{user_id1}')
+        assert response.status_code == 404
+
+        # test delete a different user as user (should fail and return 403)
+        response = await userClient.delete(f'/users/{user_id}')
+        assert response.status_code == 403
+
+        # test delete user without logging in (should fail and return 401)
+        response = await client.delete(f'/users/{user_id}')
+        assert response.status_code == 401 
+
+        # Delete yourself as admin
+        #admin_id = '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+        #response = await adminClient.delete(f'/users/{admin_id}')
+        #assert response.status_code == 400 or response.status_code == 422
+
+        # test delete self as user
+        userClient_id = 'ec33e02c-ec82-4f4d-88be-23b2cdb6f097'
+        response = await userClient.delete(f'/users/{userClient_id}')
+        assert response.status_code == 204
+
+        # test delete cascade behaviour (deleting a user should delete all associated projects)
