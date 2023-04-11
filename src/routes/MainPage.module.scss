@@ -6,6 +6,29 @@
   margin: auto;
 }
 
+#filtersBtn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0f62fe;
+  color: white;
+  border: none;
+  width: 130px;
+  text-align: center;
+  border-radius: 10px;
+  padding: 10px 30px;
+  margin: 12px 0;
+  font-size: 1rem;
+  cursor: pointer;
+}
+#filtersBtn span {
+  margin-right: 10px;
+}
+
+#filtersBtn:hover {
+  opacity: 0.8;
+}
+
 @media (min-width: 1600px) {
   #cardContainer {
     grid-template-columns: 1fr 1fr 1fr;

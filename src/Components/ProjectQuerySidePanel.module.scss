@@ -14,3 +14,16 @@
 .dateInputField {
   width: 50px;
 }
+
+#applyFiltersBtn {
+  margin: 15px;
+  background-color: #0f62fe;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+}
+
+#filterOptions {
+  display: flex;
+  width: 100%;
+}
