@@ -1,13 +1,23 @@
 import { Content, SideNav, SideNavItems } from '@carbon/react';
-import { Outlet } from 'react-router';
+import { Outlet, useNavigate } from 'react-router';
 
 import MainHeader from '@/Components/MainHeader';
 import CustomSideNavLink from '@/Components/CustomSideNavLink';
 import { Cube, Dashboard, Events, Settings } from '@carbon/icons-react';
+import { useEffect } from 'react';
+import useAuth from '@/hooks/useAuth';
 
 function AdminPanel() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
-    return (
+    useEffect(() => {
+        if(!user.isAdmin()) {
+            navigate('/', { replace: true }); 
+        }
+    }, [navigate, user]);
+
+    return (    
         <>
             <MainHeader />
             <SideNav
