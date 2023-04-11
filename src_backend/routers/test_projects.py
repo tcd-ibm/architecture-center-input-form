@@ -42,11 +42,11 @@ class TestGetProjectsId:
 
     async def test_not_found_invalid_uuid(self, client, userClient, adminClient):
         # TEST
-        response = await client.get('/projects/123abc')
+        response = await client.get('/projects/invaliduuid')
         assert response.status_code == 404
-        response = await userClient.get('/projects/123abc')
+        response = await userClient.get('/projects/invaliduuid')
         assert response.status_code == 404
-        response = await adminClient.get('/projects/123abc')
+        response = await adminClient.get('/projects/invaliduuid')
         assert response.status_code == 404
 
     async def test_not_found_valid_uuid(self, client, userClient, adminClient):
@@ -295,6 +295,80 @@ class TestPostProjects:
         response = await adminClient.post('/projects', data=request_data)
         assert response.status_code == 200
 
+    async def test_empty_fields(self, adminClient):
+        # PRECONDITIONS
+        request_data_copy = await setup_project_request_data(adminClient)
+
+        # TEST
+        request_data = request_data_copy.copy()
+        request_data['title'] = None
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['title'] = ''
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['link'] = None
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['link'] = ''
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['completionDate'] = None
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['completionDate'] = ''
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['description'] = None
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['description'] = ''
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['content'] = None
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        request_data = request_data_copy.copy()
+        request_data['content'] = ''
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+    async def test_invalid_link(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+
+        # TEST
+        request_data['link'] = 'invalidlink'
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+    async def test_invalid_completion_date(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+
+        # TEST
+        request_data['completionDate'] = 'invalidcompletiondate'
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+
 
 # Tests for PATCH /projects/{id}
 
@@ -454,3 +528,550 @@ class TestPatchProjectsId:
             'is_live': False
         }
         assert response.json() == expected_response_body
+
+    async def test_patch_all(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # TEST
+        patch_data = {
+            'title': 'title1new',
+            'link': 'https://example.com/new',
+            'description': 'description1new',
+            'completionDate': '2022-10-05T14:48:22',
+            'content': 'content1new',
+            'tags': '2, 3',
+            'is_live': True,
+            'user': 'shouldbeignored',
+            'visit_count': 123456
+        }
+        response = await adminClient.patch(f'/projects/{projectId}', data=patch_data)
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}', params={ 'additional_info': True })
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1new',
+            'link': 'https://example.com/new',
+            'description': 'description1new',
+            'date': '2022-10-05T14:48:22',
+            'content': 'content1new',
+            'tags': [
+                { 'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s' }, 
+                { 'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s' }
+            ],
+            'is_live': True,
+            'user': {
+                'email': 'admin@admin.com',
+                'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+            },
+            'visit_count': 0
+        }
+        assert response.json() == expected_response_body
+
+    async def test_patch_not_all(self, adminClient):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # TEST
+        patch_data = {
+            'title': 'title1new',
+            'content': 'content1new'
+        }
+        response = await adminClient.patch(f'/projects/{projectId}', data=patch_data)
+        assert response.status_code == 200
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1new',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1new',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_invalid_link(self, adminClient):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # TEST
+        patch_data = {
+            'link': 'invalidlink',
+        }
+        response = await adminClient.patch(f'/projects/{projectId}', data=patch_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_invalid_completion_date(self, adminClient):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # TEST
+        patch_data = {
+            'completionDate': 'invaliddate',
+        }
+        response = await adminClient.patch(f'/projects/{projectId}', data=patch_data)
+        assert response.status_code == 400 or response.status_code == 422
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_not_found_invalid_uuid(self, client, userClient, adminClient):
+        # TEST
+        response = await client.patch('/projects/invaliduuid')
+        assert response.status_code == 401
+        response = await userClient.patch('/projects/invaliduuid')
+        assert response.status_code == 404
+        response = await adminClient.patch('/projects/invaliduuid')
+        assert response.status_code == 404
+
+    async def test_not_found_valid_uuid(self, client, userClient, adminClient):
+        # TEST
+        response = await client.patch('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99')
+        assert response.status_code == 401
+        response = await userClient.patch('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99')
+        assert response.status_code == 404
+        response = await adminClient.patch('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99')
+
+    async def test_as_admin(self, adminClient, userClient):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await userClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await userClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'title': 'title1new' })
+        assert response.status_code == 200
+
+        # POSTCONDITIONS
+        response = await userClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1new',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_as_user_self(self, userClient, adminClient):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await userClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await userClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await userClient.patch(f'/projects/{projectId}', data={ 'title': 'title1new' })
+        assert response.status_code == 200
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1new',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_as_user_not_self(self, adminClient, userClient, client):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await userClient.patch(f'/projects/{projectId}', data={ 'title': 'title1new' })
+        assert response.status_code == 403
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_as_anon(self, adminClient, client):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await client.patch(f'/projects/{projectId}', data={ 'title': 'title1new' })
+        assert response.status_code == 401
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+# Tests for DELETE /projects/{id}
+
+class TestDeleteProjectsId:
+    
+    async def test_not_found_invalid_uuid(self, client, userClient, adminClient):
+        # TEST
+        response = await client.delete('/projects/invaliduuid')
+        assert response.status_code == 401
+        response = await userClient.delete('/projects/invaliduuid')
+        assert response.status_code == 404
+        response = await adminClient.delete('/projects/invaliduuid')
+        assert response.status_code == 404
+
+    async def test_not_found_valid_uuid(self, client, userClient, adminClient):
+        # TEST
+        response = await client.delete('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99')
+        assert response.status_code == 401
+        response = await userClient.delete('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99')
+        assert response.status_code == 404
+        response = await adminClient.delete('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99')
+        assert response.status_code == 404
+
+    async def test_as_admin(self, adminClient, userClient, client):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await userClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await userClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await adminClient.delete(f'/projects/{projectId}')
+        assert response.status_code == 204
+
+        # POSTCONDITIONS
+        response = await client.get(f'/projects/{projectId}')
+        assert response.status_code == 404
+
+    async def test_as_user_self(self, userClient, client):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await userClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await userClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await userClient.delete(f'/projects/{projectId}')
+        assert response.status_code == 204
+
+        # POSTCONDITIONS
+        response = await client.get(f'/projects/{projectId}')
+        assert response.status_code == 404
+
+    async def test_as_user_not_self(self, adminClient, userClient, client):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await userClient.delete(f'/projects/{projectId}')
+        assert response.status_code == 403
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_as_anon(self, adminClient, client):
+        # PRECONDITIONS
+        request_data = {
+            'title': 'title1',
+            'link': 'https://example.com',
+            'completionDate': '2011-10-05T14:48:00.000Z',
+            'description': 'description1',
+            'content': 'content1'
+        }
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+        # TEST
+        response = await client.delete(f'/projects/{projectId}')
+        assert response.status_code == 401
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}')
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': []
+        }
+        assert response.json() == expected_response_body
+
+
+# Tests for GET /projects/{id}/image
+
+class TestGetProjectsIdImage:
+
+    async def test_not_found_invalid_uuid(self, client, userClient, adminClient):
+        # TEST
+        response = await client.get('/projects/invaliduuid/image')
+        assert response.status_code == 404
+        response = await userClient.get('/projects/invaliduuid/image')
+        assert response.status_code == 404
+        response = await adminClient.get('/projects/invaliduuid/image')
+        assert response.status_code == 404
+
+    async def test_not_found_valid_uuid(self, client, userClient, adminClient):
+        # TEST
+        response = await client.get('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99/image')
+        assert response.status_code == 404
+        response = await userClient.get('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99/image')
+        assert response.status_code == 404
+        response = await adminClient.get('/projects/f8c1147d-b1c0-4dbb-b4c2-7191ff78ac99/image')
+        assert response.status_code == 404
+
+    # TODO tests for approved/unapproved projects

@@ -1,6 +1,7 @@
 from typing import Any, TypeVar
 from collections.abc import Mapping
 from fastapi import Response
+from dateutil import parser as dateparser
 import uuid
 
 
@@ -33,6 +34,13 @@ def set_count_headers(response: Response, count: int, per_page: int) -> None:
 def is_valid_uuid(value: str) -> bool:
     try:
         uuid.UUID(value)
+        return True
+    except ValueError:
+        return False
+    
+def is_valid_iso_date(value: str) -> bool:
+    try:
+        dateparser.parse(value)
         return True
     except ValueError:
         return False

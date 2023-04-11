@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Response, status, U
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from dateutil import parser as dateparser
 from uuid import uuid4
 
 from db import get_session
 from api import get_current_user, is_admin
 from utils.auth import require_admin, require_authenticated
-from utils.data import is_valid_uuid, patch_object
+from utils.data import is_valid_iso_date, is_valid_uuid, patch_object
 from utils.FileStorageManager import file_storage
 from utils.sql import get_one
 from models import Project, ProjectContent, ProjectContentAdditional, ProjectContentAdditionalAdmin, Tag, User
@@ -60,10 +61,9 @@ async def get_project(id: str,
         return ProjectContent(**data)
 
 
-# TODO validation & tests for validation
 @router.post('')
 async def create_project(title: str = Form(),
-                         link: str = Form(),
+                         link: str = Form(regex=r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'),
                          completionDate: str = Form(),
                          description: str = Form(),
                          content: str = Form(),
@@ -76,10 +76,14 @@ async def create_project(title: str = Form(),
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
     #                         detail="Unauthorized")
 
+    if not is_valid_iso_date(completionDate):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail="Invalid date")
+
     data = {
         "title": title,
         "link": link,
-        "date": completionDate,
+        "date": dateparser.parse(completionDate) if completionDate else None,
         "description": description,
         "content": content,
         "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
@@ -149,11 +153,10 @@ async def create_project(title: str = Form(),
 
 
 # TODO image handling
-# TODO validation & tests for validation
 @router.patch('/{id}')
 async def modify_project(id: str,
                          title: str | None = Form(None),
-                         link: str | None = Form(None),
+                         link: str | None = Form(default=None, regex=r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'),
                          completionDate: str | None = Form(None),
                          description: str | None = Form(None),
                          content: str | None = Form(None),
@@ -162,6 +165,10 @@ async def modify_project(id: str,
                          imageFile: UploadFile | None = None,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(require_authenticated)):
+    
+    if completionDate and not is_valid_iso_date(completionDate):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail="Invalid date")
     
     # if not current_user:
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -235,7 +242,7 @@ async def modify_project(id: str,
     data = {
         "title": title,
         "link": link,
-        "date": completionDate,
+        "date": dateparser.parse(completionDate) if completionDate else None,
         "description": description,
         "content": content,
         "is_live": is_live,
@@ -272,6 +279,10 @@ async def delete_project(id: str,
     # if not current_user:
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
     #                         detail="Unauthorized")
+
+    if not is_valid_uuid(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
 
     instance = await get_one(session,
         select(Project)
