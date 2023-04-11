@@ -145,6 +145,7 @@ async def delete_user(id: str,
                       session: AsyncSession = Depends(get_session)):
 
     ensure_admin_or_self(user, id)
+    ensure_admin_not_deleting_self(user, id)
     
     instance = await get_user_by_id(session, id)
 
@@ -154,12 +155,14 @@ async def delete_user(id: str,
 
 
 def ensure_admin_or_self(user: User, userId: str) -> None:
-    if is_admin(user) and str(user.id) == userId:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Admin user cannot delete themselves.")
     if not is_admin(user) and str(user.id) != userId:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Non-admin user can only access self.")
+    
+def ensure_admin_not_deleting_self(user:User, userId: str) -> None:
+    if is_admin(user) and str(user.id) == userId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Admin user cannot delete themselves.")
     
 async def ensure_email_not_used(session: AsyncSession, email: str) -> None:
     instance = await get_one(session,

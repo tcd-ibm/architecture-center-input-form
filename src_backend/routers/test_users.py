@@ -3,6 +3,8 @@ import pytest
 
 pytestmark = pytest.mark.anyio
 
+admin_id = '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+userClient_id = 'ec33e02c-ec82-4f4d-88be-23b2cdb6f097'
 
 # Tests for GET /users
 
@@ -91,10 +93,10 @@ class TestGetUsers:
 
         # add new user and some projects, test get users with additional data as admin
         # Add a new user
-            #add_new_user = {
-             #   'email': 'newuser@email.com',
-                #  'password': 'newuserpassword'
-                #}
+        #   add_new_user = {
+        #       'email': 'newuser@email.com',
+        #       'password': 'newuserpassword'
+        #       }
             #response = await client.post('/users', json=add_new_user)
             #assert response.status_code == 200
             #access_token = response.json()['access_token']
@@ -130,14 +132,45 @@ class TestGetUsers:
 # Tests for GET /users/{id}
 
 class TestGetUsersId:
-    pass
+
     # TODO write tests
+    async def test_getting_users_with_id(self, client, adminClient, userClient):
     # test get a different user as admin
+        # Add a new user
+        add_new_user = {
+        'email': 'newuser@email.com',
+        'password': 'newuserpassword'
+        }
+        response = await client.post("/users", json=add_new_user)
+        assert response.status_code == 200
+        new_user_id = response.json()['id']
+        # get user as an admin using id
+        response = await adminClient.get(f'/users/{new_user_id}')
+        assert response.status_code == 200
+        assert response.json()['id'] == new_user_id
+
     # test get self as admin
+        response = await adminClient.get(f'/users/{admin_id}')
+        assert response.status_code == 200
+        assert response.json()['id'] == admin_id
+
     # test get self as user
+        response = await userClient.get(f'/users/{userClient_id}')
+        assert response.status_code == 200
+        assert response.json()['id'] == userClient_id
+
     # test get a different user as user (should fail and return 403)
+        response = await userClient.get(f'/users/{new_user_id}')
+        assert response.status_code == 403
+
     # test get user without logging in (should fail and return 401)
+        response = await client.get(f'/users/{new_user_id}')
+        assert response.status_code == 401
+
     # test get user with invalid id (should fail and return 404)
+        user_id1 = 'f0f75371-e71f-41ae-a28b-f1956c14f829' # random uuid
+        response = await adminClient.get(f'/users/{user_id1}')
+        assert response.status_code == 404
 
 
 # Tests for POST /users
@@ -192,12 +225,10 @@ class TestDeleteUsersId:
         assert response.status_code == 401 
 
         # Delete yourself as admin
-        #admin_id = '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
-        #response = await adminClient.delete(f'/users/{admin_id}')
-        #assert response.status_code == 400 or response.status_code == 422
+        response = await adminClient.delete(f'/users/{admin_id}')
+        assert response.status_code == 400 or response.status_code == 422
 
         # test delete self as user
-        userClient_id = 'ec33e02c-ec82-4f4d-88be-23b2cdb6f097'
         response = await userClient.delete(f'/users/{userClient_id}')
         assert response.status_code == 204
 
