@@ -48,6 +48,8 @@ MAX_PAGE_SIZE = 50
 # tokenUrl is to specify OpenAPI route address of token endpoint for frontend login
 # OAuthPasswordBearer extracts Bearer from Authorization Header and send it to tokenUrl
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token")
+# TODO fix this madness
+oauth2_bearer_no_auto_error = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token", auto_error=False)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -394,7 +396,7 @@ async def admin_get_all_users(response: Response,
     return results
 
 
-@router.put("/admin/project/live/{id}")
+@router.put("/admin/project/live/{id}", deprecated=True)
 async def toggle_project_is_live(
     id: str,
     session: AsyncSession = Depends(get_session),
@@ -907,7 +909,7 @@ async def delete_project(id: str,
     return {"status": "success"}
 
 
-@router.put("/user/project/{id}", response_model=ProjectWithUserAndTags)
+@router.put("/user/project/{id}", response_model=ProjectWithUserAndTags, deprecated=True)
 async def modify_project(project: ProjectUpdate,
                          id: str,
                          session: AsyncSession = Depends(get_session),
@@ -965,7 +967,7 @@ async def modify_project(project: ProjectUpdate,
     return originalProject
 
 
-@router.get("/user/project/{id}", response_model=ProjectFull)
+@router.get("/user/project/{id}", response_model=ProjectFull, deprecated=True)
 async def get_project(id: str,
                       session: AsyncSession = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
@@ -1194,7 +1196,7 @@ async def get_project_image(id: str):
                             detail="Project image not found")
 
 
-@router.get("/project/{id}", response_model=ProjectFull)
+@router.get("/project/{id}", response_model=ProjectFull, deprecated=True)
 async def get_project_by_id(
         id: str,
         session: AsyncSession = Depends(get_session),

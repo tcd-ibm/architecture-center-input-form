@@ -13,7 +13,7 @@ from sqlalchemy.future import select
 
 import api
 from router import router
-from api import get_current_user, oauth2_bearer
+from api import get_current_user, oauth2_bearer, oauth2_bearer_no_auto_error
 from models import SQLModel, User
 from db import get_session
 
@@ -77,7 +77,7 @@ def dependency_override(app: FastAPI, db_test_session: SessionTesting) -> None:
         finally:
             pass
 
-    async def _get_user(token: str | None = Depends(oauth2_bearer)):
+    async def _get_user(token: str | None = Depends(oauth2_bearer_no_auto_error)):
         if token == 'admintoken':
             result = await db_test_session.execute(select(User).where(User.email == 'admin@admin.com'))
             return result.scalar_one_or_none()

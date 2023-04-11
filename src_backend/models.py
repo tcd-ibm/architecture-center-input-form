@@ -1,4 +1,5 @@
 from typing import Optional, List
+from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
@@ -187,6 +188,32 @@ class ProjectFeatured(ProjectBase):
     tags: List["Tag"] = []
     date: datetime
 
+class UserBasicInfo(UserBase):
+    id: UUID
+
+class ProjectInfo(BaseModel):
+    id: UUID
+    title: str
+    link: str
+    description: str
+    date: datetime
+    tags: List["Tag"] = []
+
+class ProjectInfoAdditional(ProjectInfo):
+    is_live: bool
+
+class ProjectInfoAdditionalAdmin(ProjectInfoAdditional):
+    visit_count: int
+    user: UserBasicInfo
+
+class ProjectContent(ProjectInfo):
+    content: str
+
+class ProjectContentAdditional(ProjectInfoAdditional):
+    content: str
+
+class ProjectContentAdditionalAdmin(ProjectInfoAdditionalAdmin):
+    content: str
 
 ProjectWithUserAndTags.update_forward_refs()
 CategoryWithTags.update_forward_refs()

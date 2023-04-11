@@ -1,17 +1,66 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, Response, status, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from uuid import uuid4
 
 from db import get_session
-from utils.auth import require_authenticated
+from api import get_current_user, is_admin
+from utils.auth import require_admin, require_authenticated
+from utils.data import is_valid_uuid, patch_object
 from utils.FileStorageManager import file_storage
-from models import Project, Tag, User
+from utils.sql import get_one
+from models import Project, ProjectContent, ProjectContentAdditional, ProjectContentAdditionalAdmin, Tag, User
 
 
 router = APIRouter(prefix='/projects', tags=['projects'])
 
 
+@router.get('/{id}')
+async def get_project(id: str,
+                      additional_info: bool = False,
+                      session: AsyncSession = Depends(get_session),
+                      current_user: User | None = Depends(get_current_user)):
+    
+    if additional_info:
+        await require_authenticated(current_user)
+    
+    if not is_valid_uuid(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+    
+    instance = await get_one(session,
+        select(Project)
+        .options(selectinload(Project.user),
+                 selectinload(Project.tags))
+        .where(Project.id == id)                     
+    )
+
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+    
+    if not instance.is_live:
+        await require_authenticated(current_user)
+        if not is_admin(current_user) and instance.user.id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="Non-admin user can only access their projects.")
+
+    if additional_info and not is_admin(current_user) and instance.user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Non-admin user can only access their projects.")
+    
+    data = vars(instance)
+
+    if additional_info and is_admin(current_user):
+        return ProjectContentAdditionalAdmin(**data)
+    elif additional_info:
+        return ProjectContentAdditional(**data)
+    else:
+        return ProjectContent(**data)
+
+
+# TODO validation & tests for validation
 @router.post('')
 async def create_project(title: str = Form(),
                          link: str = Form(),
@@ -98,6 +147,125 @@ async def create_project(title: str = Form(),
     await session.refresh(new_project)
     return new_project
 
+
+# TODO image handling
+# TODO validation & tests for validation
+@router.patch('/{id}')
+async def modify_project(id: str,
+                         title: str | None = Form(None),
+                         link: str | None = Form(None),
+                         completionDate: str | None = Form(None),
+                         description: str | None = Form(None),
+                         content: str | None = Form(None),
+                         tags: str | None = Form(None),
+                         is_live: bool | None = Form(None),
+                         imageFile: UploadFile | None = None,
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User = Depends(require_authenticated)):
+    
+    # if not current_user:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    #                         detail="Unauthorized")
+
+    if not is_valid_uuid(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+    
+    instance = await get_one(session,
+        select(Project)
+        .options(selectinload(Project.user),
+                 selectinload(Project.tags))
+        .where(Project.id == id)                     
+    )
+
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+
+    # r = await session.execute(
+    #     select(Project).options(selectinload(Project.user),
+    #                             selectinload(
+    #                                 Project.tags)).where(Project.id == id))
+    # originalProject = r.scalar_one_or_none()
+
+    # if not originalProject:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail=f"Project with ID {id} not found")
+
+    if not is_admin(current_user) and instance.user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Non-admin user can only access their projects.")
+
+    # if originalProject.user.id != current_user.id and not is_admin(
+    #         current_user):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    #                         detail="Unauthorized")
+
+    if is_live:
+        await require_admin(current_user)
+
+    #data = project.dict(exclude_unset=True)
+    # for k, v in data.items():
+    #     if v is not None:
+    #         if k == "is_live":
+    #             if not is_admin(current_user):
+    #                 raise HTTPException(
+    #                     status_code=status.HTTP_401_UNAUTHORIZED,
+    #                     detail="Unauthorized")
+    #             setattr(originalProject, k, v)
+    #         elif k == "tags":
+    #             tags = []
+    #             for tagId in v:
+    #                 if not isinstance(tagId, int):
+    #                     raise HTTPException(
+    #                         status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail=f"TagId {tagId} must be an integer")
+    #                 r = await session.execute(
+    #                     select(Tag).where(Tag.tagId == tagId))
+    #                 tag = r.scalar_one_or_none()
+    #                 if not tag:
+    #                     raise HTTPException(
+    #                         status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail=f"Tag with ID {tagId} not found")
+    #                 tags.append(tag)
+    #             setattr(originalProject, k, tags)
+    #         else:
+    #             setattr(originalProject, k, v)
+
+    data = {
+        "title": title,
+        "link": link,
+        "date": completionDate,
+        "description": description,
+        "content": content,
+        "is_live": is_live,
+        "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
+    }
+    tags = []
+    for tagId in data["tags"]:
+        if not isinstance(tagId, int):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Tag must be an integer")
+        r = await session.execute(select(Tag).where(Tag.tagId == tagId))
+        tag = r.scalar_one_or_none()
+        if not tag:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Tag with ID {tagId} not found")
+        tags.append(tag)
+
+    data["tags"] = tags
+    if len(tags) == 0:
+        data["tags"] = None
+
+    patch_object(instance, data)
+
+    session.add(instance)
+    await session.commit()
+    await session.refresh(instance)
+    return instance
+
+
+# TODO ensure that project is live
 @router.get('/{id}/image')
 async def get_project_image(id: str):
 
