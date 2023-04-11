@@ -84,6 +84,9 @@ def dependency_override(app: FastAPI, db_test_session: SessionTesting) -> None:
         if token == 'usertoken':
             result = await db_test_session.execute(select(User).where(User.email == 'user@user.com'))
             return result.scalar_one_or_none()
+        elif token:
+            result = (await db_test_session.execute(select(User).where(User.email == token))).scalar_one_or_none()
+            return result
         return None
 
     app.dependency_overrides[get_session] = _get_db_test_session

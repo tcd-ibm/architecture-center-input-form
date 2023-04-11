@@ -95,9 +95,42 @@ class TestGetUsers:
         # assert response.status_code == 422
         # PROBLEM HERE 
 
+    # async def test_admin(self, client, adminClient):
 
+        # add new user and some projects, test get users with additional data as admin
+        # Add a new user
+            #add_new_user = {
+             #   'email': 'newuser@email.com',
+                #  'password': 'newuserpassword'
+                #}
+            #response = await client.post('/users', json=add_new_user)
+            #assert response.status_code == 200
+            #access_token = response.json()['access_token']
+            #assert response.status_code == 200
 
-    # add new user and some projects, test get users with additional data as admin
+        # Add  some projects
+            #project_data = {
+            #     'title': 'Project',
+            #     'link': 'http://github.com',
+            #     'completionDate': '2023-04-11',
+            #     'description': 'Test project to test users',
+            #     'content': 'Content content content'
+            # }
+            # headers = { 'Authorization': 'Bearer newuser@email.com' } 
+            # response = await client.post('/projects', headers=headers, data= project_data)
+            # assert response.status_code == 200
+            # project_id = response.json()['id']
+
+            # # Check project params are ok
+            # response = await adminClient.get(f'/projects')
+            # assert response.status_code == 200
+            # assert response.json()['title'] == 'Project'
+            # assert response.json()['link'] == 'http://github.com'
+            # assert response.json()['completionDate'] == '2023-04-11'
+            # assert response.json()['description'] == 'Test project to test users'
+            # assert response.json()['content'] == 'Content content content'
+            # assert len(response.json()['tags']) == 3
+
     # test get users with additional data as regular user (should fail and return 403)
     # test get users with additional data without logging in (should fail and return 401)
 
