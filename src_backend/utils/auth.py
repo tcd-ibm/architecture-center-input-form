@@ -4,10 +4,10 @@ from api import get_current_user, is_admin
 from models import User
 
 
-async def require_authenticated(user: User = Depends(get_current_user)) -> User:
+async def require_authenticated(user: User | None = Depends(get_current_user)) -> User:
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Unauthorized")
+                            detail="Not authenticated")
     return user
 
 async def require_admin(user: User = Depends(require_authenticated)) -> User:
