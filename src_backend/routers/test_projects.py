@@ -286,6 +286,32 @@ class TestPostProjects:
         # TEST
         response = await userClient.post('/projects', data=request_data)
         assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}', params={ 'additional_info': True })
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': [
+                {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+            ],
+            'is_live': False,
+            'user': {
+                'email': 'user@user.com',
+                'id': 'ec33e02c-ec82-4f4d-88be-23b2cdb6f097'
+            },
+            'visit_count': 0
+        }
+        assert response.json() == expected_response_body
 
     async def test_as_admin(self, adminClient):
         # PRECONDITIONS
@@ -294,6 +320,32 @@ class TestPostProjects:
         # TEST
         response = await adminClient.post('/projects', data=request_data)
         assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}', params={ 'additional_info': True })
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': [
+                {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+            ],
+            'is_live': False,
+            'user': {
+                'email': 'admin@admin.com',
+                'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+            },
+            'visit_count': 0
+        }
+        assert response.json() == expected_response_body
 
     async def test_empty_fields(self, adminClient):
         # PRECONDITIONS
@@ -368,6 +420,54 @@ class TestPostProjects:
         response = await adminClient.post('/projects', data=request_data)
         assert response.status_code == 400 or response.status_code == 422
 
+    async def test_response_body(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+
+        # TEST
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': [
+                {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+            ],
+            'is_live': False
+        }
+        assert response.json() == expected_response_body
+
+        # # POSTCONDITIONS
+        # response = await adminClient.get(f'/projects/{projectId}', params={ 'additional_info': True })
+        # assert response.status_code == 200
+        # expected_response_body = {
+        #     'id': projectId,
+        #     'title': 'title1',
+        #     'link': 'https://example.com',
+        #     'description': 'description1',
+        #     'date': '2011-10-05T14:48:00',
+        #     'content': 'content1',
+        #     'tags': [
+        #         {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+        #         {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+        #         {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+        #     ],
+        #     'is_live': False,
+        #     'user': {
+        #         'email': 'admin@admin.com',
+        #         'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+        #     },
+        #     'visit_count': 0
+        # }
+        # assert response.json() == expected_response_body
 
 
 # Tests for PATCH /projects/{id}
@@ -870,6 +970,33 @@ class TestPatchProjectsId:
             'date': '2011-10-05T14:48:00',
             'content': 'content1',
             'tags': []
+        }
+        assert response.json() == expected_response_body
+
+    async def test_response_body(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # TEST
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'title': 'title1new' })
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1new',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': [
+                {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+            ],
+            'is_live': False
         }
         assert response.json() == expected_response_body
 

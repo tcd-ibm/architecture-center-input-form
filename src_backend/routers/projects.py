@@ -61,7 +61,7 @@ async def get_project(id: str,
         return ProjectContent(**data)
 
 
-@router.post('')
+@router.post('', response_model=ProjectContentAdditional)
 async def create_project(title: str = Form(),
                          link: str = Form(regex=r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'),
                          completionDate: str = Form(),
@@ -149,11 +149,21 @@ async def create_project(title: str = Form(),
     session.add(new_project)
     await session.commit()
     await session.refresh(new_project)
+
+    # needed for adding tags to the response
+    # TODO can it be avoided?
+    new_project = await get_one(session,
+        select(Project)
+        .options(selectinload(Project.user),
+                 selectinload(Project.tags))
+        .where(Project.id == new_project.id)                     
+    )
+
     return new_project
 
 
 # TODO image handling
-@router.patch('/{id}')
+@router.patch('/{id}', response_model=ProjectContentAdditional)
 async def modify_project(id: str,
                          title: str | None = Form(None),
                          link: str | None = Form(default=None, regex=r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'),
