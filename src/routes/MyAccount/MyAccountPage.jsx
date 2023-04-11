@@ -1,13 +1,12 @@
-import { Content, SideNav, SideNavItems, Tile, Heading, TextInput, IconButton, Modal} from '@carbon/react';
-import { CubeView, Information, Edit} from '@carbon/icons-react';
+import { Content, Tile, TextInput, IconButton, Modal} from '@carbon/react';
+import { Edit} from '@carbon/icons-react';
 import MainHeader from '@/Components/MainHeader';
-import CustomSideNavLink from '@/Components/CustomSideNavLink';
 import { useNavigate } from 'react-router';
 import styles from './MyAccountPage.module.scss';
 import axios from 'axios';
 import useAuth from '@/hooks/useAuth';
 import { useEffect, useState, useRef } from 'react';
-import { EmailInput, PasswordInput } from '@/Components/ValidatedInputs';
+import { PasswordInput } from '@/Components/ValidatedInputs';
 import ProjectManager from '../../Components/ProjectManager';
 
 function MyAccountPage() {
@@ -17,9 +16,9 @@ function MyAccountPage() {
     const [userEmail, setUserEmail] = useState(null);
     const [date, setDate] = useState(null);
     const [userID, setID] = useState(null);
-    const [emailModalOpen, setEmailModalOpen] = useState(false);
+    // const [emailModalOpen, setEmailModalOpen] = useState(false);
     const [passwordModalOpen, setPassModalOpen] = useState(false);
-    const emailInputRef = useRef();
+    // const emailInputRef = useRef();
     const passwordInputRef = useRef();
 
     useEffect(() => {
@@ -42,14 +41,14 @@ function MyAccountPage() {
 
     }, [navigate, user]);
 
-    const handleEmailChange = (newEmail) => {
-        try {
-            axios.put(`/user/update/${userID}`, { email: newEmail }, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
-            logout();
-        } catch(error) {
-            console.log(error);
-        }
-    };
+    // const handleEmailChange = (newEmail) => {
+    //     try {
+    //         axios.put(`/user/update/${userID}`, { email: newEmail }, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${user.accessToken}` } });
+    //         logout();
+    //     } catch(error) {
+    //         console.log(error);
+    //     }
+    // };
 
     const handlePassChange = (newPassword) => {
         try {
@@ -78,9 +77,9 @@ function MyAccountPage() {
                                 readOnly={true}
                                 size='lg'
                             />
-                            <IconButton className={styles.icon} label='Edit' kind='ghost' onClick={() => setEmailModalOpen(true)} >
+                            {/* <IconButton className={styles.icon} label='Edit' kind='ghost' onClick={() => setEmailModalOpen(true)} >
                                 Update Email<Edit style={{marginLeft: '10px'}}/>
-                            </IconButton>
+                            </IconButton> */}
                         </div>
             
                         <div className={styles.mainText}>
@@ -111,7 +110,7 @@ function MyAccountPage() {
                                 size='lg'
                             />
                         </div>
-                        <Modal
+                        {/* <Modal
                             open={emailModalOpen}
                             modalHeading='Change your account email'
                             modalLabel='Account Preferences'
@@ -127,7 +126,7 @@ function MyAccountPage() {
                               placeholder={userEmail}
                               ref={emailInputRef}
                             />
-                        </Modal>
+                        </Modal> */}
                         <Modal
                             open={passwordModalOpen}
                             modalHeading='Change your account password'
