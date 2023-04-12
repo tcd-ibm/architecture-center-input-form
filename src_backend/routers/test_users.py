@@ -176,21 +176,70 @@ class TestGetUsersId:
 # Tests for POST /users
 
 class TestPostUsers:
-    pass
     # TODO write tests
+    async def test_post_users(self, client):
+        # Add a new user
+        add_new_user = {
+            'email': 'newuser@email.com',
+            'password': 'newuserpassword'
+            }
+        response = await client.post("/users", json=add_new_user)
+        assert response.status_code == 200
 
+        assert 'id' in response.json()
+        assert 'access_token' in response.json()
+        assert 'token_type' in response.json()
+        assert 'email' in response.json()
+        assert 'role' in response.json()
+        assert 'expires_at' in response.json()
+        assert response.json()['email'] == 'newuser@email.com' #assert emails match
+        assert response.json()['role'] == 0 #assert not admin
 
 # Tests for PATCH /users/{id}
 
 class TestPatchUsersId:
-    pass
     # TODO write tests
+    async def test_update_user(self, client, adminClient, userClient):
+        # Add a new user
+        add_new_user = {
+        'email': 'newuser@email.com',
+        'password': 'newuserpassword'
+        }
+
+        response = await client.post('/users', json=add_new_user)
+        assert response.status_code == 200
+
+        new_user_id = response.json()['id']
+        headers = {'Authorization': 'Bearer admin@admin.com'}
+        # Test updating user with empty patch body
+        response = await adminClient.patch(f'/users/{new_user_id}', json={}, headers=headers)
+        assert response.status_code == 400
+        assert 'detail' in response.json()
+
+        #Test admin updating any user password
+        # headers = {'Authorization': 'Bearer admin@admin.com'}
+        # user_patch_data ={'password':'password123'}
+        # response = await adminClient.patch(f'/users/{new_user_id}', json=user_patch_data, headers=headers)
+        # assert response.status_code == 200
+        # print(response.json())
+
+        # Test update role as admin
+        user_patch_data ={'role':'1'}
+        response = await adminClient.patch(f'/users/{new_user_id}', json=user_patch_data, headers=headers)
+        assert response.status_code == 200
+        assert response.json()['role'] == 1
+        print(response.json())
+
+        # Test update role as non admin
+        user_patch_data ={'role':'0'}
+        response = await userClient.patch(f'/users/{new_user_id}', json=user_patch_data)
+        assert response.status_code == 403
+        print(response.json())
 
 
 # Tests for DELETE /users/{id}
 
 class TestDeleteUsersId:
-    pass
     # TODO write tests
     
     async def test_deleting_users(self, client, adminClient, userClient):
