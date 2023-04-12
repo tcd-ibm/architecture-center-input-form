@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, Depends, Form, HTTPException, Response, status, UploadFile
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,117 +6,102 @@ from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.sql import and_
 from datetime import datetime
 from dateutil import parser as dateparser
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from db import get_session
-from api import get_current_user, is_admin, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_current_time, MAX_PAGE_SIZE
+from api import get_current_user, is_admin, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_current_time
 from utils.auth import require_admin, require_authenticated
-from utils.data import is_valid_iso_date, is_valid_uuid, patch_object
+from utils.data import is_valid_iso_date, is_valid_uuid, patch_object, set_count_headers
 from utils.FileStorageManager import file_storage
-from utils.sql import get_one
+from utils.sql import get_all, get_one, get_some
 from models import Category, Project, ProjectContent, ProjectContentAdditional, ProjectContentAdditionalAdmin, ProjectWithUserAndTags, Tag, User
 
 
 router = APIRouter(prefix='/projects', tags=['projects'])
 
 
-@router.get('', response_model=List[ProjectWithUserAndTags])
-async def query_all_live_projects(
-    response: Response,
-    start_date: datetime = datetime.min,
-    end_date: datetime = Depends(get_current_time),
-    per_page: int = DEFAULT_PAGE_SIZE,
-    page: int = DEFAULT_PAGE,
-    keyword: str = "",
-    tags: str = "",
-    additional_info: bool = False,
-    session: AsyncSession = Depends(get_session),
-) -> List[ProjectWithUserAndTags]:
+# TODO finish refactoring
+@router.get('', response_model=list[ProjectWithUserAndTags])
+async def query_projects(response: Response,
+                         start_date: datetime = datetime.min,
+                         end_date: datetime = Depends(get_current_time),
+                         per_page: int = DEFAULT_PAGE_SIZE,
+                         page: int = DEFAULT_PAGE,
+                         keyword: str = "",
+                         tags: str = "",
+                         additional_info: bool = False,
+                         session: AsyncSession = Depends(get_session)):
+
+    conditions = []
 
     if tags:
         try:
             tag_ids = [int(tag) for tag in tags.split(',')]
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                detail="Invalid tag id")
 
-            r = await session.execute(
-                select(Tag).options(joinedload(Tag.category)).filter(
-                    Tag.tagId.in_(tag_ids)))
-            tagInstances = r.scalars().all()
-            for tag in tag_ids:
-                if tag not in [
-                        tagInstance.tagId for tagInstance in tagInstances
-                ]:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Tag with ID {tag} not found")
+        tag_instances = await get_all(session,
+            select(Tag)
+            .options(joinedload(Tag.category))
+            .filter(Tag.tagId.in_(tag_ids))                     
+        )
+        tag_instances_ids = [ instance.tagId for instance in tag_instances ]
 
-            r = await session.execute(select(func.count(Category.categoryId)))
-            num_categories = r.scalar_one_or_none()
+        for tag_id in tag_ids:
+            if tag_id not in tag_instances_ids:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Invalid tag id")
 
-            tag_ids_by_category = [[
-                tag.tagId for tag in tagInstances
-                if tag.categoryId == categoryId
-            ] for categoryId in range(1, num_categories + 1)]
+        num_categories = await get_one(session, select(func.count(Category.categoryId)))
 
-            conditions = []
-            for i, tag_list in enumerate(tag_ids_by_category):
-                if tag_list:
-                    conditions.append(
+        # TODO refactor
+        tag_ids_by_category = [[
+            tag.tagId for tag in tag_instances
+            if tag.categoryId == categoryId
+        ] for categoryId in range(1, num_categories + 1)]
+
+        for i, tag_list in enumerate(tag_ids_by_category):
+            if tag_list:
+                conditions.append(
+                    Project.tags.any(
                         and_(
-                            Project.tags.any(
-                                and_(Tag.categoryId == (i + 1),
-                                     Project.tags.any(
-                                         Tag.tagId.in_(tag_list)))), ))
+                            Tag.categoryId == (i + 1), 
+                            Project.tags.any(Tag.tagId.in_(tag_list))
+                        )
+                    )
+                )
 
-            query = select(func.count(Project.id)).filter(
-                Project.is_live == True,
-                Project.title.like(f'%{keyword}%'), Project.date >= start_date,
-                Project.date <= end_date)
-            query = query.filter(and_(*conditions)) if conditions else query
-            count = (await session.execute(query)).scalar_one_or_none()
-
-            query = select(Project).group_by(Project.id).filter(
-                Project.is_live == True,
-                Project.title.like(f'%{keyword}%'),
-                Project.date >= start_date, Project.date <= end_date).options(
-                    selectinload(Project.user), selectinload(
-                        Project.tags)).order_by(Project.date.desc()).offset(
-                            max((page - 1) * per_page,
-                                0)).limit(min(per_page, MAX_PAGE_SIZE))
-
-            query = query.filter(and_(*conditions)) if conditions else query
-
-            r = await session.execute(query)
-            response.headers['X-Total-Count'] = str(count)
-            response.headers['X-Total-Pages'] = str(count // per_page +
-                                                    (1 if count %
-                                                     per_page else 0))
-            return r.scalars().all()
-        except ValueError as e:
-            print(e)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Tags must be integers")
-
-    query = select(func.count(Project.id)).filter(
+    query = select(
+        func.count(Project.id)
+    ).filter(
         Project.is_live == True,
-        Project.title.like(f'%{keyword}%'), Project.date >= start_date,
-        Project.date <= end_date)
-    count = (await session.execute(query)).scalar_one_or_none()
+        Project.title.like(f'%{keyword}%'), 
+        Project.date >= start_date,
+        Project.date <= end_date
+    )
+    query = query.filter(and_(*conditions)) if conditions else query
 
-    response.headers['X-Total-Count'] = str(count)
-    response.headers['X-Total-Pages'] = str(count // per_page +
-                                            (1 if count % per_page else 0))
+    count = await get_one(session, query)
+    set_count_headers(response, count, per_page)
 
-    r = await session.execute(
-        select(Project).filter(
-            Project.is_live == True,
-            Project.title.like(f'%{keyword}%'),
-            Project.date >= start_date, Project.date <= end_date).options(
-                selectinload(Project.user),
-                selectinload(Project.tags)).order_by(
-                    Project.date.desc()).offset(max(
-                        (page - 1) * per_page,
-                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
-    return r.scalars().all()
+    query = select(
+        Project
+    ).filter(
+        Project.is_live == True,
+        Project.title.like(f'%{keyword}%'),
+        Project.date >= start_date, 
+        Project.date <= end_date
+    ).options(
+        selectinload(Project.user), 
+        selectinload(Project.tags)
+    ).order_by(
+        Project.date.desc()
+    )
+    query = query.filter(and_(*conditions)) if conditions else query
+
+    return await get_some(session, page, per_page, query)
 
 
 @router.get('/{id}')
@@ -129,30 +113,14 @@ async def get_project(id: str,
     if additional_info:
         await require_authenticated(current_user)
     
-    if not is_valid_uuid(id):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Project not found')
-    
-    instance = await get_one(session,
-        select(Project)
-        .options(selectinload(Project.user),
-                 selectinload(Project.tags))
-        .where(Project.id == id)                     
-    )
+    instance = await get_project_by_id(session, id)
 
-    if not instance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Project not found')
+    if additional_info:
+        ensure_admin_or_self(current_user, str(instance.user.id))
     
     if not instance.is_live:
         await require_authenticated(current_user)
-        if not is_admin(current_user) and instance.user.id != current_user.id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                                detail="Non-admin user can only access their projects.")
-
-    if additional_info and not is_admin(current_user) and instance.user.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Non-admin user can only access their projects.")
+        ensure_admin_or_self(current_user, str(instance.user.id))
     
     data = vars(instance)
 
@@ -175,9 +143,6 @@ async def create_project(title: str = Form(),
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(require_authenticated)):
     
-    # if not current_user:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-    #                         detail="Unauthorized")
 
     if not is_valid_iso_date(completionDate):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -189,26 +154,15 @@ async def create_project(title: str = Form(),
         "date": dateparser.parse(completionDate) if completionDate else None,
         "description": description,
         "content": content,
-        "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
+        "tags": await get_tags(session, tags) if tags else []
     }
-    tags = []
-    for tagId in data["tags"]:
-        if not isinstance(tagId, int):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Tag must be an integer")
-        r = await session.execute(select(Tag).where(Tag.tagId == tagId))
-        tag = r.scalar_one_or_none()
-        if not tag:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"Tag with ID {tagId} not found")
-        tags.append(tag)
 
-    data["tags"] = tags
-    new_project = Project(**data,
-                          id=str(uuid4()),
-                          user_id=current_user.id,
-                          #date=datetime.utcnow(),
-                          user=current_user)
+    new_project = Project(
+        **data,
+        id=str(uuid4()),
+        user_id=current_user.id,
+        user=current_user
+    )
 
     if imageFile:
         contents = imageFile.file.read()
@@ -254,7 +208,7 @@ async def create_project(title: str = Form(),
     await session.refresh(new_project)
 
     # needed for adding tags to the response
-    # TODO can it be avoided?
+    # TODO research whether it can be avoided
     new_project = await get_one(session,
         select(Project)
         .options(selectinload(Project.user),
@@ -282,75 +236,13 @@ async def modify_project(id: str,
     if completionDate and not is_valid_iso_date(completionDate):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="Invalid date")
-    
-    # if not current_user:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-    #                         detail="Unauthorized")
 
-    if not is_valid_uuid(id):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Project not found')
-    
-    instance = await get_one(session,
-        select(Project)
-        .options(selectinload(Project.user),
-                 selectinload(Project.tags))
-        .where(Project.id == id)                     
-    )
-
-    if not instance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Project not found')
-
-    # r = await session.execute(
-    #     select(Project).options(selectinload(Project.user),
-    #                             selectinload(
-    #                                 Project.tags)).where(Project.id == id))
-    # originalProject = r.scalar_one_or_none()
-
-    # if not originalProject:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-    #                         detail=f"Project with ID {id} not found")
-
-    if not is_admin(current_user) and instance.user.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Non-admin user can only access their projects.")
-
-    # if originalProject.user.id != current_user.id and not is_admin(
-    #         current_user):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-    #                         detail="Unauthorized")
+    instance = await get_project_by_id(session, id)
 
     if is_live:
         await require_admin(current_user)
 
-    #data = project.dict(exclude_unset=True)
-    # for k, v in data.items():
-    #     if v is not None:
-    #         if k == "is_live":
-    #             if not is_admin(current_user):
-    #                 raise HTTPException(
-    #                     status_code=status.HTTP_401_UNAUTHORIZED,
-    #                     detail="Unauthorized")
-    #             setattr(originalProject, k, v)
-    #         elif k == "tags":
-    #             tags = []
-    #             for tagId in v:
-    #                 if not isinstance(tagId, int):
-    #                     raise HTTPException(
-    #                         status_code=status.HTTP_400_BAD_REQUEST,
-    #                         detail=f"TagId {tagId} must be an integer")
-    #                 r = await session.execute(
-    #                     select(Tag).where(Tag.tagId == tagId))
-    #                 tag = r.scalar_one_or_none()
-    #                 if not tag:
-    #                     raise HTTPException(
-    #                         status_code=status.HTTP_400_BAD_REQUEST,
-    #                         detail=f"Tag with ID {tagId} not found")
-    #                 tags.append(tag)
-    #             setattr(originalProject, k, tags)
-    #         else:
-    #             setattr(originalProject, k, v)
+    ensure_admin_or_self(current_user, str(instance.user.id))
 
     data = {
         "title": title,
@@ -359,22 +251,10 @@ async def modify_project(id: str,
         "description": description,
         "content": content,
         "is_live": is_live,
-        "tags": [int(tagId) for tagId in tags.split(",")] if tags else []
+        "tags": await get_tags(session, tags) if tags else []
     }
-    tags = []
-    for tagId in data["tags"]:
-        if not isinstance(tagId, int):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Tag must be an integer")
-        r = await session.execute(select(Tag).where(Tag.tagId == tagId))
-        tag = r.scalar_one_or_none()
-        if not tag:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"Tag with ID {tagId} not found")
-        tags.append(tag)
 
-    data["tags"] = tags
-    if len(tags) == 0:
+    if len(data["tags"]) == 0:
         data["tags"] = None
 
     patch_object(instance, data)
@@ -397,47 +277,13 @@ async def modify_project(id: str,
 async def delete_project(id: str,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(require_authenticated)):
-    # if not current_user:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-    #                         detail="Unauthorized")
 
-    if not is_valid_uuid(id):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Project not found')
-
-    instance = await get_one(session,
-        select(Project)
-        .options(selectinload(Project.user),
-                 selectinload(Project.tags))
-        .where(Project.id == id)                     
-    )
-
-    if not instance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Project not found')
-
-    # r = await session.execute(
-    #     select(Project).options(selectinload(Project.user),
-    #                             selectinload(
-    #                                 Project.tags)).where(Project.id == id))
-    # originalProject = r.scalar_one_or_none()
-
-    # if not originalProject:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-    #                         detail=f"Project with ID {id} not found")
-
-    # if not is_admin(
-    #         current_user) and originalProject.user.id != current_user.id:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-    #                         detail="Unauthorized")
+    instance = await get_project_by_id(session, id)
     
-    if not is_admin(current_user) and instance.user.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Non-admin user can only access their projects.")
+    ensure_admin_or_self(current_user, str(instance.user.id))
 
     await session.delete(instance)
     await session.commit()
-    #await session.flush()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -453,3 +299,48 @@ async def get_project_image(id: str):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Project image not found")
+
+
+async def get_project_by_id(session: AsyncSession, id: str):
+    if not is_valid_uuid(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+    
+    instance = await get_one(session,
+        select(Project)
+        .options(selectinload(Project.user),
+                 selectinload(Project.tags))
+        .where(Project.id == UUID(id))                     
+    )
+
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+    
+    return instance
+
+def ensure_admin_or_self(user: User, userId: str) -> None:
+    if not is_admin(user) and str(user.id) != userId:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Non-admin user can only access self.")
+    
+async def get_tags(session: AsyncSession, tag_ids: str) -> list[Tag]:
+    try:
+        tag_ids = [int(tag) for tag in tag_ids.split(',')]
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail="Invalid tag id")
+    
+    tags = []
+
+    for tag_id in tag_ids:
+        tag = await get_one(session,
+            select(Tag).where(Tag.tagId == tag_id)      
+        )
+        if not tag:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                detail="Invalid tag id")
+        
+        tags.append(tag)
+
+    return tags
