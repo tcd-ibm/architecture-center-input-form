@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Accordion, AccordionItem, Heading, Form, Stack, Dropdown, Checkbox, Button, Tag } from '@carbon/react';
+import { TrashCan } from '@carbon/icons-react';
 
 import AddTagForm from '@/Components/AddTagForm';
 import AddCategoryForm from '@/Components/AddCategoryForm';
@@ -51,6 +52,13 @@ function ContentSettingsPage() {
         console.log(response.data.categoryId, response.data.tagName);
     };
 
+    const handleDeleteTag = async (tag) => {
+        const currentId = tag.tagId;
+        await axios.delete(`/admin/tag/${currentId}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${user.accessToken}` } });
+        fetchTags();
+        console.log('deleted tag');
+    };
+
     const handleAddCategory = async (categoryName) => {
         const newCategory = {
             categoryName: categoryName
@@ -58,6 +66,13 @@ function ContentSettingsPage() {
         const response = await axios.post('/admin/category', newCategory, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${user.accessToken}` } });
         fetchTags();
         console.log(response.data.categoryId, response.data.categoryName);
+    };
+
+    const handleDeleteCategory = async (category) => {
+        const currentId = category.categoryId;
+        await axios.delete(`/admin/category/${currentId}`, { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${user.accessToken}` } });
+        fetchTags();
+        console.log('deleted category');
     };
 
     return (
@@ -96,15 +111,26 @@ function ContentSettingsPage() {
                     <AccordionItem key={category.categoryId} title={category.categoryName}>
                         <div style={{ width: '100%' }}>
                             <Stack gap={5}>
+                                <div style={{ 'font-size': '12px' }}>Click on a tag to delete...</div>
                                 <div>
                                     {category.tags.map(tag =>
-                                        <Tag type='magenta' title='Clear Filter' key={tag.tagId}>{tag.tagName}</Tag>
+                                        <Tag
+                                            type='magenta'
+                                            title='Clear Filter'
+                                            key={tag.tagId}
+                                            onClick={() => handleDeleteTag(tag)}>
+                                            {tag.tagName}
+                                        </Tag>
                                     )}
                                 </div>
                                 <AddTagForm onSubmit={tagName => handleAddTag(category.categoryId, tagName)} />
+                                <Button kind='danger' size='sm' onClick={() => handleDeleteCategory(category)}>
+                                    Delete category
+                                </Button>
                             </Stack>
                         </div>
                     </AccordionItem>
+
                 )}
             </Accordion>
             <AddCategoryForm onSubmit={categoryName => handleAddCategory(categoryName)} />
