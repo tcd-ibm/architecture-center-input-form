@@ -46,7 +46,7 @@ function MainHeader() {
                     <Asleep />
                 </HeaderGlobalAction>
                 {user &&
-                    <OverflowMenu size='lg' renderIcon={User} flipped={true} style={{ boxShadow: 'none' }} aria-label='My Account'>
+                    <OverflowMenu ariaLabel='user-options' size='lg' renderIcon={User} flipped={true} style={{ boxShadow: 'none' }} aria-label='My Account'>
                         <CustomOverflowMenuItem itemText='My Account' href='/account' />
                         <CustomOverflowMenuItem itemText='Log out' onClick={logout} />
                     </OverflowMenu>
