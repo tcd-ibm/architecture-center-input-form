@@ -800,7 +800,7 @@ async def create_project(title: str = Form(),
                          description: str = Form(),
                          content: str = Form(),
                          tags: str = Form(""),
-                         imageFile: UploadFile | None = None,
+                         imageFile: UploadFile = None,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(get_current_user)):
     if not current_user:
