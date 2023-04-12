@@ -101,7 +101,7 @@ class TestGetTagsId:
         cat1Id = (response.json())['categoryId']
         assert cat1Id
 
-        response = await adminClient.post('/admin/tag', 
+        response = await adminClient.post('/tags', 
             json={ "tagName": "tag1", "tagNameShort": "tag1s", "categoryId": cat1Id })
         assert response.status_code == 200
         tag1Id = (response.json())['tagId']
