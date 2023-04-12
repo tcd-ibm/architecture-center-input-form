@@ -17,7 +17,7 @@ function AddTagForm(props) {
     return (
         <Form style={{marginTop: '20px', width: '100%'}}>
             <Stack orientation='horizontal' gap={6}>
-                <TextInput id='add-tag-input' size='sm' labelText='Tag name' ref={inputRef} />
+                <TextInput size='sm' labelText='Tag name' ref={inputRef} />
                 <div style={{width: 'fit-content', height: 'fit-content', marginTop: 'auto'}} >
                     <Button size='sm' renderIcon={Add} hasIconOnly iconDescription='Add' onClick={submitHandler} />
                 </div>
