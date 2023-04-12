@@ -1,4 +1,4 @@
-import { Heading, FileUploader, Form, Stack, ComboBox, Checkbox, Button, Tile, Modal } from '@carbon/react';
+import { Heading, FileUploader, Form, Stack, Button, Tile, Modal } from '@carbon/react';
 import { useState, useEffect } from 'react';
 import { storage } from './../../firebase';
 import { ref, uploadBytes } from 'firebase/storage';
@@ -61,6 +61,7 @@ function ShowcaseSettingsPage() {
     return (
         <>
         <Modal open={modalOpen}
+            transactional
             size='sm'
             modalHeading='Are you sure you want to remove the featured project? No featured
                           project will be visible in the showcase until you set a new one.'
@@ -74,7 +75,7 @@ function ShowcaseSettingsPage() {
         <Form>
             <Stack gap={5}>
                 <Tile style = {{maxWidth: '500px', paddingBottom: '10px', marginBottom: '5px '}}>
-                    <img src={url} style={{maxWidth: '100%', marginBottom: '10px'}} onError={(event) => event.target.style.display = 'none'} />
+                    <img alt='' src={url} style={{maxWidth: '100%', marginBottom: '10px'}} onError={(event) => event.target.style.display = 'none'} />
                     <FileUploader
                         labelTitle='Upload header image'
                         labelDescription='Max file size is 10mb. Only .png files are supported.'

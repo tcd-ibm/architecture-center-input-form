@@ -1,8 +1,8 @@
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, 
-    TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
-    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, ModalWrapper } from '@carbon/react';
+    TableToolbarContent, TableToolbarSearch, Table, TableHead, 
+    TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal} from '@carbon/react';
 import { TrashCan, Edit } from '@carbon/icons-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './ProjectManager.module.scss';
 import { useNavigate } from 'react-router';
@@ -125,7 +125,7 @@ export default function ProjectManager({userID}) {
 
 
     function handleModifyProject(selectedRows) {
-        if (selectedRows.length == 1) {
+        if (selectedRows.length === 1) {
             const projectId = selectedRows[0].id;
             navigate(`/edit/${projectId}`);
         }

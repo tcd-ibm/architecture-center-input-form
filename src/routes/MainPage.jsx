@@ -121,7 +121,7 @@ function MainPage() {
       />
       <Content
         style={
-          isOnMobile ? { padding: '16px', margin: 0, 'marginTop': '64px' } : {}
+          isOnMobile ? { padding: '16px', margin: 0, 'margin-top': '64px' } : {}
         }
       >
         {isOnMobile ? (

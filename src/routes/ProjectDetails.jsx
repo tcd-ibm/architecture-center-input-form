@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import axios from 'axios';
 import MainHeader from '@/Components/MainHeader';
 import { Tile, Content, Grid, Column, Tag, Button } from '@carbon/react';
-import { ArrowRight, LogoGithub, DataDefinition, Document, Link, Growth} from '@carbon/icons-react';
+import { Link, Growth} from '@carbon/icons-react';
 import Asciidoctor from 'asciidoctor';
 import styles from './ProjectDetails.module.scss';
 import { useMediaQuery } from 'react-responsive';

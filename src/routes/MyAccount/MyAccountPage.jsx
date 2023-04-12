@@ -102,7 +102,7 @@ function MyAccountPage() {
                             <p>Account Created Date</p>
                             <TextInput
                                 labelText=''
-                                id='password'
+                                id='account-created-date'
                                 className={styles.textBox} 
                                 defaultValue={date}
                                 readOnly={true}
