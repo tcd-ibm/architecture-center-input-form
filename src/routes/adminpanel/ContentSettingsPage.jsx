@@ -111,7 +111,7 @@ function ContentSettingsPage() {
                     <AccordionItem key={category.categoryId} title={category.categoryName}>
                         <div style={{ width: '100%' }}>
                             <Stack gap={5}>
-                                <div style={{ 'font-size': '12px' }}>Click on a tag to delete...</div>
+                                <div style={{ 'fontSize': '12px' }}>Click on a tag to delete...</div>
                                 <div>
                                     {category.tags.map(tag =>
                                         <Tag

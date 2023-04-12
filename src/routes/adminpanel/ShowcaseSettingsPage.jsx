@@ -61,7 +61,6 @@ function ShowcaseSettingsPage() {
     return (
         <>
         <Modal open={modalOpen}
-            transactional
             size='sm'
             modalHeading='Are you sure you want to remove the featured project? No featured
                           project will be visible in the showcase until you set a new one.'

@@ -17,7 +17,7 @@ function AddCategoryForm(props) {
     return (
         <div style={{ marginTop: '20px', width: '100%' }}>
             <Stack orientation='horizontal' gap={6}>
-                <TextInput size='md' labelText='Category name' ref={inputRef} />
+                <TextInput id='category-name' size='md' labelText='Category name' ref={inputRef} />
                 <div style={{ width: 'fit-content', height: 'fit-content', marginTop: 'auto' }} >
                     <Button size='md' renderIcon={Add} hasIconOnly iconDescription='Add' onClick={submitHandler} />
                 </div>

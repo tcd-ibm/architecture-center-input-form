@@ -20,7 +20,7 @@ function MainPage() {
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
-  const [totalProjects, setTotalProjects] = useState([]);
+  const [totalProjects, setTotalProjects] = useState();
 
   useEffect(() => {
     // sets the sidebar to be hidden by default on mobile
