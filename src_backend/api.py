@@ -293,7 +293,7 @@ async def delete_user(id: str,
 
 @router.post('/user/token',
              summary="Create access and refresh tokens for user",
-             response_model=Token)
+             response_model=Token, deprecated=True)
 async def login(form: OAuth2PasswordRequestForm = Depends(),
                 session: AsyncSession = Depends(get_session)):
     user = await get_user_with_email_db(form.username, session)

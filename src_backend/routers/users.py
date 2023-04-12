@@ -8,10 +8,11 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import func
 
-from api import _create_token, ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, \
-    get_password_hash, get_user_projects_count_by_id, is_admin, SALT, get_current_user, MAX_PAGE_SIZE
+#from api import _create_token, ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, \
+#    get_password_hash, get_user_projects_count_by_id, is_admin, SALT
+from api import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_user_projects_count_by_id
 from db import get_session
-from utils.auth import require_admin, require_authenticated
+from utils.auth import ACCESS_TOKEN_EXPIRE_MINUTES, create_token, get_password_hash, is_admin, require_admin, require_authenticated
 from utils.data import is_empty, is_valid_uuid, patch_object, set_count_headers
 from utils.sql import get_one, get_some
 from models import Token, User, UserInfo, UserResponse, UserSignup, UserUpdate, \
@@ -81,7 +82,7 @@ async def create_user(user: UserSignup,
 
     new_user = User(
         email=user.email,
-        hashed_password=get_password_hash(user.password + SALT),
+        hashed_password=get_password_hash(user.password),
         created_at=now,
         updated_at=now,
         password_version=0,
@@ -93,7 +94,7 @@ async def create_user(user: UserSignup,
     await session.refresh(new_user)
 
     # TODO refactor auth code
-    token = _create_token(
+    token = create_token(
         data={
             "sub": 'thisisdumb',
             "password_version": 0,

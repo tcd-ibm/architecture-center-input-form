@@ -13,7 +13,7 @@ from sqlalchemy.future import select
 
 import api
 from router import router
-from api import get_current_user, oauth2_bearer, oauth2_bearer_no_auto_error
+from utils.auth import get_current_user, oauth2_bearer
 from models import SQLModel, User
 from db import get_session
 
@@ -77,17 +77,12 @@ def dependency_override(app: FastAPI, db_test_session: SessionTesting) -> None:
         finally:
             pass
 
-    async def _get_user(token: str | None = Depends(oauth2_bearer_no_auto_error)):
-        if token == 'admintoken':
-            result = await db_test_session.execute(select(User).where(User.email == 'admin@admin.com'))
-            return result.scalar_one_or_none()
-        if token == 'usertoken':
-            result = await db_test_session.execute(select(User).where(User.email == 'user@user.com'))
-            return result.scalar_one_or_none()
-        elif token:
+    async def _get_user(token: str | None = Depends(oauth2_bearer)):
+        if token:
             result = (await db_test_session.execute(select(User).where(User.email == token))).scalar_one_or_none()
             return result
-        return None
+        else:        
+            return None
 
     app.dependency_overrides[get_session] = _get_db_test_session
     app.dependency_overrides[get_current_user] = _get_user
@@ -99,13 +94,13 @@ async def client(app: FastAPI, dependency_override) -> Generator[AsyncClient, An
 
 @pytest.fixture()
 async def userClient(app: FastAPI, dependency_override) -> Generator[AsyncClient, Any, None]:
-    headers = { 'Authorization': 'Bearer usertoken' } 
+    headers = { 'Authorization': 'Bearer user@user.com' } 
     async with AsyncClient(app=app, base_url='http://testserver' + API_PREFIX, headers=headers) as client:
         yield client
 
 @pytest.fixture()
 async def adminClient(app: FastAPI, dependency_override) -> Generator[AsyncClient, Any, None]:
-    headers = { 'Authorization': 'Bearer admintoken' } 
+    headers = { 'Authorization': 'Bearer admin@admin.com' } 
     async with AsyncClient(app=app, base_url='http://testserver' + API_PREFIX, headers=headers) as client:
         yield client
 
