@@ -1,9 +1,9 @@
 //import { Heading } from '@carbon/react';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, Dropdown,
-    TableToolbarContent, TableToolbarSearch, TableToolbarMenu, TableToolbarAction, Table, TableHead, 
+    TableToolbarContent, TableToolbarSearch, Table, TableHead, 
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, Button } from '@carbon/react';
 import { TrashCan, Edit, DataCheck, CheckmarkOutline, Star, StarFilled } from '@carbon/icons-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 import { useNavigate } from 'react-router';
@@ -155,7 +155,7 @@ function ManageProjectsPage() {
 
 
     function handleModifyProject(selectedRows) {
-        if (selectedRows.length == 1) {
+        if (selectedRows.length === 1) {
             const projectId = selectedRows[0].id;
             navigate(`/edit/${projectId}`);
         }

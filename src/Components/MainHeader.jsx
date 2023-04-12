@@ -18,7 +18,7 @@ function MainHeader() {
     return (
         <Header aria-label='Amazing SwEng Project'>
             <CustomHeaderName href='/' prefix=''>
-                <img src={url} style={{ maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }} onError={(event) => event.target.style.display = defaultURL} />
+                <img alt='' src={url} style={{ maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }} onError={(event) => event.target.style.display = defaultURL} />
                 <div>Project Showcase</div>
             </CustomHeaderName>
             <HeaderNavigation aria-label='Amazing SwEng Project'>
