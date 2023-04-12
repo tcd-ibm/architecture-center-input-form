@@ -181,7 +181,7 @@ function MainPage() {
           pageSize={pageSize}
           pageSizes={[6, 12, 18]}
           size='lg'
-          totalItems={totalProjects}
+          totalItems={projects.length}
         />
       </Content>
     </>
