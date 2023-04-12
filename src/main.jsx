@@ -25,7 +25,7 @@ import { AuthContextProvider } from '@/hooks/useAuth';
 import { AppThemeProvider } from '@/hooks/useAppTheme';
 
 // eslint-disable-next-line no-restricted-globals
-axios.defaults.baseURL = `http://${location.hostname}:5297/api/v1/`;
+axios.defaults.baseURL = `http://${location.host}/api/v1/`;
 
 const router = createBrowserRouter([
   {
