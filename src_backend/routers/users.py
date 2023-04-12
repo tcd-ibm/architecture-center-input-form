@@ -8,18 +8,40 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import func
 
-#from api import _create_token, ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, \
-#    get_password_hash, get_user_projects_count_by_id, is_admin, SALT
-from api import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_user_projects_count_by_id
 from db import get_session
 from utils.auth import ACCESS_TOKEN_EXPIRE_MINUTES, create_token, get_password_hash, is_admin, require_admin, require_authenticated
-from utils.data import is_empty, is_valid_uuid, patch_object, set_count_headers
+from utils.data import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, is_empty, is_valid_uuid, patch_object, set_count_headers
 from utils.sql import get_one, get_some
 from models import Token, User, UserInfo, UserResponse, UserSignup, UserUpdate, \
-    ProjectInfoAdditional, ProjectInfoAdditionalAdmin, Project
+    ProjectInfoAdditional, ProjectInfoAdditionalAdmin, Project, ProjectCount
 
 
 router = APIRouter(prefix='/users', tags=['users'])
+
+
+async def get_user_projects_count_by_id(id: str, session: AsyncSession):
+    live_count = await get_one(session, 
+        select(func.count(Project.id))
+        .where(Project.user_id == id,
+               Project.is_live == True)           
+    )
+    draft_count = await get_one(session, 
+        select(func.count(Project.id))
+        .where(Project.user_id == id,
+               Project.is_live == False)          
+    )
+    total_count = await get_one(session, 
+        select(func.count(Project.id))
+        .where(Project.user_id == id)        
+    )
+
+    result = ProjectCount(
+        live_count=live_count,
+        draft_count=draft_count,
+        total_count=total_count
+    )
+
+    return result
 
 
 @router.get('', response_model=List[UserInfo], dependencies=[Depends(require_admin)])

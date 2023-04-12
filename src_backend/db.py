@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from dotenv import load_dotenv
+
+
 # get the database url from the environment variable
 load_dotenv("./database.env")
 DATABASE_URL = os.getenv("DATABASE_URL")

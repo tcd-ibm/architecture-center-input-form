@@ -10,10 +10,8 @@ from dateutil import parser as dateparser
 from uuid import UUID, uuid4
 
 from db import get_session
-#from api import get_current_user, is_admin, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_current_time
-from api import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_current_time
 from utils.auth import get_current_user, is_admin, require_admin, require_authenticated
-from utils.data import is_valid_iso_date, is_valid_uuid, patch_object, set_count_headers
+from utils.data import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, is_valid_iso_date, is_valid_uuid, patch_object, set_count_headers
 from utils.FileStorageManager import file_storage
 from utils.sql import get_all, get_one, get_some
 from models import Category, Project, ProjectContent, ProjectContentAdditional, \
@@ -23,11 +21,17 @@ from models import Category, Project, ProjectContent, ProjectContentAdditional, 
 router = APIRouter(prefix='/projects', tags=['projects'])
 
 
+def get_end_date(end_date: datetime | None = None) -> datetime:
+    if end_date:
+        return end_date
+    return datetime.utcnow()
+
+
 # TODO finish refactoring
 @router.get('', response_model=Union[list[ProjectInfoAdditionalAdmin], list[ProjectInfo]])
 async def query_projects(response: Response,
                          start_date: datetime = datetime.min,
-                         end_date: datetime = Depends(get_current_time),
+                         end_date: datetime = Depends(get_end_date),
                          per_page: int = DEFAULT_PAGE_SIZE,
                          page: int = DEFAULT_PAGE,
                          keyword: str = "",

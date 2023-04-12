@@ -5,6 +5,11 @@ from dateutil import parser as dateparser
 import uuid
 
 
+DEFAULT_PAGE = 1
+DEFAULT_PAGE_SIZE = 30
+MAX_PAGE_SIZE = 50
+
+
 T = TypeVar('T')
 
 def patch_object(instance: T, patch: Any) -> T:

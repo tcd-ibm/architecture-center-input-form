@@ -7,7 +7,6 @@ from datetime import timedelta, datetime
 from jose import jwt, JWTError
 from uuid import UUID
 
-from api import API_PREFIX
 from db import get_session
 from utils.sql import get_one
 from models import User
@@ -15,6 +14,7 @@ from models import User
 # TODO move to env
 SECRET_KEY = "d8e632e42229356dbbcd5fdc366a05e9bfaca0193ba016e4fd6cf03307d90241"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+API_PREFIX = "/api/v1"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token", auto_error=False)

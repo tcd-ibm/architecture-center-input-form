@@ -2,8 +2,7 @@ from typing import Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import Select
 
-
-MAX_PAGE_SIZE = 50
+from utils.data import MAX_PAGE_SIZE
 
 async def get_one(session: AsyncSession, statement: Select) -> Any:
     r = await session.execute(statement)
