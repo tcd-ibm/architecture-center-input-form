@@ -1096,7 +1096,7 @@ async def query_user_projects(
     return r.scalars().all()
 
 
-@router.get("/project/featured", response_model=ProjectFeatured)
+@router.get("/project/featured", response_model=ProjectFeatured, deprecated=True)
 async def get_featured_project(session: AsyncSession = Depends(
     get_session)) -> ProjectFeatured:
     if not id:
@@ -1117,7 +1117,7 @@ async def get_featured_project(session: AsyncSession = Depends(
     return project
 
 
-@router.delete("/project/featured")
+@router.delete("/project/featured", deprecated=True)
 async def delete_featured_project(session: AsyncSession = Depends(get_session),
                                   current_user=Depends(get_current_user)):
     if not current_user:
@@ -1143,7 +1143,7 @@ async def delete_featured_project(session: AsyncSession = Depends(get_session),
     return {"status": "success"}
 
 
-@router.put("/project/featured/{id}")
+@router.put("/project/featured/{id}", deprecated=True)
 async def set_featured_project(id: str,
                                session: AsyncSession = Depends(get_session),
                                current_user=Depends(get_current_user)):

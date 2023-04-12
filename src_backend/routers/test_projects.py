@@ -1684,3 +1684,68 @@ class TestGetUsersIdProjects:
             }
         ]
         assert response.json() == expected_response_body
+
+# Tests for GET /projects/featured
+
+class TestGetProjectsFeatured:
+
+    async def test_live_featured(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_live': True, 'is_featured': True })
+        assert response.status_code == 200
+
+        # TEST
+        response = await adminClient.get('/projects/featured')
+        assert response.status_code == 200
+        expected_response_body = [
+            {
+                'id': projectId, 
+                'title': 'title1', 
+                'link': 'https://example.com', 
+                'description': 'description1',
+                'date': '2011-10-05T14:48:00', 
+                'tags': [
+                    {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                    {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                    {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+                ]
+            }
+        ]
+        assert response.json() == expected_response_body
+
+    async def test_not_live_featured(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_featured': True })
+        assert response.status_code == 200
+
+        # TEST
+        response = await adminClient.get('/projects/featured')
+        assert response.status_code == 200
+        expected_response_body = []
+        assert response.json() == expected_response_body
+
+    async def test_not_featured(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_live': True })
+        assert response.status_code == 200
+
+        # TEST
+        response = await adminClient.get('/projects/featured')
+        assert response.status_code == 200
+        expected_response_body = []
+        assert response.json() == expected_response_body

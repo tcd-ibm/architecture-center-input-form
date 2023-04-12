@@ -120,6 +120,17 @@ async def query_projects(response: Response,
     return [ ProjectInfo(**item) for item in data ]
 
 
+@router.get('/featured', response_model=list[ProjectInfo])
+async def get_featured_projects(session: AsyncSession = Depends(get_session)):
+    instances = await get_all(session,
+        select(Project)
+        .options(selectinload(Project.tags))
+        .where(Project.is_featured == True,
+               Project.is_live == True)                          
+    )
+    return instances
+
+
 @router.get('/{id}', response_model=Union[ProjectContentAdditionalAdmin, ProjectContentAdditional, ProjectContent])
 async def get_project(id: str,
                       additional_info: bool = False,
