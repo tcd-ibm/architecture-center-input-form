@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Content, Loading, Search } from '@carbon/react';
+import { Content, Loading, Search, Pagination } from '@carbon/react';
 import styles from './MainPage.module.scss';
 import { useMediaQuery } from 'react-responsive';
 
@@ -17,9 +17,12 @@ function MainPage() {
   const [queryMenuContent, setQueryMenuContent] = useState([]);
   const [sideBarExpanded, setSideBarExpanded] = useState(true);
   const queryMenuRef = useRef();
-
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
-
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(2);
+  const [pageNum, setPageNum] = useState(0);
+  const [numberOfEntries, setNumberOfEntries] = useState();
+  
   useEffect(() => {
     // sets the sidebar to be hidden by default on mobile
     if (isOnMobile) {
@@ -45,9 +48,16 @@ function MainPage() {
       });
   }, []);
 
+  const requestConfig = { 
+    params: {
+      per_page: pageSize,
+      page: page
+    } 
+  };
+
   useEffect(() => {
     axios
-      .get('/projects')
+      .get('/projects', requestConfig)
       .then((res) => {
         setProjects(res.data);
         setIsLoading(false);
@@ -93,6 +103,11 @@ function MainPage() {
   const toggleExpandedState = () => {
     setSideBarExpanded(!sideBarExpanded);
   };
+
+  const handlePaginationChange = event => {
+    setPage(event.page);
+    setPageSize(event.pageSize);
+};
 
   return (
     <>
@@ -144,6 +159,19 @@ function MainPage() {
             ))}
           </div>
         )}
+        { isLoading ? null: 
+          <Pagination 
+            backwardText='Previous page'
+            forwardText='Next page'
+            itemsPerPageText='Items per page:'
+            onChange={handlePaginationChange}
+            page={page}
+            pageSize={pageSize}
+            pageSizes={[4, 6, 8, 10 ]}
+            size='lg'
+            totalItems={10}
+          />
+        }
       </Content>
     </>
   );
