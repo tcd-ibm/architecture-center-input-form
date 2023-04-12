@@ -10,7 +10,7 @@ export default function FeaturedCard({project, isOnMobile}) {
 
 	return (
         <>
-		<CustomClickableTile className={isOnMobile ? styles.featuredTileMobile : styles.featuredTile} href={`./details/${project.id}`} >
+		<CustomClickableTile className={isOnMobile ? styles.featuredTileMobile : styles.featuredTile} href={`/details/${project.id}`} >
 			<CustomLink size='lg' className={styles.titleLink}>{project.title}</CustomLink>
 			<Tag type='red' className={isOnMobile ? styles.featuredTagMobile : styles.featuredTag} renderIcon={Star}>FEATURED PROJECT</Tag>
 			<p className={styles.description}>{project.description}</p>

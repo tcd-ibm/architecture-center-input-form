@@ -1,6 +1,6 @@
 //import { Heading } from '@carbon/react';
 import { DataTable, TableContainer, TableToolbar, TableBatchActions, TableBatchAction, Dropdown,
-    TableToolbarContent, TableToolbarSearch, Table, TableHead, 
+    TableToolbarContent, TableToolbarSearch, Table, TableHead,
     TableHeader, TableRow, TableSelectAll, TableBody, TableSelectRow, TableCell, Pagination, Modal, Button } from '@carbon/react';
 import { TrashCan, Edit, DataCheck, CheckmarkOutline, Star, StarFilled } from '@carbon/icons-react';
 import { useState, useEffect } from 'react';
@@ -8,6 +8,10 @@ import axios from 'axios';
 
 import { useNavigate } from 'react-router';
 import useAuth from '@/hooks/useAuth';
+
+import { CustomLink } from '@/Components/CustomCarbonNavigation';
+
+
 
 function ManageProjectsPage() {
 
@@ -103,6 +107,8 @@ function ManageProjectsPage() {
                 first = false;
                 return currentTag;
             });
+        } else if (cell.info.header === 'title') {
+            return <CustomLink href={`/details/${cell.id.substring(0, cell.id.indexOf(':'))}`}>{cell.value}</CustomLink>;
         } else if (cell.info.header === 'is_live')  {
             if (cell.value) {
                 return <Button kind='ghost' style={{color: '#00b200'}} renderIcon={CheckmarkOutline}>Approved</Button>;
