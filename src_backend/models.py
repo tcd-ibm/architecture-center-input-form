@@ -201,6 +201,7 @@ class ProjectInfo(BaseModel):
 
 class ProjectInfoAdditional(ProjectInfo):
     is_live: bool
+    is_featured: bool
 
 class ProjectInfoAdditionalAdmin(ProjectInfoAdditional):
     visit_count: int

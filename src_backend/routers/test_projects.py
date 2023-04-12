@@ -254,12 +254,8 @@ class TestGetProjects:
                 'id': projectId, 
                 'title': 'title1', 
                 'link': 'https://example.com', 
-                'description': 'description1', 
-                #'is_live': True, 
-                'is_featured': False, 
-                #'visit_count': 0, 
-                'date': '2011-10-05T14:48:00', 
-                #'user': {'username': None}, 
+                'description': 'description1',
+                'date': '2011-10-05T14:48:00',
                 'tags': [
                     {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
                     {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
@@ -267,7 +263,132 @@ class TestGetProjects:
                 ]
             }
         ]
-        #assert response.json() == expected_response_body
+        assert response.json() == expected_response_body
+
+    async def test_response_body_additional_info(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_live': True })
+        assert response.status_code == 200
+
+        # TEST
+        params = { 'additional_info': True }
+        response = await adminClient.get('/projects', params=params)
+        assert response.status_code == 200
+        expected_response_body = [
+            {
+                'id': projectId, 
+                'title': 'title1', 
+                'link': 'https://example.com', 
+                'description': 'description1',
+                'date': '2011-10-05T14:48:00',
+                'tags': [
+                    {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                    {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                    {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+                ],
+                'is_live': True, 
+                'is_featured': False, 
+                'visit_count': 0, 
+                'user': {
+                    'email': 'admin@admin.com', 
+                    'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+                }
+            }
+        ]
+        assert response.json() == expected_response_body
+
+    async def test_not_live_additional_info(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+
+        # TEST
+        params = { 'additional_info': True }
+        response = await adminClient.get('/projects', params=params)
+        assert response.status_code == 200
+        expected_response_body = [
+            {
+                'id': projectId, 
+                'title': 'title1', 
+                'link': 'https://example.com', 
+                'description': 'description1',
+                'date': '2011-10-05T14:48:00',
+                'tags': [
+                    {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                    {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                    {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+                ],
+                'is_live': False, 
+                'is_featured': False, 
+                'visit_count': 0, 
+                'user': {
+                    'email': 'admin@admin.com', 
+                    'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+                }
+            }
+        ]
+        assert response.json() == expected_response_body
+
+    async def test_featured(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_live': True, 'is_featured': True })
+        assert response.status_code == 200
+
+        # TEST
+        response = await adminClient.get('/projects')
+        assert response.status_code == 200
+        expected_response_body = []
+        assert response.json() == expected_response_body
+
+    async def test_featured_additional_info(self, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await adminClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_live': True, 'is_featured': True })
+        assert response.status_code == 200
+
+        # TEST
+        params = { 'additional_info': True }
+        response = await adminClient.get('/projects', params=params)
+        assert response.status_code == 200
+        expected_response_body = [
+            {
+                'id': projectId, 
+                'title': 'title1', 
+                'link': 'https://example.com', 
+                'description': 'description1',
+                'date': '2011-10-05T14:48:00',
+                'tags': [
+                    {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                    {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                    {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+                ],
+                'is_live': True, 
+                'is_featured': True, 
+                'visit_count': 0, 
+                'user': {
+                    'email': 'admin@admin.com', 
+                    'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+                }
+            }
+        ]
+        assert response.json() == expected_response_body
 
 
 # Tests for GET /projects/{id}
@@ -385,7 +506,8 @@ class TestGetProjectsId:
                 {'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s', 'categoryId': 1}, 
                 {'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s', 'categoryId': 1}
             ],
-            'is_live': True
+            'is_live': True,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 
@@ -416,6 +538,7 @@ class TestGetProjectsId:
                 {'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s', 'categoryId': 1}
             ],
             'is_live': True,
+            'is_featured': False,
             'user': {
                 'email': 'user@user.com',
                 'id': 'ec33e02c-ec82-4f4d-88be-23b2cdb6f097'
@@ -539,6 +662,7 @@ class TestPostProjects:
                 {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
             ],
             'is_live': False,
+            'is_featured': False,
             'user': {
                 'email': 'user@user.com',
                 'id': 'ec33e02c-ec82-4f4d-88be-23b2cdb6f097'
@@ -573,6 +697,7 @@ class TestPostProjects:
                 {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
             ],
             'is_live': False,
+            'is_featured': False,
             'user': {
                 'email': 'admin@admin.com',
                 'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
@@ -675,33 +800,35 @@ class TestPostProjects:
                 {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
                 {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
             ],
-            'is_live': False
+            'is_live': False,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 
-        # # POSTCONDITIONS
-        # response = await adminClient.get(f'/projects/{projectId}', params={ 'additional_info': True })
-        # assert response.status_code == 200
-        # expected_response_body = {
-        #     'id': projectId,
-        #     'title': 'title1',
-        #     'link': 'https://example.com',
-        #     'description': 'description1',
-        #     'date': '2011-10-05T14:48:00',
-        #     'content': 'content1',
-        #     'tags': [
-        #         {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
-        #         {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
-        #         {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
-        #     ],
-        #     'is_live': False,
-        #     'user': {
-        #         'email': 'admin@admin.com',
-        #         'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
-        #     },
-        #     'visit_count': 0
-        # }
-        # assert response.json() == expected_response_body
+        # POSTCONDITIONS
+        response = await adminClient.get(f'/projects/{projectId}', params={ 'additional_info': True })
+        assert response.status_code == 200
+        expected_response_body = {
+            'id': projectId,
+            'title': 'title1',
+            'link': 'https://example.com',
+            'description': 'description1',
+            'date': '2011-10-05T14:48:00',
+            'content': 'content1',
+            'tags': [
+                {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+            ],
+            'is_live': False,
+            'is_featured': False,
+            'user': {
+                'email': 'admin@admin.com',
+                'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+            },
+            'visit_count': 0
+        }
+        assert response.json() == expected_response_body
 
 
 # Tests for PATCH /projects/{id}
@@ -732,6 +859,7 @@ class TestPatchProjectsId:
             'content': 'content1',
             'tags': [],
             'is_live': False,
+            'is_featured': False,
             'user': {
                 'email': 'admin@admin.com',
                 'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
@@ -759,6 +887,7 @@ class TestPatchProjectsId:
             'content': 'content1',
             'tags': [],
             'is_live': True,
+            'is_featured': False,
             'user': {
                 'email': 'admin@admin.com',
                 'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
@@ -789,7 +918,8 @@ class TestPatchProjectsId:
             'date': '2011-10-05T14:48:00',
             'content': 'content1',
             'tags': [],
-            'is_live': False
+            'is_live': False,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 
@@ -811,7 +941,8 @@ class TestPatchProjectsId:
             'date': '2011-10-05T14:48:00',
             'content': 'content1',
             'tags': [],
-            'is_live': False
+            'is_live': False,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 
@@ -837,7 +968,8 @@ class TestPatchProjectsId:
             'date': '2011-10-05T14:48:00',
             'content': 'content1',
             'tags': [],
-            'is_live': False
+            'is_live': False,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 
@@ -859,7 +991,8 @@ class TestPatchProjectsId:
             'date': '2011-10-05T14:48:00',
             'content': 'content1',
             'tags': [],
-            'is_live': False
+            'is_live': False,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 
@@ -880,6 +1013,7 @@ class TestPatchProjectsId:
             'content': 'content1new',
             'tags': '2, 3',
             'is_live': True,
+            'is_featured': True,
             'user': 'shouldbeignored',
             'visit_count': 123456
         }
@@ -901,6 +1035,7 @@ class TestPatchProjectsId:
                 { 'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s' }
             ],
             'is_live': True,
+            'is_featured': True,
             'user': {
                 'email': 'admin@admin.com',
                 'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
@@ -1231,7 +1366,8 @@ class TestPatchProjectsId:
                 {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
                 {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
             ],
-            'is_live': False
+            'is_live': False,
+            'is_featured': False
         }
         assert response.json() == expected_response_body
 

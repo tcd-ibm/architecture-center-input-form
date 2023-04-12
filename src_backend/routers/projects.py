@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import APIRouter, Depends, Form, HTTPException, Response, status, UploadFile
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,14 +15,15 @@ from utils.auth import require_admin, require_authenticated
 from utils.data import is_valid_iso_date, is_valid_uuid, patch_object, set_count_headers
 from utils.FileStorageManager import file_storage
 from utils.sql import get_all, get_one, get_some
-from models import Category, Project, ProjectContent, ProjectContentAdditional, ProjectContentAdditionalAdmin, ProjectWithUserAndTags, Tag, User
+from models import Category, Project, ProjectContent, ProjectContentAdditional, \
+    ProjectContentAdditionalAdmin, ProjectInfo, ProjectInfoAdditionalAdmin, Tag, User
 
 
 router = APIRouter(prefix='/projects', tags=['projects'])
 
 
 # TODO finish refactoring
-@router.get('', response_model=list[ProjectWithUserAndTags])
+@router.get('', response_model=Union[list[ProjectInfoAdditionalAdmin], list[ProjectInfo]])
 async def query_projects(response: Response,
                          start_date: datetime = datetime.min,
                          end_date: datetime = Depends(get_current_time),
@@ -30,7 +32,11 @@ async def query_projects(response: Response,
                          keyword: str = "",
                          tags: str = "",
                          additional_info: bool = False,
-                         session: AsyncSession = Depends(get_session)):
+                         session: AsyncSession = Depends(get_session),
+                         current_user: User | None = Depends(get_current_user)):
+    
+    if additional_info:
+        await require_admin(current_user)
 
     conditions = []
 
@@ -76,11 +82,13 @@ async def query_projects(response: Response,
     query = select(
         func.count(Project.id)
     ).filter(
-        Project.is_live == True,
         Project.title.like(f'%{keyword}%'), 
         Project.date >= start_date,
         Project.date <= end_date
     )
+    if not additional_info:
+        query = query.filter(Project.is_live == True)
+        query = query.filter(Project.is_featured == False)
     query = query.filter(and_(*conditions)) if conditions else query
 
     count = await get_one(session, query)
@@ -89,7 +97,6 @@ async def query_projects(response: Response,
     query = select(
         Project
     ).filter(
-        Project.is_live == True,
         Project.title.like(f'%{keyword}%'),
         Project.date >= start_date, 
         Project.date <= end_date
@@ -99,12 +106,21 @@ async def query_projects(response: Response,
     ).order_by(
         Project.date.desc()
     )
+    if not additional_info:
+        query = query.filter(Project.is_live == True)
+        query = query.filter(Project.is_featured == False)
     query = query.filter(and_(*conditions)) if conditions else query
 
-    return await get_some(session, page, per_page, query)
+    data = await get_some(session, page, per_page, query)
+    data = [ vars(instance) for instance in data ]
+
+    if additional_info:
+        return [ ProjectInfoAdditionalAdmin(**item) for item in data ]
+    
+    return [ ProjectInfo(**item) for item in data ]
 
 
-@router.get('/{id}')
+@router.get('/{id}', response_model=Union[ProjectContentAdditionalAdmin, ProjectContentAdditional, ProjectContent])
 async def get_project(id: str,
                       additional_info: bool = False,
                       session: AsyncSession = Depends(get_session),
@@ -229,6 +245,7 @@ async def modify_project(id: str,
                          content: str | None = Form(None),
                          tags: str | None = Form(None),
                          is_live: bool | None = Form(None),
+                         is_featured: bool | None = Form(None),
                          imageFile: UploadFile | None = None,
                          session: AsyncSession = Depends(get_session),
                          current_user: User = Depends(require_authenticated)):
@@ -251,6 +268,7 @@ async def modify_project(id: str,
         "description": description,
         "content": content,
         "is_live": is_live,
+        "is_featured": is_featured,
         "tags": await get_tags(session, tags) if tags else []
     }
 
