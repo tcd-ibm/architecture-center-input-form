@@ -127,6 +127,7 @@ function ProjectQuerySidePanel(props, ref) {
             />
           </DatePicker>
           <Toggle
+            labelText='Filter by date'
             labelA='Off'
             labelB='On'
             id='toggle-1'

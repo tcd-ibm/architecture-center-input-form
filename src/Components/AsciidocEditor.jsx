@@ -43,7 +43,7 @@ function DocEditor(props, ref) {
   return (
     <>
       <Tabs>
-        <TabList ariaLabel='Ascii Editor'>
+        <TabList aria-label='Ascii Editor'>
         <Tab>
           Content Editor
         </Tab>
