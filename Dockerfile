@@ -16,7 +16,7 @@ RUN yarn install
 
 
 EXPOSE 5297
-EXPOSE 4621
+#EXPOSE 4621
 
 RUN chmod +x start.sh
 RUN chmod -R 777 /architecture-center-input-form
