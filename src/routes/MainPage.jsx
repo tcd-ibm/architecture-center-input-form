@@ -20,9 +20,8 @@ function MainPage() {
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(2);
-  const [pageNum, setPageNum] = useState(0);
   const [numberOfEntries, setNumberOfEntries] = useState();
-  
+    
   useEffect(() => {
     // sets the sidebar to be hidden by default on mobile
     if (isOnMobile) {
@@ -48,9 +47,14 @@ function MainPage() {
       });
   }, []);
 
+  const handlePaginationChange = event => {
+    setPage(event.page);
+    setPageSize(event.pageSize);
+  };
+
   const requestConfig = { 
     params: {
-      per_page: pageSize,
+      per_page: 6,
       page: page
     } 
   };
@@ -61,6 +65,7 @@ function MainPage() {
       .then((res) => {
         setProjects(res.data);
         setIsLoading(false);
+        setNumberOfEntries(projects.length);
       })
       .catch((err) => {
         console.log(err);
@@ -103,11 +108,6 @@ function MainPage() {
   const toggleExpandedState = () => {
     setSideBarExpanded(!sideBarExpanded);
   };
-
-  const handlePaginationChange = event => {
-    setPage(event.page);
-    setPageSize(event.pageSize);
-};
 
   return (
     <>
@@ -159,19 +159,18 @@ function MainPage() {
             ))}
           </div>
         )}
-        { isLoading ? null: 
-          <Pagination 
+        <Pagination 
+            className={styles.pagination}
             backwardText='Previous page'
             forwardText='Next page'
             itemsPerPageText='Items per page:'
             onChange={handlePaginationChange}
             page={page}
             pageSize={pageSize}
-            pageSizes={[4, 6, 8, 10 ]}
+            pageSizes={[6]}
             size='lg'
-            totalItems={10}
+            totalItems={projects.length}
           />
-        }
       </Content>
     </>
   );
