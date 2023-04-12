@@ -1618,7 +1618,7 @@ class TestGetUsersIdProjects:
         response = await adminClient.get('/users/ec33e02c-ec82-4f4d-88be-23b2cdb6f097/projects')
         assert response.status_code == 200
 
-    async def test_response_body(self, adminClient):
+    async def test_response_body_admin(self, adminClient):
         # PRECONDITIONS
         request_data = await setup_project_request_data(adminClient)
         response = await adminClient.post('/projects', data=request_data)
@@ -1637,11 +1637,14 @@ class TestGetUsersIdProjects:
                 'title': 'title1', 
                 'link': 'https://example.com', 
                 'description': 'description1', 
-                #'is_live': True, 
+                'is_live': True, 
                 'is_featured': False, 
-                #'visit_count': 0, 
+                'visit_count': 0, 
                 'date': '2011-10-05T14:48:00', 
-                #'user': {'username': None}, 
+                'user': {
+                    'email': 'admin@admin.com', 
+                    'id': '170b76ca-9cdb-4d3b-af35-f3c0202d7357'
+                }, 
                 'tags': [
                     {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
                     {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
@@ -1649,4 +1652,35 @@ class TestGetUsersIdProjects:
                 ]
             }
         ]
-        #assert response.json() == expected_response_body
+        assert response.json() == expected_response_body
+
+    async def test_response_body_user(self, userClient, adminClient):
+        # PRECONDITIONS
+        request_data = await setup_project_request_data(adminClient)
+        response = await userClient.post('/projects', data=request_data)
+        assert response.status_code == 200
+        projectId = (response.json())['id']
+        assert projectId
+        response = await adminClient.patch(f'/projects/{projectId}', data={ 'is_live': True })
+        assert response.status_code == 200
+
+        # TEST
+        response = await userClient.get('/users/ec33e02c-ec82-4f4d-88be-23b2cdb6f097/projects')
+        assert response.status_code == 200
+        expected_response_body = [
+            {
+                'id': projectId, 
+                'title': 'title1', 
+                'link': 'https://example.com', 
+                'description': 'description1', 
+                'is_live': True, 
+                'is_featured': False,
+                'date': '2011-10-05T14:48:00', 
+                'tags': [
+                    {'categoryId': 1, 'tagId': 1, 'tagName': 'tag1', 'tagNameShort': 'tag1s'}, 
+                    {'categoryId': 1, 'tagId': 2, 'tagName': 'tag2', 'tagNameShort': 'tag2s'}, 
+                    {'categoryId': 1, 'tagId': 3, 'tagName': 'tag3', 'tagNameShort': 'tag3s'}
+                ]
+            }
+        ]
+        assert response.json() == expected_response_body
