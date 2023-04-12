@@ -46,7 +46,8 @@ async def admin_get_all_users(response: Response,
         UserInfo(id=user.id,
                  created_at=user.created_at,
                  email=user.email,
-                 username=user.username if user.username else None,
+                 username='thisisdumb',
+                 #user.username if user.username else None,
                  is_active=user.is_active,
                  role=user.role) 
         for user in users
@@ -94,7 +95,7 @@ async def create_user(user: UserSignup,
     # TODO refactor auth code
     token = _create_token(
         data={
-            "sub": user.username,
+            "sub": 'thisisdumb',
             "password_version": 0,
             "role": 0
         },
@@ -102,11 +103,12 @@ async def create_user(user: UserSignup,
     )
 
     response = {
+        "id" : new_user.id,
         "access_token": token,
         "token_type": "bearer",
         "email": user.email,
         "role": 0,
-        "expires_at": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        "expires_at": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
 
     return response
@@ -142,9 +144,10 @@ async def update_user(user_patch: UserUpdate,
 async def delete_user(id: str,
                       user: User = Depends(require_authenticated),
                       session: AsyncSession = Depends(get_session)):
-    
-    ensure_admin_or_self(user, id)
 
+    ensure_admin_or_self(user, id)
+    ensure_admin_not_deleting_self(user, id)
+    
     instance = await get_user_by_id(session, id)
 
     await session.delete(instance)
@@ -193,6 +196,11 @@ def ensure_admin_or_self(user: User, userId: str) -> None:
     if not is_admin(user) and str(user.id) != userId:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Non-admin user can only access self.")
+    
+def ensure_admin_not_deleting_self(user:User, userId: str) -> None:
+    if is_admin(user) and str(user.id) == userId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Admin user cannot delete themselves.")
     
 async def ensure_email_not_used(session: AsyncSession, email: str) -> None:
     instance = await get_one(session,

@@ -57,6 +57,7 @@ class UserUpdate(SQLModel):
 
 
 class Token(SQLModel):
+    id: UUID 
     access_token: str
     token_type: str
     email: str
