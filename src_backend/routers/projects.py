@@ -1,20 +1,123 @@
+from typing import List
 from fastapi import APIRouter, Depends, Form, HTTPException, Response, status, UploadFile
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.sql import and_
+from datetime import datetime
 from dateutil import parser as dateparser
 from uuid import uuid4
 
 from db import get_session
-from api import get_current_user, is_admin
+from api import get_current_user, is_admin, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, get_current_time, MAX_PAGE_SIZE
 from utils.auth import require_admin, require_authenticated
 from utils.data import is_valid_iso_date, is_valid_uuid, patch_object
 from utils.FileStorageManager import file_storage
 from utils.sql import get_one
-from models import Project, ProjectContent, ProjectContentAdditional, ProjectContentAdditionalAdmin, Tag, User
+from models import Category, Project, ProjectContent, ProjectContentAdditional, ProjectContentAdditionalAdmin, ProjectWithUserAndTags, Tag, User
 
 
 router = APIRouter(prefix='/projects', tags=['projects'])
+
+
+@router.get('', response_model=List[ProjectWithUserAndTags])
+async def query_all_live_projects(
+    response: Response,
+    start_date: datetime = datetime.min,
+    end_date: datetime = Depends(get_current_time),
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
+    keyword: str = "",
+    tags: str = "",
+    additional_info: bool = False,
+    session: AsyncSession = Depends(get_session),
+) -> List[ProjectWithUserAndTags]:
+
+    if tags:
+        try:
+            tag_ids = [int(tag) for tag in tags.split(',')]
+
+            r = await session.execute(
+                select(Tag).options(joinedload(Tag.category)).filter(
+                    Tag.tagId.in_(tag_ids)))
+            tagInstances = r.scalars().all()
+            for tag in tag_ids:
+                if tag not in [
+                        tagInstance.tagId for tagInstance in tagInstances
+                ]:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Tag with ID {tag} not found")
+
+            r = await session.execute(select(func.count(Category.categoryId)))
+            num_categories = r.scalar_one_or_none()
+
+            tag_ids_by_category = [[
+                tag.tagId for tag in tagInstances
+                if tag.categoryId == categoryId
+            ] for categoryId in range(1, num_categories + 1)]
+
+            conditions = []
+            for i, tag_list in enumerate(tag_ids_by_category):
+                if tag_list:
+                    conditions.append(
+                        and_(
+                            Project.tags.any(
+                                and_(Tag.categoryId == (i + 1),
+                                     Project.tags.any(
+                                         Tag.tagId.in_(tag_list)))), ))
+
+            query = select(func.count(Project.id)).filter(
+                Project.is_live == True,
+                Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+                Project.date <= end_date)
+            query = query.filter(and_(*conditions)) if conditions else query
+            count = (await session.execute(query)).scalar_one_or_none()
+
+            query = select(Project).group_by(Project.id).filter(
+                Project.is_live == True,
+                Project.title.like(f'%{keyword}%'),
+                Project.date >= start_date, Project.date <= end_date).options(
+                    selectinload(Project.user), selectinload(
+                        Project.tags)).order_by(Project.date.desc()).offset(
+                            max((page - 1) * per_page,
+                                0)).limit(min(per_page, MAX_PAGE_SIZE))
+
+            query = query.filter(and_(*conditions)) if conditions else query
+
+            r = await session.execute(query)
+            response.headers['X-Total-Count'] = str(count)
+            response.headers['X-Total-Pages'] = str(count // per_page +
+                                                    (1 if count %
+                                                     per_page else 0))
+            return r.scalars().all()
+        except ValueError as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Tags must be integers")
+
+    query = select(func.count(Project.id)).filter(
+        Project.is_live == True,
+        Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+        Project.date <= end_date)
+    count = (await session.execute(query)).scalar_one_or_none()
+
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
+
+    r = await session.execute(
+        select(Project).filter(
+            Project.is_live == True,
+            Project.title.like(f'%{keyword}%'),
+            Project.date >= start_date, Project.date <= end_date).options(
+                selectinload(Project.user),
+                selectinload(Project.tags)).order_by(
+                    Project.date.desc()).offset(max(
+                        (page - 1) * per_page,
+                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
+    return r.scalars().all()
 
 
 @router.get('/{id}')
@@ -279,6 +382,14 @@ async def modify_project(id: str,
     session.add(instance)
     await session.commit()
     await session.refresh(instance)
+
+    instance = await get_one(session,
+        select(Project)
+        .options(selectinload(Project.user),
+                 selectinload(Project.tags))
+        .where(Project.id == id)                     
+    )
+
     return instance
 
 

@@ -1,20 +1,20 @@
 import asyncio
 from typing import List
 from datetime import datetime, timedelta
-import re
 from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy import func
 
 from api import _create_token, ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, \
-    get_password_hash, get_user_projects_count_by_id, is_admin, SALT
+    get_password_hash, get_user_projects_count_by_id, is_admin, SALT, get_current_user, MAX_PAGE_SIZE
 from db import get_session
 from utils.auth import require_admin, require_authenticated
-from utils.data import is_empty, patch_object, set_count_headers
+from utils.data import is_empty, is_valid_uuid, patch_object, set_count_headers
 from utils.sql import get_one, get_some
-from models import Token, User, UserInfo, UserResponse, UserSignup, UserUpdate
+from models import Token, User, UserInfo, UserResponse, UserSignup, UserUpdate, ProjectWithUserAndTags, Project
 
 
 router = APIRouter(prefix='/users', tags=['users'])
@@ -150,9 +150,52 @@ async def delete_user(id: str,
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+@router.get("/{id}/projects",
+            response_model=List[ProjectWithUserAndTags], tags=['projects'])
+async def get_projects_by_user_id(
+    id: str,
+    response: Response,
+    per_page: int = DEFAULT_PAGE_SIZE,
+    page: int = DEFAULT_PAGE,
+    additional_info: bool = False,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(require_authenticated)):
+
+    # if not is_admin(current_user):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    #                         detail="only admin can get projects by user id")
+
+    # id = id.replace("-", "")
+    # if len(id) != 32:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail="Invalid user id")
+
+    if not is_valid_uuid(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Project not found')
+    
+    ensure_admin_or_self(current_user, id)
+
+    instance = await get_user_by_id(session, id)
+
+    count = (await session.execute(
+        select(func.count(Project.id)).where(Project.user_id == id)
+    )).scalar_one_or_none()
+    response.headers['X-Total-Count'] = str(count)
+    response.headers['X-Total-Pages'] = str(count // per_page +
+                                            (1 if count % per_page else 0))
+
+    result = await session.execute(
+        select(Project).options(
+            selectinload(Project.user),
+            selectinload(Project.tags)).where(Project.user_id == id).offset(
+                max((page - 1) * per_page,
+                    0)).limit(min(per_page, MAX_PAGE_SIZE)))
+    return result.scalars().all()
+
 
 def ensure_admin_or_self(user: User, userId: str) -> None:
-    if not is_admin(user) and user.id != userId:
+    if not is_admin(user) and str(user.id) != userId:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Non-admin user can only access self.")
     

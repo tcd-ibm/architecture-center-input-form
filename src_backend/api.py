@@ -54,7 +54,9 @@ oauth2_bearer_no_auto_error = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_current_time():
+def get_current_time(end_date: datetime | None = None):
+    if end_date:
+        return end_date
     return datetime.utcnow()
 
 
@@ -464,7 +466,7 @@ async def admin_get_total_projects_visit(
     return {"total": count}
 
 
-@router.get("/admin/projects", response_model=List[ProjectWithUserAndTags])
+@router.get("/admin/projects", response_model=List[ProjectWithUserAndTags], deprecated=True)
 async def admin_get_all_projects(
     response: Response,
     per_page: int = DEFAULT_PAGE_SIZE,
@@ -761,7 +763,7 @@ async def get_user_projects_count_by_id(id: str, session: AsyncSession):
 
 
 @router.get("/admin/user/{id}/projects",
-            response_model=List[ProjectWithUserAndTags])
+            response_model=List[ProjectWithUserAndTags], deprecated=True)
 async def get_projects_by_user_id(
     id: str,
     response: Response,
@@ -992,7 +994,7 @@ async def get_project(id: str,
     return project
 
 
-@router.get("/user/projects", response_model=List[ProjectWithUserAndTags])
+@router.get("/user/projects", response_model=List[ProjectWithUserAndTags], deprecated=True)
 async def query_user_projects(
     response: Response,
     start_date: datetime = datetime.min,
@@ -1221,102 +1223,102 @@ async def get_project_by_id(
     return project
 
 
-@router.get("/projects", response_model=List[ProjectWithUserAndTags])
-async def query_all_live_projects(
-    response: Response,
-    start_date: datetime = datetime.min,
-    end_date: datetime = Depends(get_current_time),
-    per_page: int = DEFAULT_PAGE_SIZE,
-    page: int = DEFAULT_PAGE,
-    keyword: str = "",
-    tags: str = "",
-    session: AsyncSession = Depends(get_session),
-) -> List[ProjectWithUserAndTags]:
+# @router.get("/projects", response_model=List[ProjectWithUserAndTags], deprecated=True)
+# async def query_all_live_projects(
+#     response: Response,
+#     start_date: datetime = datetime.min,
+#     end_date: datetime = Depends(get_current_time),
+#     per_page: int = DEFAULT_PAGE_SIZE,
+#     page: int = DEFAULT_PAGE,
+#     keyword: str = "",
+#     tags: str = "",
+#     session: AsyncSession = Depends(get_session),
+# ) -> List[ProjectWithUserAndTags]:
 
-    if tags:
-        try:
-            tag_ids = [int(tag) for tag in tags.split(',')]
+#     if tags:
+#         try:
+#             tag_ids = [int(tag) for tag in tags.split(',')]
 
-            r = await session.execute(
-                select(Tag).options(joinedload(Tag.category)).filter(
-                    Tag.tagId.in_(tag_ids)))
-            tagInstances = r.scalars().all()
-            for tag in tag_ids:
-                if tag not in [
-                        tagInstance.tagId for tagInstance in tagInstances
-                ]:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Tag with ID {tag} not found")
+#             r = await session.execute(
+#                 select(Tag).options(joinedload(Tag.category)).filter(
+#                     Tag.tagId.in_(tag_ids)))
+#             tagInstances = r.scalars().all()
+#             for tag in tag_ids:
+#                 if tag not in [
+#                         tagInstance.tagId for tagInstance in tagInstances
+#                 ]:
+#                     raise HTTPException(
+#                         status_code=status.HTTP_400_BAD_REQUEST,
+#                         detail=f"Tag with ID {tag} not found")
 
-            r = await session.execute(select(func.count(Category.categoryId)))
-            num_categories = r.scalar_one_or_none()
+#             r = await session.execute(select(func.count(Category.categoryId)))
+#             num_categories = r.scalar_one_or_none()
 
-            tag_ids_by_category = [[
-                tag.tagId for tag in tagInstances
-                if tag.categoryId == categoryId
-            ] for categoryId in range(1, num_categories + 1)]
+#             tag_ids_by_category = [[
+#                 tag.tagId for tag in tagInstances
+#                 if tag.categoryId == categoryId
+#             ] for categoryId in range(1, num_categories + 1)]
 
-            conditions = []
-            for i, tag_list in enumerate(tag_ids_by_category):
-                if tag_list:
-                    conditions.append(
-                        and_(
-                            Project.tags.any(
-                                and_(Tag.categoryId == (i + 1),
-                                     Project.tags.any(
-                                         Tag.tagId.in_(tag_list)))), ))
+#             conditions = []
+#             for i, tag_list in enumerate(tag_ids_by_category):
+#                 if tag_list:
+#                     conditions.append(
+#                         and_(
+#                             Project.tags.any(
+#                                 and_(Tag.categoryId == (i + 1),
+#                                      Project.tags.any(
+#                                          Tag.tagId.in_(tag_list)))), ))
 
-            query = select(func.count(Project.id)).filter(
-                Project.is_live == True,
-                Project.title.like(f'%{keyword}%'), Project.date >= start_date,
-                Project.date <= end_date)
-            query = query.filter(and_(*conditions)) if conditions else query
-            count = (await session.execute(query)).scalar_one_or_none()
+#             query = select(func.count(Project.id)).filter(
+#                 Project.is_live == True,
+#                 Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+#                 Project.date <= end_date)
+#             query = query.filter(and_(*conditions)) if conditions else query
+#             count = (await session.execute(query)).scalar_one_or_none()
 
-            query = select(Project).group_by(Project.id).filter(
-                Project.is_live == True,
-                Project.title.like(f'%{keyword}%'),
-                Project.date >= start_date, Project.date <= end_date).options(
-                    selectinload(Project.user), selectinload(
-                        Project.tags)).order_by(Project.date.desc()).offset(
-                            max((page - 1) * per_page,
-                                0)).limit(min(per_page, MAX_PAGE_SIZE))
+#             query = select(Project).group_by(Project.id).filter(
+#                 Project.is_live == True,
+#                 Project.title.like(f'%{keyword}%'),
+#                 Project.date >= start_date, Project.date <= end_date).options(
+#                     selectinload(Project.user), selectinload(
+#                         Project.tags)).order_by(Project.date.desc()).offset(
+#                             max((page - 1) * per_page,
+#                                 0)).limit(min(per_page, MAX_PAGE_SIZE))
 
-            query = query.filter(and_(*conditions)) if conditions else query
+#             query = query.filter(and_(*conditions)) if conditions else query
 
-            r = await session.execute(query)
-            response.headers['X-Total-Count'] = str(count)
-            response.headers['X-Total-Pages'] = str(count // per_page +
-                                                    (1 if count %
-                                                     per_page else 0))
-            return r.scalars().all()
-        except ValueError as e:
-            print(e)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Tags must be integers")
+#             r = await session.execute(query)
+#             response.headers['X-Total-Count'] = str(count)
+#             response.headers['X-Total-Pages'] = str(count // per_page +
+#                                                     (1 if count %
+#                                                      per_page else 0))
+#             return r.scalars().all()
+#         except ValueError as e:
+#             print(e)
+#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+#                                 detail="Tags must be integers")
 
-    query = select(func.count(Project.id)).filter(
-        Project.is_live == True,
-        Project.title.like(f'%{keyword}%'), Project.date >= start_date,
-        Project.date <= end_date)
-    count = (await session.execute(query)).scalar_one_or_none()
+#     query = select(func.count(Project.id)).filter(
+#         Project.is_live == True,
+#         Project.title.like(f'%{keyword}%'), Project.date >= start_date,
+#         Project.date <= end_date)
+#     count = (await session.execute(query)).scalar_one_or_none()
 
-    response.headers['X-Total-Count'] = str(count)
-    response.headers['X-Total-Pages'] = str(count // per_page +
-                                            (1 if count % per_page else 0))
+#     response.headers['X-Total-Count'] = str(count)
+#     response.headers['X-Total-Pages'] = str(count // per_page +
+#                                             (1 if count % per_page else 0))
 
-    r = await session.execute(
-        select(Project).filter(
-            Project.is_live == True,
-            Project.title.like(f'%{keyword}%'),
-            Project.date >= start_date, Project.date <= end_date).options(
-                selectinload(Project.user),
-                selectinload(Project.tags)).order_by(
-                    Project.date.desc()).offset(max(
-                        (page - 1) * per_page,
-                        0)).limit(min(per_page, MAX_PAGE_SIZE)))
-    return r.scalars().all()
+#     r = await session.execute(
+#         select(Project).filter(
+#             Project.is_live == True,
+#             Project.title.like(f'%{keyword}%'),
+#             Project.date >= start_date, Project.date <= end_date).options(
+#                 selectinload(Project.user),
+#                 selectinload(Project.tags)).order_by(
+#                     Project.date.desc()).offset(max(
+#                         (page - 1) * per_page,
+#                         0)).limit(min(per_page, MAX_PAGE_SIZE)))
+#     return r.scalars().all()
 
 
 @router.get("/tag/{tagId}", response_model=Tag, deprecated=True)
