@@ -5,6 +5,9 @@ WORKDIR /architecture-center-input-form
 COPY . .
 
 ENV PATH /architecture-center-input-form:$PATH
+
+ENV NODE_OPTIONS="--max-old-space-size=8192"
+
 # update 
 RUN yum -y update
 # get install script and pass it to execute:  test
