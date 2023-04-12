@@ -228,13 +228,13 @@ class TestPatchUsersId:
         response = await adminClient.patch(f'/users/{new_user_id}', json=user_patch_data, headers=headers)
         assert response.status_code == 200
         assert response.json()['role'] == 1
-        print(response.json())
+        #print(response.json())
 
         # Test update role as non admin
         user_patch_data ={'role':'0'}
         response = await userClient.patch(f'/users/{new_user_id}', json=user_patch_data)
         assert response.status_code == 403
-        print(response.json())
+        #print(response.json())
 
 
 # Tests for DELETE /users/{id}
