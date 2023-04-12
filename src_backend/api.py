@@ -333,7 +333,7 @@ async def get_current_user_info(current_user: User = Depends(get_current_user),
     return r.scalar_one_or_none()
 
 
-@router.get("/admin/users/total")
+@router.get("/admin/users/total", deprecated=True)
 async def admin_get_total_users(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)):
@@ -424,7 +424,7 @@ async def toggle_project_is_live(
     return {"status": "success", "is_live": project.is_live}
 
 
-@router.get("/admin/projects/total")
+@router.get("/admin/projects/total", deprecated=True)
 async def admin_get_total_projects(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)):
@@ -445,7 +445,7 @@ async def admin_get_total_projects(
     return {"total": count}
 
 
-@router.get("/admin/projects/total/visit")
+@router.get("/admin/projects/total/visit", deprecated=True)
 async def admin_get_total_projects_visit(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)):
@@ -670,7 +670,7 @@ async def delete_tag(id: int,
     return {"status": "success"}
 
 
-@router.get("/admin/projects/recent/{n}")
+@router.get("/admin/projects/recent/{n}", deprecated=True)
 async def get_projects_updated_count_in_n_days(
     n: int,
     current_user: User = Depends(get_current_user),
@@ -712,7 +712,7 @@ async def get_projects_updated_count_in_n_days(
     return results
 
 
-@router.get("/admin/tags/popular/{n}", response_model=List[TagCount])
+@router.get("/admin/tags/popular/{n}", response_model=List[TagCount], deprecated=True)
 async def get_top_n_popular_tags(
     n: int,
     current_user: User = Depends(get_current_user),
