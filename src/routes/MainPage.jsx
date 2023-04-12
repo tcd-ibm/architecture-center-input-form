@@ -19,9 +19,9 @@ function MainPage() {
   const queryMenuRef = useRef();
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2);
-  const [numberOfEntries, setNumberOfEntries] = useState();
-    
+  const [pageSize, setPageSize] = useState(6);
+  const [totalProjects, setTotalProjects] = useState([]);
+
   useEffect(() => {
     // sets the sidebar to be hidden by default on mobile
     if (isOnMobile) {
@@ -54,7 +54,7 @@ function MainPage() {
 
   const requestConfig = { 
     params: {
-      per_page: 6,
+      per_page: pageSize,
       page: page
     } 
   };
@@ -65,12 +65,22 @@ function MainPage() {
       .then((res) => {
         setProjects(res.data);
         setIsLoading(false);
-        setNumberOfEntries(projects.length);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    axios
+      .get('/projects')
+      .then((res) => {
+        setTotalProjects(res.data.length);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [totalProjects]);
 
   useEffect(() => {
     axios
@@ -167,9 +177,9 @@ function MainPage() {
             onChange={handlePaginationChange}
             page={page}
             pageSize={pageSize}
-            pageSizes={[6]}
+            pageSizes={[6, 12, 18]}
             size='lg'
-            totalItems={projects.length}
+            totalItems={totalProjects}
           />
       </Content>
     </>
