@@ -47,16 +47,16 @@ function MainPage() {
       });
   }, []);
 
-  const handlePaginationChange = event => {
+  const handlePaginationChange = (event) => {
     setPage(event.page);
     setPageSize(event.pageSize);
   };
 
-  const requestConfig = { 
+  const requestConfig = {
     params: {
       per_page: pageSize,
-      page: page
-    } 
+      page: page,
+    },
   };
 
   useEffect(() => {
@@ -100,6 +100,8 @@ function MainPage() {
       tags: queryMenuRef.current.selectedTagList.join(','),
     };
 
+    console.log('hi2', params);
+
     axios
       .get('./projects', { params })
       .then((res) => {
@@ -121,7 +123,7 @@ function MainPage() {
 
   return (
     <>
-      <MainHeader />
+      <MainHeader toggleSideBar={toggleExpandedState} />
       <ProjectQuerySidePanel
         menuContent={queryMenuContent}
         ref={queryMenuRef}
@@ -131,18 +133,19 @@ function MainPage() {
       />
       <Content
         style={
-          isOnMobile ? { padding: '16px', margin: 0, 'marginTop': '64px' } : {}
+          isOnMobile ? { padding: '16px', margin: 0, marginTop: '64px' } : {}
         }
       >
         {isOnMobile ? (
           <Search
             labelText='Search'
             placeholder='Search'
+            style={{ marginBottom: '10px' }}
             onChange={handleSearchAndFilterChange}
           />
         ) : null}
 
-        {isOnMobile ? (
+        {/* {isOnMobile ? (
           <p
             id={styles.filtersBtn}
             onClick={() => {
@@ -152,7 +155,7 @@ function MainPage() {
             <span>Filters</span>
             <Filter />
           </p>
-        ) : null}
+        ) : null} */}
 
         {isLoading ? (
           <Loading
@@ -169,18 +172,18 @@ function MainPage() {
             ))}
           </div>
         )}
-        <Pagination 
-            className={styles.pagination}
-            backwardText='Previous page'
-            forwardText='Next page'
-            itemsPerPageText='Items per page:'
-            onChange={handlePaginationChange}
-            page={page}
-            pageSize={pageSize}
-            pageSizes={[6, 12, 18]}
-            size='lg'
-            totalItems={totalProjects}
-          />
+        <Pagination
+          className={styles.pagination}
+          backwardText='Previous page'
+          forwardText='Next page'
+          itemsPerPageText='Items per page:'
+          onChange={handlePaginationChange}
+          page={page}
+          pageSize={pageSize}
+          pageSizes={[6, 12, 18]}
+          size='lg'
+          totalItems={totalProjects}
+        />
       </Content>
     </>
   );

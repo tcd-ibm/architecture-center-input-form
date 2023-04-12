@@ -59,6 +59,12 @@ function ProjectQuerySidePanel(props, ref) {
     onChange();
   };
 
+  useEffect(() => {
+    if (isOnMobile) {
+      toggleExpandedState();
+    }
+  }, [isOnMobile]);
+
   return (
     <SideNav
       className='sideNav1'
