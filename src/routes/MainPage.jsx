@@ -169,7 +169,7 @@ function MainPage() {
             pageSize={pageSize}
             pageSizes={[4, 6, 8, 10 ]}
             size='lg'
-            totalItems={10000000}
+            totalItems={10}
           />
         }
       </Content>
