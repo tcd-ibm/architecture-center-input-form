@@ -42,3 +42,26 @@
     max-width: calc(400px);
   }
 }
+
+#pagination {
+  max-width: calc(2 * 400px + 1 * 20px);
+  margin: 20px auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+#pagination button {
+  background-color: #0F62FE;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+
+}
+
+#pagination button:hover {
+  opacity: 0.7;
+}
+
+.btnInvisible {
+  opacity: 0;
+}

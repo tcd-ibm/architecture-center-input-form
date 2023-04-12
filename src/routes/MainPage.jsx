@@ -17,7 +17,7 @@ function MainPage() {
   const [queryMenuContent, setQueryMenuContent] = useState([]);
   const [sideBarExpanded, setSideBarExpanded] = useState(true);
   const queryMenuRef = useRef();
-
+  const [pageNum, setPageNum] = useState(0);
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
 
   useEffect(() => {
@@ -144,6 +144,24 @@ function MainPage() {
             ))}
           </div>
         )}
+        { isLoading ? null: 
+            <div id='pagination'>
+                <button className={pageNum === 0? 'btnInvisible': ' '} onClick={()=>{ 
+                    if (pageNum > 0) {
+                        setPageNum(pageNum -1);
+                        console.log(projects.length);
+                    }
+                }}>Back</button>
+        
+                <p>{ 'page ' + (pageNum+1) + ' of ' + Math.ceil(projects.length/10)}</p>
+
+                <button className={pageNum + 1 === Math.ceil(projects.length/10)? 'btnInvisible': ' '} onClick={()=>{
+                    if (pageNum+1 < Math.ceil(projects.length/10)) {
+                        setPageNum(pageNum + 1);
+                    }
+                }}>Next</button>
+            </div>
+          }
       </Content>
     </>
   );
