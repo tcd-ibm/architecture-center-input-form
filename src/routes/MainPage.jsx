@@ -177,7 +177,7 @@ function MainPage() {
             onChange={handlePaginationChange}
             page={page}
             pageSize={pageSize}
-            pageSizes={[4, 6, 8, 10]}
+            pageSizes={[6, 12, 18]}
             size='lg'
             totalItems={totalProjects}
           />
