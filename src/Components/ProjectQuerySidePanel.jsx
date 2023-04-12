@@ -76,6 +76,7 @@ function ProjectQuerySidePanel(props, ref) {
       <Stack gap={5} className={styles.innerContainer}>
         {isOnMobile ? null : (
           <Search
+            id='searchBox'
             labelText='Search'
             placeholder='Search'
             onChange={handleSearch}

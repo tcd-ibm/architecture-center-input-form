@@ -96,11 +96,9 @@ function MainPage() {
 
   const handleSearchAndFilterChange = () => {
     const params = {
-      keyword: document.querySelector('input').value,
+      keyword: document.querySelector('#searchBox').value,
       tags: queryMenuRef.current.selectedTagList.join(','),
     };
-
-    console.log('hi2', params);
 
     axios
       .get('./projects', { params })
@@ -138,6 +136,7 @@ function MainPage() {
       >
         {isOnMobile ? (
           <Search
+            id='searchBox'
             labelText='Search'
             placeholder='Search'
             style={{ marginBottom: '10px' }}
