@@ -31,6 +31,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends(),
         expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     response = {
+        "id": user.id,
         "access_token": token,
         "token_type": "bearer",
         "email": user.email,

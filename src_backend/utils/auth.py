@@ -17,7 +17,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 API_PREFIX = "/api/v1"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/user/token", auto_error=False)
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl=API_PREFIX + "/auth/token", auto_error=False)
 
 
 def AuthenticationError(detail: str) -> HTTPException:
@@ -54,8 +54,11 @@ def decode_token(token: str) -> dict:
         raise AuthenticationError("Could not validate credentials")
 
 
-async def get_current_user(token: str = Depends(oauth2_bearer),
+async def get_current_user(token: str | None = Depends(oauth2_bearer),
                            session: AsyncSession = Depends(get_session)) -> User | None:
+    
+    if not token:
+        return None
     
     payload = decode_token(token=token)
 
