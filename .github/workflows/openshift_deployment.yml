@@ -4,7 +4,7 @@ name: OpenShift
 
 env:
   APP_NAME: "architecture-center-input-form"
-  APP_PORT: 4621
+  APP_PORT: 5297
   PROJECT_NAME: "moeto88-dev"
   
 
