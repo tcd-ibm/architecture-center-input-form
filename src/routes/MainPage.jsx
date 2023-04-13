@@ -77,7 +77,7 @@ function MainPage() {
     axios
       .get('/projects', requestConfig)
       .then((res) => {
-        setProjects(res.data.filter(proj => (proj.id !== featuredProject.id)));
+        setProjects(res.data.filter(proj => ((!featuredProject.id) || proj.id !== featuredProject.id)));
         setIsLoading(false);
       })
       .catch((err) => {
