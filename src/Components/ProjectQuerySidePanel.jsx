@@ -16,6 +16,7 @@ import {
   DatePickerInput,
   Tile,
   Toggle,
+  Button
 } from '@carbon/react';
 import styles from './ProjectQuerySidePanel.module.scss';
 import { useMediaQuery } from 'react-responsive';
@@ -106,7 +107,7 @@ function ProjectQuerySidePanel(props, ref) {
             ))}
           </Accordion>
         )}
-        <Tile style={{ border: '1px solid gray' }}>
+        <Tile style={{ border: '1px solid gray', height: '240px' }}>
           <DatePicker
             style={{ marginBottom: '20px' }}
             datePickerType='single'
@@ -119,7 +120,7 @@ function ProjectQuerySidePanel(props, ref) {
               placeholder='dd/mm/yyyy'
               labelText='Start date'
               size='sm'
-              style={{ width: '190px' }}
+              style={{ width: '100%' }}
             />
           </DatePicker>
           <DatePicker
@@ -134,7 +135,7 @@ function ProjectQuerySidePanel(props, ref) {
               placeholder='dd/mm/yyyy'
               labelText='End date'
               size='sm'
-              style={{ width: '190px' }}
+              style={{ width: '100%' }}
             />
           </DatePicker>
           <Toggle
@@ -150,7 +151,8 @@ function ProjectQuerySidePanel(props, ref) {
 
       {isOnMobile ? (
         <div id={styles.filterOptions}>
-          <button
+          <Button
+            kind='secondary'
             id={styles.applyFiltersBtn}
             onClick={() => {
               setSelectedTagList([]);
@@ -158,15 +160,15 @@ function ProjectQuerySidePanel(props, ref) {
             }}
           >
             Reset
-          </button>
-          <button
+          </Button>
+          <Button
             id={styles.applyFiltersBtn}
             onClick={() => {
               toggleExpandedState();
             }}
           >
             Apply
-          </button>
+          </Button>
         </div>
       ) : null}
     </SideNav>

@@ -26,6 +26,8 @@ function MainPage() {
     // sets the sidebar to be hidden by default on mobile
     if (isOnMobile) {
       setSideBarExpanded(false);
+    } else {
+      setSideBarExpanded(true);
     }
   }, []);
 
@@ -129,19 +131,18 @@ function MainPage() {
         toggleExpandedState={toggleExpandedState}
         onChange={handleSearchAndFilterChange}
       />
-      <Content
-        style={
-          isOnMobile ? { padding: '16px', margin: 0, marginTop: '64px' } : {}
-        }
+      <Content style={isOnMobile ? { padding: '0px', margin: '0px', marginTop: '15px' } : {padding: '0px', paddingTop: '5px'}}
       >
+        <div style={{ margin: '20px' }}>
         {isOnMobile ? (
+          <div className={styles.searchBar}>
           <Search
             id='searchBox'
             labelText='Search'
             placeholder='Search'
-            style={{ marginBottom: '10px' }}
             onChange={handleSearchAndFilterChange}
           />
+          </div>
         ) : null}
 
         {/* {isOnMobile ? (
@@ -171,6 +172,7 @@ function MainPage() {
             ))}
           </div>
         )}
+        </div>
         <Pagination
           className={styles.pagination}
           backwardText='Previous page'
@@ -179,7 +181,7 @@ function MainPage() {
           onChange={handlePaginationChange}
           page={page}
           pageSize={pageSize}
-          pageSizes={[6, 12, 18]}
+          pageSizes={[10, 20, 30]}
           size='lg'
           totalItems={projects.length}
         />
