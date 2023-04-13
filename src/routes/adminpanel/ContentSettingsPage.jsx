@@ -13,6 +13,8 @@ function ContentSettingsPage() {
 
     const { user } = useAuth();
 
+    const tagColors = ['red', 'magenta', 'purple', 'blue', 'cyan', 'teal', 'green', 'gray', 'cool-gray', 'warm-gray', 'high-contrast'];
+
     const items = [
         {
             id: 'everyone',
@@ -115,7 +117,7 @@ function ContentSettingsPage() {
                                 <div>
                                     {category.tags.map(tag =>
                                         <Tag
-                                            type='magenta'
+                                            type={tagColors[tag.categoryId % 10]}
                                             title='Clear Filter'
                                             key={tag.tagId}
                                             onClick={() => handleDeleteTag(tag)}>
