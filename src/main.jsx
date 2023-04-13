@@ -24,7 +24,8 @@ import MyAccountPage from './routes/MyAccount/MyAccountPage';
 import { AuthContextProvider } from '@/hooks/useAuth';
 import { AppThemeProvider } from '@/hooks/useAppTheme';
 
-axios.defaults.baseURL = 'http://localhost:5297/api/v1/';
+// eslint-disable-next-line no-restricted-globals
+axios.defaults.baseURL = `http://${location.host}/api/v1/`;
 
 const router = createBrowserRouter([
   {

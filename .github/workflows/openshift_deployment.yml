@@ -2,7 +2,7 @@ name: OpenShift
 
 env:
   APP_NAME: "architecture-center-input-form"
-  APP_PORT: 4621
+  APP_PORT: 5297
   
 
 on:
@@ -14,7 +14,7 @@ on:
 jobs:   
   openshift-deploy:
     name: Deploy to OpenShift
-      # ubuntu-20.04 can also be used
+      # ubuntu-20.04 can also be used. 
     runs-on: ubuntu-20.04
 
     outputs:
@@ -51,7 +51,7 @@ jobs:
     
     - name: Set environment
       run: |
-        oc set env deployment.apps/architecture-center-input-form PORT=4621
+        oc set env deployment.apps/architecture-center-input-form PORT=5297
     
     - name: Print application URL
       env:
