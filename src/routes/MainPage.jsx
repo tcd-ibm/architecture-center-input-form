@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Content, Loading, Search, Pagination } from '@carbon/react';
+import { Content, Loading, Search } from '@carbon/react';
 import styles from './MainPage.module.scss';
 import { useMediaQuery } from 'react-responsive';
 
@@ -8,7 +8,7 @@ import MainHeader from '@/Components/MainHeader';
 import ProjectQuerySidePanel from '@/Components/ProjectQuerySidePanel';
 import Card from '@/Components/Card';
 import FeaturedCard from '../Components/FeaturedCard';
-import { Filter } from '@carbon/icons-react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 function MainPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -132,9 +132,13 @@ function MainPage() {
         toggleExpandedState={toggleExpandedState}
         onChange={handleSearchAndFilterChange}
       />
-      <Content style={isOnMobile ? { padding: '0px', margin: '0px', marginTop: '15px' } : { padding: '0px', paddingTop: '5px' }}
-      >
-        <div style={{ margin: '20px' }}>
+      <Content style={
+        isOnMobile
+          ? { padding: '0px', margin: '0px', marginTop: '15px' }
+          : { padding: '0px', paddingTop: '5px' }}>
+        <InfiniteScroll
+          dataLength={projects.length}
+          style={{ margin: '20px' }}>
           {isOnMobile ? (
             <div className={styles.searchBar}>
               <Search
@@ -173,19 +177,7 @@ function MainPage() {
               ))}
             </div>
           )}
-        </div>
-        <Pagination
-          className={styles.pagination}
-          backwardText='Previous page'
-          forwardText='Next page'
-          itemsPerPageText='Items per page:'
-          onChange={handlePaginationChange}
-          page={page}
-          pageSize={pageSize}
-          pageSizes={[10, 20, 30]}
-          size='lg'
-          totalItems={projects.length}
-        />
+        </InfiniteScroll>
       </Content>
     </>
   );
