@@ -23,7 +23,7 @@ EXPOSE 5297
 
 RUN chmod +x start.sh
 RUN chmod -R 777 /architecture-center-input-form
-RUN chmod -R a+rw /architecture-center-input-form/database
+# RUN chmod -R a+rw /architecture-center-input-form/database
 
 CMD start.sh
 # gunicorn app:app -b 0.0.0.0:5297 -w 8 -k uvicorn.workers.UvicornWorker & yarn dev
