@@ -171,18 +171,22 @@ function ProjectQuerySidePanel(props, ref) {
         </Tile>
       </Stack>
 
-      {isOnMobile ? (
-        <div id={styles.filterOptions}>
-          <Button
-            kind='secondary'
-            id={styles.applyFiltersBtn}
-            onClick={() => {
-              setSelectedTagList([]);
-              selectedTagListRef.current = [];
-            }}
-          >
-            Reset
-          </Button>
+      <div id={styles.filterOptions}>
+        <Button
+          kind='secondary'
+          id={isOnMobile ? styles.applyFiltersBtn : styles.resetFiltersBtn}
+          onClick={() => {
+            setSelectedTagList([]);
+            selectedTagListRef.current = [];
+            onChange();
+            if (isOnMobile) {
+              toggleExpandedState();
+            }
+          }}
+        >
+          Clear
+        </Button>
+        {isOnMobile ? (
           <Button
             id={styles.applyFiltersBtn}
             onClick={() => {
@@ -191,8 +195,8 @@ function ProjectQuerySidePanel(props, ref) {
           >
             Apply
           </Button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </SideNav>
   );
 }
