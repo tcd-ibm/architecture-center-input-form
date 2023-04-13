@@ -51,7 +51,7 @@ function MainHeader({ toggleSideBar = null }) {
         <img
           alt=''
           src={url}
-          style={{ maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }}
+          style={isOnSmallMobile ? { maxWidth: '50px' } : { maxWidth: '50px', marginLeft: '15px', marginRight: '10px' }}
           onError={(event) => (event.target.style.display = defaultURL)}
         />
         {isOnSmallMobile ? null : <div>Project Showcase</div>}
