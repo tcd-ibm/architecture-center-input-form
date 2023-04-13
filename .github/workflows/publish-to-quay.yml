@@ -8,7 +8,6 @@ name: "Publish to Quay.io"
 on:
   push:
     branches:
-      - main
       - dev
     tags: [ 'v*.*.*' ]
 
