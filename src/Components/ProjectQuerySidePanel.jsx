@@ -34,8 +34,6 @@ function ProjectQuerySidePanel(props, ref) {
   const [endDate, setEndDate] = useState(getUTCDateFromLocal(new Date()));
   const [filterDate, setFilterDate] = useState(false);
 
-  console.log(startDate, endDate);
-
   useImperativeHandle(
     ref,
     () => ({
