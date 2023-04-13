@@ -108,6 +108,7 @@ function MainHeader({ toggleSideBar = null }) {
         )}
         {!user && isOnMobile && (
           <OverflowMenu
+            ariaLabel='my-account'
             size='lg'
             renderIcon={User}
             flipped={true}

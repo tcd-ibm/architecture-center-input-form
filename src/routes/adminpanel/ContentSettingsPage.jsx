@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Accordion, AccordionItem, Heading, Form, Stack, Dropdown, Checkbox, Button, Tag } from '@carbon/react';
-import { TrashCan } from '@carbon/icons-react';
 
 import AddTagForm from '@/Components/AddTagForm';
 import AddCategoryForm from '@/Components/AddCategoryForm';
