@@ -105,7 +105,7 @@ function ProjectQuerySidePanel(props, ref) {
         {menuContent && (
           <Accordion>
             {menuContent.map((item, index) => (
-              <AccordionItem title={item.title} key={index} open>
+              <AccordionItem title={item.title} key={index}>
                 <fieldset className='cds--fieldset'>
                   {item.tags.map((tagItem, index) => (
                     <Checkbox
