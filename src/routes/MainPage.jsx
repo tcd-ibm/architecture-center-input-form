@@ -74,16 +74,17 @@ function MainPage() {
   }, []);
 
   useEffect(() => {
+
     axios
       .get('/projects', requestConfig)
       .then((res) => {
-        setProjects(res.data.filter(proj => ((!featuredProject.id) || proj.id !== featuredProject.id)));
+        setProjects(res.data.filter(proj => (!featuredProject || proj.id !== featuredProject.id)));
         setIsLoading(false);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [page, pageSize]);
+  }, [featuredProject, page, pageSize]);
 
   useEffect(() => {
     axios
