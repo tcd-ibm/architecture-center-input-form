@@ -14,7 +14,7 @@ on:
 jobs:   
   openshift-deploy:
     name: Deploy to OpenShift
-      # ubuntu-20.04 can also be used
+      # ubuntu-20.04 can also be used. 
     runs-on: ubuntu-20.04
 
     outputs:
