@@ -10,7 +10,7 @@ ENV NODE_OPTIONS="--max-old-space-size=8192"
 
 # update 
 RUN yum -y update
-# get install script and pass it to execute:  test
+# get install script and pass it to execute: 
 RUN yum install -y python3 python3-pip vim npm sqlite
 RUN pip3 install --no-cache-dir -r requirements.txt
 
