@@ -1,5 +1,6 @@
 .innerContainer {
   padding: 1rem;
+  padding-bottom: 80px;
   overflow-y: auto;
 }
 
@@ -16,17 +17,12 @@
 }
 
 #resetFiltersBtn {
-  margin: 15px;
   text-align: center;
-  padding: 10px 20px;
 }
 
 #applyFiltersBtn {
-  margin: 15px;
-  padding: 10px 30px;
 }
 
 #filterOptions {
-  display: flex;
-  width: 100%;
+  width: 100vw;
 }

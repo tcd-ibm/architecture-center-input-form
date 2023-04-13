@@ -18,6 +18,7 @@ import {
   Toggle,
   Button,
 } from '@carbon/react';
+import { TrashCan } from '@carbon/icons-react';
 import styles from './ProjectQuerySidePanel.module.scss';
 import { useMediaQuery } from 'react-responsive';
 
@@ -120,7 +121,7 @@ function ProjectQuerySidePanel(props, ref) {
             ))}
           </Accordion>
         )}
-        <Tile style={{ border: '1px solid gray', height: '240px' }}>
+        <Tile style={{ border: '1px solid gray', height: '240px'}}>
           <DatePicker
             style={{ marginBottom: '20px' }}
             datePickerType='single'
@@ -171,24 +172,23 @@ function ProjectQuerySidePanel(props, ref) {
         </Tile>
       </Stack>
 
-      <div id={styles.filterOptions}>
+      <div style={{width: '100%', position: 'absolute', bottom: '0px'}}>
         <Button
           kind='secondary'
-          id={isOnMobile ? styles.applyFiltersBtn : styles.resetFiltersBtn}
+          style={isOnMobile ? {width: '50%'} : {width: '100%'}}
+          renderIcon={TrashCan}
           onClick={() => {
             setSelectedTagList([]);
             selectedTagListRef.current = [];
             onChange();
-            if (isOnMobile) {
-              toggleExpandedState();
-            }
           }}
         >
           Clear
         </Button>
         {isOnMobile ? (
           <Button
-            id={styles.applyFiltersBtn}
+            style={{ width: '50%'}}
+            kind='primary'
             onClick={() => {
               toggleExpandedState();
             }}
