@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - dev
     tags: [ 'v*.*.*' ]
 
 env:
@@ -27,6 +28,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Build Project
+        run: yarn build
         
       - name: Determine image tags
         if: env.IMAGE_TAGS == ''
