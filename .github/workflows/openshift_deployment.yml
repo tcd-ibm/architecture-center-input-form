@@ -54,7 +54,7 @@ jobs:
     
     - name: Set environment
       run: |
-        oc set env deployment.apps/architecture-center-input-form PORT=4621
+        oc set env deployment.apps/architecture-center-input-form PORT=${{ env.APP_PORT }}
     
     - name: Print application URL
       env:
