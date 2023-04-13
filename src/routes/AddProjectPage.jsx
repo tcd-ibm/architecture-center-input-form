@@ -12,7 +12,7 @@ function AddProjectPage() {
         link: null,
         description: null,
         content: null,
-        date: new Date(),
+        date: null,
         tags: []
     };
 

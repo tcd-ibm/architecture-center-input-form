@@ -4,6 +4,7 @@ import { Content, Form, TextInput, Stack, Tile, TextArea, Button, Tag, DatePicke
 import { useNavigate } from 'react-router';
 import { useMediaQuery } from 'react-responsive';
 
+import { getUTCDateFromLocal } from '@/utils/dates';
 import DocEditor from '@/Components/AsciidocEditor';
 import styles from './EditProject.module.scss';
 
@@ -12,7 +13,7 @@ export default function EditProject({projectData, user, isEdit}) {
 	const navigate = useNavigate();
 
 	const [tags, setTags] = useState([]);
-    const [date, setDate] = useState(new Date(projectData.date));
+    const [date, setDate] = useState(projectData.date ? new Date(projectData.date) : getUTCDateFromLocal(new Date()));
     const tagColors = ['red', 'magenta', 'purple', 'blue', 'cyan', 'teal', 'green', 'gray', 'cool-gray', 'warm-gray', 'high-contrast'];
 
     const titleInputRef = useRef();
@@ -58,9 +59,7 @@ export default function EditProject({projectData, user, isEdit}) {
             link: linkInputRef.current.value,
             description: previewDescriptionInputRef.current.value,
             content: contentInputRef.current.value,
-            // TODO fix
-            //completionDate: date.toISOString(),
-            completionDate: new Date(0).toISOString(),
+            completionDate: date.toISOString(),
             tags: tags.filter(item => item?.selected).map(item => item.tagId)
         };
 
@@ -75,9 +74,7 @@ export default function EditProject({projectData, user, isEdit}) {
                 formData.append('link', linkInputRef.current.value);
                 formData.append('description', previewDescriptionInputRef.current.value);
                 formData.append('content', contentInputRef.current.value);
-                // TODO fix
-                //formData.append('completionDate', date.toISOString());
-                formData.append('completionDate', new Date(0).toISOString());
+                formData.append('completionDate', date.toISOString());
                 formData.append('tags', tags.filter(item => item?.selected).map(item => item.tagId));
                 if(file) formData.append('imageFile', file);
                 await axios.post('/user/project', formData, { headers: { Authorization: `Bearer ${user.accessToken}` } });
@@ -124,7 +121,7 @@ export default function EditProject({projectData, user, isEdit}) {
                 <TextInput labelText='Project Title' id='title' ref={titleInputRef} defaultValue={projectData.title} required />
                 <TextInput labelText='Link to Project' placeholder='https://example.com' defaultValue={projectData.link} id='link' invalid={Boolean(invalidText)} invalidText={invalidText} ref={linkInputRef} onBlur={validateLink}/>
                 {/*<TextInput labelText='Completion Date' id='date' ref={completionDateInputRef} placeholder='2023-01-01' />*/}
-                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(new Date(date))} style={{width: '100%'}}>
+                <DatePicker datePickerType='single' dateFormat='d/m/Y' value={date} onChange={date => setDate(getUTCDateFromLocal(date))} style={{width: '100%'}}>
                     <DatePickerInput
                       placeholder='dd/mm/yyyy'
                       labelText='Completion Date'

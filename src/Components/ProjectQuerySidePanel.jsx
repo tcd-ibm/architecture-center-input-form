@@ -20,6 +20,8 @@ import {
 import styles from './ProjectQuerySidePanel.module.scss';
 import { useMediaQuery } from 'react-responsive';
 
+import { getUTCDateFromLocal } from '@/utils/dates';
+
 function ProjectQuerySidePanel(props, ref) {
   const { menuContent, onChange, getExpandedState, toggleExpandedState } =
     props;
@@ -27,9 +29,11 @@ function ProjectQuerySidePanel(props, ref) {
   const [selectedTagList, setSelectedTagList] = useState([]);
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
 
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(getUTCDateFromLocal(new Date()));
+  const [endDate, setEndDate] = useState(getUTCDateFromLocal(new Date()));
   const [filterDate, setFilterDate] = useState(false);
+
+  console.log(startDate, endDate);
 
   useImperativeHandle(
     ref,
@@ -108,7 +112,7 @@ function ProjectQuerySidePanel(props, ref) {
             datePickerType='single'
             dateFormat='d/m/Y'
             value={startDate}
-            onChange={(date) => setStartDate(new Date(date))}
+            onChange={(date) => setStartDate(getUTCDateFromLocal(date))}
           >
             <DatePickerInput
               id='date-picker-input-id-start'
@@ -123,7 +127,7 @@ function ProjectQuerySidePanel(props, ref) {
             datePickerType='single'
             dateFormat='d/m/Y'
             value={endDate}
-            onChange={(date) => setEndDate(new Date(date))}
+            onChange={(date) => setEndDate(getUTCDateFromLocal(date))}
           >
             <DatePickerInput
               id='date-picker-input-id-finish'
