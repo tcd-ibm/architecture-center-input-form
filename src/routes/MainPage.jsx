@@ -37,6 +37,12 @@ function MainPage() {
   }, []);
 
   useEffect(() => {
+    if (!isOnMobile) {
+      setSideBarExpanded(true);
+    }
+  }, [isOnMobile]);
+
+  useEffect(() => {
     axios
       .get('/tags')
       .then((res) => {
@@ -105,17 +111,12 @@ function MainPage() {
       });
   }, [totalProjects]);
 
-  useEffect(() => {
-    handlePaginationChange();
-    console.log(dateFilter);
-  }, [dateFilter]);
-
   const handleSearchAndFilterChange = () => {
     const params = {
       keyword: document.querySelector('#searchBox').value,
       tags: queryMenuRef.current.selectedTagList.join(','),
-      startDate: '',
-      endDate: '',
+      startDate: dateFilter.on ? dateFilter.startDate : '',
+      endDate: dateFilter.on ? dateFilter.endDate : '',
     };
 
     axios
@@ -137,6 +138,10 @@ function MainPage() {
     setSideBarExpanded(!sideBarExpanded);
   };
 
+  const setExpandedStateToFalse = () => {
+    setSideBarExpanded(false);
+  };
+
   return (
     <>
       <MainHeader toggleSideBar={toggleExpandedState} />
@@ -145,6 +150,7 @@ function MainPage() {
         ref={queryMenuRef}
         getExpandedState={getExpandedState}
         toggleExpandedState={toggleExpandedState}
+        setExpandedStateToFalse={setExpandedStateToFalse}
         onChange={handleSearchAndFilterChange}
       />
       <Content
@@ -162,7 +168,7 @@ function MainPage() {
                 labelText='Search'
                 placeholder='Search'
                 onChange={handleSearchAndFilterChange}
-                setDateFilter={setDateFilter}
+                // setDateFilter={setDateFilter}
               />
             </div>
           ) : null}

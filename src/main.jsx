@@ -1,6 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  Navigate,
+} from 'react-router-dom';
 import axios from 'axios';
 
 // eslint-disable-next-line custom-rules/no-global-css
@@ -24,7 +29,7 @@ import MyAccountPage from './routes/MyAccount/MyAccountPage';
 import { AuthContextProvider } from '@/hooks/useAuth';
 import { AppThemeProvider } from '@/hooks/useAppTheme';
 
-if(import.meta.env.DEV) {
+if (import.meta.env.DEV) {
   axios.defaults.baseURL = 'http://localhost:5297/api/v1/';
 } else {
   axios.defaults.baseURL = '/api/v1/';
@@ -38,11 +43,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <MainPage />
+        element: <MainPage />,
       },
       {
         path: 'add',
-        element: <AddProjectPage />
+        element: <AddProjectPage />,
       },
       {
         path: 'edit/:projectId',
@@ -50,11 +55,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'login',
-        element: <LoginPage />
+        element: <LoginPage />,
       },
       {
         path: 'signup',
-        element: <SignUpPage />
+        element: <SignUpPage />,
       },
       {
         path: 'details/:projectId',
@@ -70,35 +75,34 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Navigate to='dashboard' replace={true} />
+            element: <Navigate to='dashboard' replace={true} />,
           },
           {
             path: 'showcase',
-            element: <ShowcaseSettingsPage />
+            element: <ShowcaseSettingsPage />,
           },
           {
             path: 'content',
-            element: <ContentSettingsPage />
+            element: <ContentSettingsPage />,
           },
           {
             path: 'users',
-            element: <ManageUsersPage />
+            element: <ManageUsersPage />,
           },
           {
             path: 'projects',
-            element: <ManageProjectsPage />
+            element: <ManageProjectsPage />,
           },
           {
             path: 'dashboard',
-            element: <DashboardPage />
-          }
-        ]
-      }
-    ]
-  }
+            element: <DashboardPage />,
+          },
+        ],
+      },
+    ],
+  },
 ]);
 
- 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthContextProvider>

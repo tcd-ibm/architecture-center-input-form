@@ -30,7 +30,7 @@ function ProjectQuerySidePanel(props, ref) {
     onChange,
     getExpandedState,
     toggleExpandedState,
-    setDateFilter,
+    setExpandedStateToFalse,
   } = props;
   const selectedTagListRef = useRef([]);
   const [selectedTagList, setSelectedTagList] = useState([]);
@@ -70,17 +70,18 @@ function ProjectQuerySidePanel(props, ref) {
 
   useEffect(() => {
     if (isOnMobile) {
-      toggleExpandedState();
+      setExpandedStateToFalse();
     }
   }, [isOnMobile]);
 
-  const applyDateFilterChanges = () => {
-    setDateFilter({
-      on: filterDate,
-      startDate: startDate,
-      endDate: endDate,
-    });
-  };
+  //   const applyDateFilterChanges = () => {
+  //     setDateFilter({
+  //       on: !filterDate,
+  //       startDate: startDate,
+  //       endDate: endDate,
+  //     });
+  //     onChange();
+  //   };
 
   return (
     <SideNav
@@ -127,7 +128,7 @@ function ProjectQuerySidePanel(props, ref) {
             value={startDate}
             onChange={(date) => {
               setStartDate(getUTCDateFromLocal(date));
-              applyDateFilterChanges();
+              //   applyDateFilterChanges();
             }}
           >
             <DatePickerInput
@@ -145,7 +146,7 @@ function ProjectQuerySidePanel(props, ref) {
             value={endDate}
             onChange={(date) => {
               setEndDate(getUTCDateFromLocal(date));
-              applyDateFilterChanges();
+              //   applyDateFilterChanges();
             }}
           >
             <DatePickerInput
@@ -164,7 +165,7 @@ function ProjectQuerySidePanel(props, ref) {
             size='sm'
             onToggle={(event) => {
               setFilterDate(event);
-              applyDateFilterChanges();
+              //   applyDateFilterChanges();
             }}
           />
         </Tile>
