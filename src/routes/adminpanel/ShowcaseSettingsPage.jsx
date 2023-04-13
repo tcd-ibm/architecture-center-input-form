@@ -2,6 +2,7 @@ import { Heading, FileUploader, Form, Stack, Button, Tile, Modal } from '@carbon
 import { useState, useEffect } from 'react';
 import { storage } from './../../firebase';
 import { ref, uploadBytes } from 'firebase/storage';
+import { Upload, TrashCan } from '@carbon/icons-react';
 
 import axios from 'axios';
 import useAuth from '@/hooks/useAuth';
@@ -78,7 +79,7 @@ function ShowcaseSettingsPage() {
                     <FileUploader
                         labelTitle='Upload header image'
                         labelDescription='Max file size is 10mb. Only .png files are supported.'
-                        buttonLabel='Add file'
+                        buttonLabel='Select image'
                         buttonKind='secondary'
                         filenameStatus='edit'
                         accept={['.png']}
@@ -90,12 +91,12 @@ function ShowcaseSettingsPage() {
                             setHeaderImage(event.target.files[0]);
                         }}
                     />
+                    <Button onClick={uploadImage} size='lg' renderIcon={Upload} style={{marginBottom: '10px'}}>Update Logo</Button>
                 </Tile>
-                <Button onClick={uploadImage} style={{marginTop: '10px', marginBottom: '10px'}}>Save</Button>
                 <Heading style={{marginBottom: '10px'}}>Remove featured project</Heading>
                 { featuredProject ? <Tile style = {{maxWidth: '500px', paddingBottom: '10px', marginBottom: '5px '}}>
                     <FeaturedCard project={featuredProject} />
-                    <Button onClick={() => setModalOpen(true)} style={{marginTop: '10px', marginBottom: '5px'}}>Remove</Button>
+                    <Button size='lg' renderIcon={TrashCan} kind='danger' onClick={() => setModalOpen(true)} style={{marginTop: '15px', marginBottom: '5px'}}>Remove</Button>
                 </Tile> :
                 <div style={{marginBottom: '20px'}}>
                     There is currently no featured project. Go to 'Manage projects' to set one.
