@@ -16,16 +16,22 @@ import {
   DatePickerInput,
   Tile,
   Toggle,
-  Button
+  Button,
 } from '@carbon/react';
 import styles from './ProjectQuerySidePanel.module.scss';
 import { useMediaQuery } from 'react-responsive';
 
 import { getUTCDateFromLocal } from '@/utils/dates';
+import { filter } from 'd3';
 
 function ProjectQuerySidePanel(props, ref) {
-  const { menuContent, onChange, getExpandedState, toggleExpandedState } =
-    props;
+  const {
+    menuContent,
+    onChange,
+    getExpandedState,
+    toggleExpandedState,
+    setDateFilter,
+  } = props;
   const selectedTagListRef = useRef([]);
   const [selectedTagList, setSelectedTagList] = useState([]);
   const isOnMobile = useMediaQuery({ query: '(max-width: 760px)' });
@@ -67,6 +73,14 @@ function ProjectQuerySidePanel(props, ref) {
       toggleExpandedState();
     }
   }, [isOnMobile]);
+
+  const applyDateFilterChanges = () => {
+    setDateFilter({
+      on: filterDate,
+      startDate: startDate,
+      endDate: endDate,
+    });
+  };
 
   return (
     <SideNav
@@ -111,7 +125,10 @@ function ProjectQuerySidePanel(props, ref) {
             datePickerType='single'
             dateFormat='d/m/Y'
             value={startDate}
-            onChange={(date) => setStartDate(getUTCDateFromLocal(date))}
+            onChange={(date) => {
+              setStartDate(getUTCDateFromLocal(date));
+              applyDateFilterChanges();
+            }}
           >
             <DatePickerInput
               id='date-picker-input-id-start'
@@ -126,7 +143,10 @@ function ProjectQuerySidePanel(props, ref) {
             datePickerType='single'
             dateFormat='d/m/Y'
             value={endDate}
-            onChange={(date) => setEndDate(getUTCDateFromLocal(date))}
+            onChange={(date) => {
+              setEndDate(getUTCDateFromLocal(date));
+              applyDateFilterChanges();
+            }}
           >
             <DatePickerInput
               id='date-picker-input-id-finish'
@@ -142,7 +162,10 @@ function ProjectQuerySidePanel(props, ref) {
             labelB='On'
             id='toggle-1'
             size='sm'
-            onToggle={(event) => setFilterDate(event)}
+            onToggle={(event) => {
+              setFilterDate(event);
+              applyDateFilterChanges();
+            }}
           />
         </Tile>
       </Stack>

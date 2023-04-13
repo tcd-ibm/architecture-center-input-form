@@ -21,6 +21,11 @@ function MainPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [totalProjects, setTotalProjects] = useState();
+  const [dateFilter, setDateFilter] = useState({
+    on: false,
+    startDate: '',
+    endDate: '',
+  });
 
   useEffect(() => {
     // sets the sidebar to be hidden by default on mobile
@@ -74,11 +79,14 @@ function MainPage() {
   }, []);
 
   useEffect(() => {
-
     axios
       .get('/projects', requestConfig)
       .then((res) => {
-        setProjects(res.data.filter(proj => (!featuredProject || proj.id !== featuredProject.id)));
+        setProjects(
+          res.data.filter(
+            (proj) => !featuredProject || proj.id !== featuredProject.id
+          )
+        );
         setIsLoading(false);
       })
       .catch((err) => {
@@ -97,10 +105,17 @@ function MainPage() {
       });
   }, [totalProjects]);
 
+  useEffect(() => {
+    handlePaginationChange();
+    console.log(dateFilter);
+  }, [dateFilter]);
+
   const handleSearchAndFilterChange = () => {
     const params = {
       keyword: document.querySelector('#searchBox').value,
       tags: queryMenuRef.current.selectedTagList.join(','),
+      startDate: '',
+      endDate: '',
     };
 
     axios
@@ -132,13 +147,14 @@ function MainPage() {
         toggleExpandedState={toggleExpandedState}
         onChange={handleSearchAndFilterChange}
       />
-      <Content style={
-        isOnMobile
-          ? { padding: '0px', margin: '0px', marginTop: '15px' }
-          : { padding: '0px', paddingTop: '5px' }}>
-        <InfiniteScroll
-          dataLength={projects.length}
-          style={{ margin: '20px' }}>
+      <Content
+        style={
+          isOnMobile
+            ? { padding: '0px', margin: '0px', marginTop: '15px' }
+            : { padding: '0px', paddingTop: '5px' }
+        }
+      >
+        <InfiniteScroll dataLength={projects.length} style={{ margin: '20px' }}>
           {isOnMobile ? (
             <div className={styles.searchBar}>
               <Search
@@ -146,6 +162,7 @@ function MainPage() {
                 labelText='Search'
                 placeholder='Search'
                 onChange={handleSearchAndFilterChange}
+                setDateFilter={setDateFilter}
               />
             </div>
           ) : null}
@@ -170,7 +187,10 @@ function MainPage() {
           ) : (
             <div id={styles.cardContainer}>
               {featuredProject && (
-                <FeaturedCard project={featuredProject} isOnMobile={isOnMobile} />
+                <FeaturedCard
+                  project={featuredProject}
+                  isOnMobile={isOnMobile}
+                />
               )}
               {projects.map((projectData, index) => (
                 <Card projectData={projectData} key={index} />
