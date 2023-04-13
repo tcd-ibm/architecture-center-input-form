@@ -10,8 +10,8 @@ export default function Card({ projectData }) {
 	return (
 		<CustomClickableTile className={styles.tile} href={`./details/${projectData.id}`} >
 			{/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
-			{/* <img src={`http://localhost:5297/api/v1/project/${projectData.id}/image`} alt='Project' className={styles.cardImage}
-				onError={event => event.target.style.display = 'none'} /> */}
+			<img src={`http://localhost:5297/api/v1/project/${projectData.id}/image`} alt='Project' className={styles.cardImage}
+				onError={event => event.target.style.display = 'none'} />
 			<CustomLink size='lg' className={styles.titleLink}>{projectData.title}</CustomLink>
 			<p className={styles.description}>{projectData.description}</p>
 			<div className={styles.tags}>
