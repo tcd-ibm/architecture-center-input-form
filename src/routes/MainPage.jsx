@@ -63,9 +63,21 @@ function MainPage() {
 
   useEffect(() => {
     axios
+      .get('/project/featured')
+      .then((res) => {
+        setFeaturedProject(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios
       .get('/projects', requestConfig)
       .then((res) => {
-        setProjects(res.data);
+        setProjects(res.data.filter(proj => (proj.id !== featuredProject.id)));
         setIsLoading(false);
       })
       .catch((err) => {
@@ -83,18 +95,6 @@ function MainPage() {
         console.log(err);
       });
   }, [totalProjects]);
-
-  useEffect(() => {
-    axios
-      .get('/project/featured')
-      .then((res) => {
-        setFeaturedProject(res.data);
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
 
   const handleSearchAndFilterChange = () => {
     const params = {
@@ -131,21 +131,21 @@ function MainPage() {
         toggleExpandedState={toggleExpandedState}
         onChange={handleSearchAndFilterChange}
       />
-      <Content style={isOnMobile ? { padding: '0px', margin: '0px', marginTop: '15px' } : {padding: '0px', paddingTop: '5px'}}
+      <Content style={isOnMobile ? { padding: '0px', margin: '0px', marginTop: '15px' } : { padding: '0px', paddingTop: '5px' }}
       >
         <div style={{ margin: '20px' }}>
-        {isOnMobile ? (
-          <div className={styles.searchBar}>
-          <Search
-            id='searchBox'
-            labelText='Search'
-            placeholder='Search'
-            onChange={handleSearchAndFilterChange}
-          />
-          </div>
-        ) : null}
+          {isOnMobile ? (
+            <div className={styles.searchBar}>
+              <Search
+                id='searchBox'
+                labelText='Search'
+                placeholder='Search'
+                onChange={handleSearchAndFilterChange}
+              />
+            </div>
+          ) : null}
 
-        {/* {isOnMobile ? (
+          {/* {isOnMobile ? (
           <p
             id={styles.filtersBtn}
             onClick={() => {
@@ -157,21 +157,21 @@ function MainPage() {
           </p>
         ) : null} */}
 
-        {isLoading ? (
-          <Loading
-            withOverlay={false}
-            style={{ margin: 'auto', marginTop: '30px' }}
-          />
-        ) : (
-          <div id={styles.cardContainer}>
-            {featuredProject && (
-              <FeaturedCard project={featuredProject} isOnMobile={isOnMobile} />
-            )}
-            {projects.map((projectData, index) => (
-              <Card projectData={projectData} key={index} />
-            ))}
-          </div>
-        )}
+          {isLoading ? (
+            <Loading
+              withOverlay={false}
+              style={{ margin: 'auto', marginTop: '30px' }}
+            />
+          ) : (
+            <div id={styles.cardContainer}>
+              {featuredProject && (
+                <FeaturedCard project={featuredProject} isOnMobile={isOnMobile} />
+              )}
+              {projects.map((projectData, index) => (
+                <Card projectData={projectData} key={index} />
+              ))}
+            </div>
+          )}
         </div>
         <Pagination
           className={styles.pagination}
