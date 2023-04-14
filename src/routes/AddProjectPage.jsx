@@ -1,15 +1,25 @@
-import { Content } from '@carbon/react';
-
 import MainHeader from '@/Components/MainHeader';
-import DocEditor from '@/Components/AsciidocEditor';
+import EditProject from '@/Components/EditProject';
+
+import useAuth from '@/hooks/useAuth';
 
 function AddProjectPage() {
+
+    const { user } = useAuth();
+
+    const project = {
+        title: null,
+        link: null,
+        description: null,
+        content: null,
+        date: null,
+        tags: []
+    };
+
     return (
         <>
-        <MainHeader />
-        <Content>
-            <DocEditor />
-        </Content>
+            <MainHeader />
+            <EditProject projectData={project} user={user} isEdit={false}/>
         </>
     );
 }

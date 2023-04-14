@@ -1,31 +1,24 @@
-import { Tile, Link, Tag } from '@carbon/react';
-import './card.scss';
+import { Tag } from '@carbon/react';
+import styles from './Card.module.scss';
 
-const CARD_IMG_URL = "http://www.redhat.com/architect/portfolio/repo/images/";
+import { CustomClickableTile, CustomLink } from './CustomCarbonNavigation';
 
-export default function Card({projectData}) {
+export default function Card({ projectData }) {
 
-  if(!projectData.islive) return null;
-  
-  return (
-    <Tile className='tile'>
-      {/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
-      <Link size='lg' className='titleLink'>{projectData.Heading}</Link>
-      <p>{projectData.Summary}</p>
-      <div className='tags'>
-        { projectData.ProductType.split(",").map(typetag =>
-            <Tag type="red" title="Clear Filter" key={projectData.ppid + typetag}>{typetag}</Tag>
-        )}
-        { projectData.Solutions.split(",").map(solutiontag =>
-            <Tag type="magenta" title="Clear Filter" key={projectData.ppid + solutiontag}>{solutiontag}</Tag>
-        )}
-        { projectData.Vertical.split(",").map(verticaltag =>
-            <Tag type="warm-gray" title="Clear Filter" key={projectData.ppid + verticaltag} >{verticaltag}</Tag>
-        )}
-        { projectData.Product.split(",").map(producttag =>
-            <Tag type="cool-gray" title="Clear Filter" key={projectData.ppid + producttag}>{producttag}</Tag>
-        )}
-      </div>
-    </Tile>
-  );
+	const tagColors = ['red', 'magenta', 'purple', 'blue', 'cyan', 'teal', 'green', 'gray', 'cool-gray', 'warm-gray', 'high-contrast'];
+
+	return (
+		<CustomClickableTile className={styles.tile} href={`./details/${projectData.id}`} >
+			{/* <img src={CARD_IMG_URL + projectData.Image1Url} className='cardImage' /> */}
+			<img src={`http://localhost:5297/api/v1/project/${projectData.id}/image`} alt='Project' className={styles.cardImage}
+				onError={event => event.target.style.display = 'none'} />
+			<CustomLink size='lg' className={styles.titleLink}>{projectData.title}</CustomLink>
+			<p className={styles.description}>{projectData.description}</p>
+			<div className={styles.tags}>
+				{projectData.tags.map(tagItem =>
+					<Tag type={tagColors[tagItem.categoryId % 10]} title='Clear Filter' style={{ marginLeft: '0px', marginRight: '5px' }} key={tagItem.tagId}>{tagItem.tagName}</Tag>
+				)}
+			</div>
+		</CustomClickableTile>
+	);
 }
