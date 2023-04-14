@@ -191,7 +191,7 @@ export default function EditProject({projectData, user, isEdit}) {
                             Upload preview image
                         </p>
                         <p className='cds--label-description'>
-                            Max file size is 50mb. Supported file types are .jpg and .png.
+                            Max file size is 50MB. Supported file types are .jpg and .png.
                         </p>
                         <FileUploaderDropContainer
                             accept={[
