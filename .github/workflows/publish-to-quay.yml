@@ -3,16 +3,17 @@ name: "Publish to Quay.io"
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
-# documentation.
+# documentation
 
 on:
   push:
     branches: 
+      - main-deployment
     tags: [ 'v*.*.*' ]
 
 env:
   REGISTRY: quay.io
-  IMAGE_NAME: moeto88/architecture-center-input-form
+  IMAGE_NAME: ${{secrets.QUAY_IO_ACCOUNT_NAME}}/architecture-center-input-form
   IMAGE_TAGS: ""
   
 jobs:
