@@ -8,11 +8,12 @@ name: "Publish to Quay.io"
 on:
   push:
     branches: 
+      - main-deployment
     tags: [ 'v*.*.*' ]
 
 env:
   REGISTRY: quay.io
-  IMAGE_NAME: moeto88/architecture-center-input-form
+  IMAGE_NAME: ${{secrets.QUAY_IO_ACCOUNT_NAME}}/architecture-center-input-form
   IMAGE_TAGS: ""
   
 jobs:

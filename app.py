@@ -1,6 +1,7 @@
-from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 import api
 
 
@@ -15,14 +16,18 @@ app.add_middleware(
     expose_headers=["X-Total-Count", "X-Total-Pages"]
 )
 
+templates = Jinja2Templates(directory="dist")
+
+app.mount("/assets", StaticFiles(directory="dist/assets"), name="static")
+
 # Add API routes
 app.include_router(api.router)
 
+@app.get("/{rest_of_path:path}")
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# redirect to docs
-@app.get("/")
-async def index():
-    return RedirectResponse(url="/docs", status_code=302)
+
 
 
 if __name__ == "__main__":
