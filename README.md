@@ -1,10 +1,21 @@
-# architecture-center-input-form
-Input form for Red Hat Architecture Center
+# Architecture Center Input Form
 
-run with docker:   
+Input form for Red Hat Architecture Center: https://www.redhat.com/architect/portfolio/
+
+# Build and run the application with podman:
+
 ```bash
 cd architecture-center-input-form-master
-docker build . -t {some_name}
-docker run --expose 5297 -p 5297:5297 --expose 4621 -p 4621:4621 --rm -it {some_name}:latest
-gunicorn app:app -b 0.0.0.0:5297 -w 8 -k uvicorn.workers.UvicornWorker & yarn dev
+
+# Build the back-end and API
+export APP_NAME=architecture-center
+podman build . -t ${APP_NAME}
+podman run --expose 5297 -p 5297:5297 --expose 4621 -p 4621:4621 --rm -it ${APP_NAME}:latest \
+gunicorn app:app -b 0.0.0.0:5297 -w 8 -k uvicorn.workers.UvicornWorker
+
+# Run the application with yarn
+sudo npm install -g vite
+npm i -D @types/node
+yarn install
+yarn dev
 ```
